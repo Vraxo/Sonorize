@@ -1,0 +1,3 @@
+Volume: 100
+Replay: Stop
+ShowInstructions: True

@@ -1,0 +1,8 @@
+Default: White
+Selected: Green
+SongPlaying: Yellow
+SongPaused: DarkYellow
+SongStopped: Red
+Volume: Blue
+Replay: Magenta
+Playlists: Cyan
