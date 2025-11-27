@@ -1,0 +1,177 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@using Sonorize.Core.Settings
+@inject LayoutStateService LayoutState
+
+<div class="zone-column" ondragover="event.preventDefault();" @ondrop="HandleZoneDrop">
+    <div class="zone-header">@Title</div>
+
+    <div class="zone-list">
+        @for (int i = 0; i < Widgets.Count; i++)
+        {
+            var index = i;
+            var widget = Widgets[i];
+
+            <div class="widget-item"
+                 draggable="true"
+                 @ondragstart="() => HandleDragStart(index)"
+                 @ondragend="HandleDragEnd"
+                 @ondrop="() => HandleItemDrop(index)"
+                 @ondrop:stopPropagation>
+
+                <span>@widget</span>
+
+                <button class="remove-btn danger" title="Remove" @onclick="() => OnRemove.InvokeAsync(index)">
+                    &times;
+                </button>
+            </div>
+        }
+
+        <div class="add-wrapper">
+            <select @bind="AddSelection">
+                <option value="">+ Add Widget</option>
+                @foreach (var w in Enum.GetValues<PlayerBarWidget>())
+                {
+                    <option value="@w">@w</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<style>
+    .zone-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 200px;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        transition: border-color 0.2s;
+    }
+
+        .zone-column:hover {
+            border-color: var(--text-secondary);
+        }
+
+    .zone-header {
+        text-align: center;
+        font-weight: bold;
+        color: var(--text-secondary);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        font-size: 0.85em;
+        letter-spacing: 1px;
+    }
+
+    .zone-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-height: 50px;
+    }
+
+    .widget-item {
+        background: var(--bg-tertiary);
+        padding: 8px 12px;
+        border-radius: var(--border-radius);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        font-size: 0.9em;
+        cursor: grab;
+        user-select: none;
+        transition: background-color 0.2s;
+    }
+
+        .widget-item:hover {
+            border-color: var(--accent-primary);
+            background-color: var(--hover-bg);
+        }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 1.2em;
+        padding: 0 4px;
+        line-height: 1;
+        opacity: 0.6;
+    }
+
+        .remove-btn:hover {
+            opacity: 1;
+            color: #ff6b6b;
+        }
+
+    .add-wrapper select {
+        width: 100%;
+        padding: 6px;
+        background: var(--bg-tertiary);
+        border: 1px dashed var(--border-color);
+        color: var(--text-secondary);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        outline: none;
+        font-size: 0.9em;
+        text-align: center;
+    }
+
+        .add-wrapper select:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+</style>
+
+@code {
+    [Parameter] public required string Title { get; set; }
+    [Parameter] public required List<PlayerBarWidget> Widgets { get; set; }
+
+    [Parameter] public EventCallback<int> OnDragStart { get; set; }
+    [Parameter] public EventCallback<int> OnDropOnItem { get; set; } // Drop onto a specific item index
+    [Parameter] public EventCallback OnDropOnZone { get; set; }      // Drop into empty space in zone
+    [Parameter] public EventCallback<int> OnRemove { get; set; }
+    [Parameter] public EventCallback<PlayerBarWidget> OnAdd { get; set; }
+
+    private PlayerBarWidget? _addSelection;
+    private PlayerBarWidget? AddSelection
+    {
+        get => _addSelection;
+        set
+        {
+            _addSelection = value;
+            if (value.HasValue)
+            {
+                OnAdd.InvokeAsync(value.Value);
+                _addSelection = null;
+            }
+        }
+    }
+
+    private void HandleDragStart(int index)
+    {
+        LayoutState.SetInternalDrag(true);
+        OnDragStart.InvokeAsync(index);
+    }
+
+    private void HandleDragEnd()
+    {
+        LayoutState.SetInternalDrag(false);
+    }
+
+    private async Task HandleItemDrop(int index)
+    {
+        await OnDropOnItem.InvokeAsync(index);
+        LayoutState.SetInternalDrag(false);
+    }
+
+    private async Task HandleZoneDrop()
+    {
+        await OnDropOnZone.InvokeAsync();
+        LayoutState.SetInternalDrag(false);
+    }
+}

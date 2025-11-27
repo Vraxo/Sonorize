@@ -1,0 +1,203 @@
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+@using Sonorize.Core
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Shared
+@implements IDisposable
+@inject NavigationManager Nav
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject LibraryService LibService
+
+<aside class="@SidebarClass" style="@SidebarStyle">
+    <div class="sidebar-content-wrapper">
+        <div class="logo">
+            <div style="display:flex; align-items:center;">
+                <div class="logo-icon"></div>
+                <span>Sonorize</span>
+            </div>
+            <button class="sidebar-toggle-btn" title="Close Sidebar" @onclick="OnClose">
+                <i class="fas fa-angle-double-left"></i>
+            </button>
+        </div>
+        <nav class="nav">
+            <div class="sidebar-nav-item-wrapper @GetActiveState("")">
+                <div class="sidebar-nav-item" @onclick='() => NavigateTo("")'>
+                    <i class="fas fa-book"></i> Your Library
+                </div>
+            </div>
+            <div class="sidebar-nav-item-wrapper @GetActiveState("albums")">
+                <div class="sidebar-nav-item" @onclick='() => NavigateTo("albums")'>
+                    <i class="fas fa-compact-disc"></i> Albums
+                </div>
+            </div>
+            <div class="sidebar-nav-item-wrapper @GetActiveState("artists")">
+                <div class="sidebar-nav-item" @onclick='() => NavigateTo("artists")'>
+                    <i class="fas fa-microphone"></i> Artists
+                </div>
+            </div>
+        </nav>
+
+        <div class="playlists-wrapper">
+            <SidebarPlaylistNav />
+        </div>
+    </div>
+
+    <!-- Resizer Handle: Only active when open -->
+    @if (IsOpen)
+    {
+        <div class="sidebar-resizer" @onmousedown="StartResize"></div>
+    }
+</aside>
+
+<!-- Global Overlay to catch mouse events when dragging fast -->
+@if (_isResizing)
+{
+    <div class="resize-overlay"
+         @onmousemove="HandleMouseMove"
+         @onmouseup="StopResize"
+         @onmouseout="HandleMouseOut">
+    </div>
+}
+
+<style>
+    /* Local styles for the specific layout of the logo area logic */
+    .logo {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-right: 10px; /* Space for the button */
+    }
+
+    .sidebar-toggle-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 4px;
+        transition: color 0.2s, background 0.2s;
+        font-size: 16px;
+    }
+
+        .sidebar-toggle-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+    /* Content Wrapper to ensure content doesn't reflow weirdly during width transition */
+    .sidebar-content-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 150px; /* Ensure content holds shape while container shrinks */
+    }
+
+    /*
+           Fixed: Removed margin/padding duplication and redundant border.
+           This serves as the single divider between Core Nav and Playlists.
+        */
+    .playlists-wrapper {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-color);
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public bool IsOpen { get; set; } = true;
+
+    // Resizing State
+    private bool _isResizing = false;
+    private double _startX;
+    private int _startWidth;
+
+    private string SidebarClass => $"sidebar {(IsOpen ? "open" : "closed")} {(AppSettings.Window.EnableSidebarAnimation && !_isResizing ? "animated" : "")}";
+
+    private string SidebarStyle => IsOpen
+        ? $"width: {AppSettings.Window.SidebarWidth}px;"
+        : "width: 0px; padding: 0; border: none;";
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private void StartResize(MouseEventArgs e)
+    {
+        _isResizing = true;
+        _startX = e.ClientX;
+        _startWidth = AppSettings.Window.SidebarWidth;
+    }
+
+    private void HandleMouseMove(MouseEventArgs e)
+    {
+        if (!_isResizing) return;
+
+        double delta = e.ClientX - _startX;
+
+        if (AppSettings.Theme.SidebarPosition == SidebarPosition.Right)
+        {
+            delta = -delta;
+        }
+
+        int newWidth = (int)(_startWidth + delta);
+
+        if (newWidth < 150) newWidth = 150;
+        if (newWidth > 600) newWidth = 600;
+
+        if (AppSettings.Window.SidebarWidth != newWidth)
+        {
+            AppSettings.Window.SidebarWidth = newWidth;
+        }
+    }
+
+    private void StopResize(MouseEventArgs e)
+    {
+        if (_isResizing)
+        {
+            _isResizing = false;
+            SettingsManager.Save(AppSettings);
+        }
+    }
+
+    private void HandleMouseOut(MouseEventArgs e)
+    {
+        if (_isResizing && e.Buttons == 0)
+        {
+            StopResize(e);
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    private void NavigateTo(string url) => Nav.NavigateTo(url);
+
+    private string GetActiveState(string href)
+    {
+        var currentUri = Nav.Uri;
+        var targetUri = Nav.ToAbsoluteUri(href).ToString();
+
+        if (href == "albums" && currentUri.Contains("/albums")) return "active";
+        if (href == "artists" && currentUri.Contains("/artists")) return "active";
+        if (href == "playlists" && currentUri.EndsWith("/playlists")) return "active";
+
+        return currentUri.Equals(targetUri, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+}

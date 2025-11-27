@@ -1,0 +1,81 @@
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Shared.Player.Widgets
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<footer class="player-bar">
+    <div class="player-zone left">
+        @foreach (var widget in AppSettings.Theme.PlayerBarLayout.Left)
+        {
+            <DynamicWidget Type="@widget" />
+        }
+    </div>
+
+    <div class="player-zone center">
+        @foreach (var widget in AppSettings.Theme.PlayerBarLayout.Center)
+        {
+            <DynamicWidget Type="@widget" />
+        }
+    </div>
+
+    <div class="player-zone right">
+        @foreach (var widget in AppSettings.Theme.PlayerBarLayout.Right)
+        {
+            <DynamicWidget Type="@widget" />
+        }
+    </div>
+</footer>
+
+<style>
+    .player-zone {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 100%;
+    }
+
+        /*
+               Updated Flex Logic:
+               - Left/Right zones share remaining space.
+               - Center zone prefers 40% width but can shrink down to 220px to avoid overlap on small screens.
+               - Right zone min-width removed to ensure tools reserve their space and force center to shrink/move.
+            */
+
+        .player-zone.left {
+            flex: 1;
+            min-width: 0; /* Required for text truncation in info widget */
+            justify-content: flex-start;
+        }
+
+        .player-zone.center {
+            /* Grow: 0, Shrink: 1, Basis: 40% */
+            flex: 0 1 40%;
+            min-width: 220px;
+            max-width: 720px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .player-zone.right {
+            flex: 1;
+            /* Removed min-width: 0 to prevent tool overlap */
+            justify-content: flex-end;
+        }
+</style>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SettingsManager.SettingsSaved += OnSettingsChanged;
+    }
+
+    private void OnSettingsChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        SettingsManager.SettingsSaved -= OnSettingsChanged;
+    }
+}

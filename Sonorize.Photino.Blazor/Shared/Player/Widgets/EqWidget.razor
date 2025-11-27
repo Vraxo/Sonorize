@@ -1,0 +1,7 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@inject LayoutStateService LayoutState
+
+<button class="player-btn" title="Equalizer" @onclick="LayoutState.OpenEq">
+    <i class="fas fa-sliders-h"></i>
+</button>

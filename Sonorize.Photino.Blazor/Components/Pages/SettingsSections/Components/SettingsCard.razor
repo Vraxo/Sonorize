@@ -1,0 +1,71 @@
+<div class="settings-card">
+    <div class="card-header">
+        <div class="header-text">
+            <span class="card-title">@Title</span>
+            @if (!string.IsNullOrEmpty(Description))
+            {
+                <span class="card-desc">@Description</span>
+            }
+        </div>
+        @if (HeaderAction != null)
+        {
+            <div class="header-action">
+                @HeaderAction
+            </div>
+        }
+    </div>
+    <div class="card-content" style="@ContentStyle">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? HeaderAction { get; set; }
+    [Parameter] public string ContentStyle { get; set; } = "";
+}
+
+<style>
+    .settings-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 0; /* Let parent container handle gaps */
+    }
+
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .card-title {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+</style>

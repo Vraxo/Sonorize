@@ -1,0 +1,170 @@
+@using Sonorize.Core.Settings
+
+<div class="editor-wrapper">
+    <div class="editor-toolbar">
+        <span class="editor-label">Drag and drop widgets to rearrange zones</span>
+        <button class="reset-layout-btn" @onclick="ResetDefaults" title="Reset all zones to default">
+            <i class="fas fa-undo"></i> Reset to Default
+        </button>
+    </div>
+
+    <div class="layout-editor">
+        <PlayerBarZoneEditor Title="Left Zone"
+                             Widgets="Config.Left"
+                             OnDragStart="@(i => HandleDragStart(Config.Left, i))"
+                             OnDropOnItem="@(i => HandleItemDrop(Config.Left, i))"
+                             OnDropOnZone="@(() => HandleZoneDrop(Config.Left))"
+                             OnRemove="@(i => Remove(Config.Left, i))"
+                             OnAdd="@(w => Add(Config.Left, w))" />
+
+        <PlayerBarZoneEditor Title="Center Zone"
+                             Widgets="Config.Center"
+                             OnDragStart="@(i => HandleDragStart(Config.Center, i))"
+                             OnDropOnItem="@(i => HandleItemDrop(Config.Center, i))"
+                             OnDropOnZone="@(() => HandleZoneDrop(Config.Center))"
+                             OnRemove="@(i => Remove(Config.Center, i))"
+                             OnAdd="@(w => Add(Config.Center, w))" />
+
+        <PlayerBarZoneEditor Title="Right Zone"
+                             Widgets="Config.Right"
+                             OnDragStart="@(i => HandleDragStart(Config.Right, i))"
+                             OnDropOnItem="@(i => HandleItemDrop(Config.Right, i))"
+                             OnDropOnZone="@(() => HandleZoneDrop(Config.Right))"
+                             OnRemove="@(i => Remove(Config.Right, i))"
+                             OnAdd="@(w => Add(Config.Right, w))" />
+    </div>
+</div>
+
+<style>
+    .editor-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .editor-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 4px;
+    }
+
+    .editor-label {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .reset-layout-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 0.85em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: var(--border-radius);
+        transition: color 0.2s, background 0.2s;
+    }
+
+        .reset-layout-btn:hover {
+            color: var(--accent-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+    .layout-editor {
+        display: flex;
+        gap: 15px;
+        background: var(--bg-tertiary);
+        padding: 15px;
+        border-radius: var(--border-radius);
+        overflow-x: auto;
+    }
+</style>
+
+@code {
+    [Parameter] public required PlayerBarConfig Config { get; set; }
+    [Parameter] public EventCallback OnChange { get; set; }
+
+    // Drag State
+    private List<PlayerBarWidget>? _sourceList;
+    private int _sourceIndex = -1;
+
+    private void HandleDragStart(List<PlayerBarWidget> list, int index)
+    {
+        _sourceList = list;
+        _sourceIndex = index;
+    }
+
+    private void HandleItemDrop(List<PlayerBarWidget> targetList, int targetIndex)
+    {
+        if (_sourceList == null || _sourceIndex == -1) return;
+
+        var item = _sourceList[_sourceIndex];
+        _sourceList.RemoveAt(_sourceIndex);
+
+        // Adjust index if dropping into same list after the removed item
+        if (_sourceList == targetList && _sourceIndex < targetIndex)
+        {
+            // Because removing the item shifted subsequent items up,
+            // the visual target index is actually one less in the new list state.
+            // However, list.Insert inserts *before*.
+            // If I drop on item 5 (visually), and I was item 1.
+            // Item 1 removed. Item 5 is now at index 4.
+            // Insert at 4 puts me before old item 5. Correct.
+            // BUT: if targetIndex was passed from the loop *before* removal, it reflects old state.
+            // Let's safe guard.
+            if (targetIndex > 0) targetIndex--;
+        }
+
+        // Clamp to safe bounds
+        targetIndex = Math.Clamp(targetIndex, 0, targetList.Count);
+
+        targetList.Insert(targetIndex, item);
+        ResetDragState();
+        NotifyChange();
+    }
+
+    private void HandleZoneDrop(List<PlayerBarWidget> targetList)
+    {
+        if (_sourceList == null || _sourceIndex == -1) return;
+
+        var item = _sourceList[_sourceIndex];
+        _sourceList.RemoveAt(_sourceIndex);
+        targetList.Add(item);
+
+        ResetDragState();
+        NotifyChange();
+    }
+
+    private void ResetDragState()
+    {
+        _sourceList = null;
+        _sourceIndex = -1;
+    }
+
+    private void Remove(List<PlayerBarWidget> list, int index)
+    {
+        list.RemoveAt(index);
+        NotifyChange();
+    }
+
+    private void Add(List<PlayerBarWidget> list, PlayerBarWidget widget)
+    {
+        list.Add(widget);
+        NotifyChange();
+    }
+
+    private void ResetDefaults()
+    {
+        var defaults = new PlayerBarConfig();
+        Config.Left = defaults.Left;
+        Config.Center = defaults.Center;
+        Config.Right = defaults.Right;
+        NotifyChange();
+    }
+
+    private void NotifyChange() => OnChange.InvokeAsync();
+}

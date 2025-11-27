@@ -1,0 +1,48 @@
+﻿@using Sonorize.Photino.Blazor.Shared
+
+@if (IsVisible)
+{
+    <div class="modal-backdrop" @onclick="Cancel">
+        <div class="modal-container" @onclick:stopPropagation>
+            <div class="modal-header">Save Theme</div>
+            <div class="modal-body">
+                <label style="display:block; margin-bottom:5px;">Theme Name</label>
+                <input type="text" class="form-control" @bind="_themeName" placeholder="My Custom Theme" @onkeyup="HandleKeyUp" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @onclick="Cancel">Cancel</button>
+                <button class="btn btn-primary" @onclick="Confirm">Save</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<string> OnConfirm { get; set; }
+
+    private string _themeName = "";
+
+    protected override void OnParametersSet()
+    {
+        if (IsVisible) _themeName = "";
+    }
+
+    private void HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") Confirm();
+        else if (e.Key == "Escape") Cancel();
+    }
+
+    private async Task Confirm()
+    {
+        if (string.IsNullOrWhiteSpace(_themeName)) return;
+        await OnConfirm.InvokeAsync(_themeName);
+    }
+
+    private async Task Cancel()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

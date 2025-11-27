@@ -1,0 +1,157 @@
+﻿@page "/queue"
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Shared
+@using Sonorize.Photino.Blazor.Shared.Modals
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div class="header">
+    <div id="header-context-controls">
+        <button class="header-action-btn" title="Back" @onclick="GoBack">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+    <h1 id="header-title">Play Queue</h1>
+    <div class="header-controls header-right">
+        <span style="color: var(--text-secondary); font-size: 0.9em;">
+            @PlayerService.PlaybackQueue.Count tracks
+        </span>
+    </div>
+</div>
+
+<div class="queue-container">
+    @if (!PlayerService.PlaybackQueue.Any())
+    {
+        <div class="empty-message">
+            <i class="fas fa-music"></i>
+            <p>Queue is empty. Go play some music!</p>
+        </div>
+    }
+    else
+    {
+        <div class="queue-list">
+            <TrackTable Songs="PlayerService.PlaybackQueue"
+                        ActiveSong="PlayerService.CurrentSong"
+                        AllowReorder="true"
+                        ShowRemoveButton="true"
+                        EmptyMessage="Queue is empty."
+                        OnPlay="PlayFromQueue"
+                        OnReorder="HandleReorder"
+                        OnRemove="HandleRemove"
+                        OnOptionsClick="OpenOptions" />
+        </div>
+    }
+</div>
+
+<TrackActionsModal IsVisible="_showActionsModal"
+                   Song="_selectedSongForModal"
+                   OnClose="CloseOptions"
+                   OnEditMetadata="OpenMetadataEditor" />
+
+<MetadataEditorModal IsVisible="_showMetadataEditor"
+                     Song="_selectedSongForModal"
+                     OnClose="CloseMetadataEditor" />
+
+<style>
+    .queue-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .queue-list {
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .empty-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 50vh;
+        color: var(--text-secondary);
+        font-size: 1.2em;
+    }
+
+        .empty-message i {
+            font-size: 3em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+</style>
+
+@code {
+    private bool _showActionsModal = false;
+    private bool _showMetadataEditor = false;
+    private Song? _selectedSongForModal;
+
+    protected override void OnInitialized()
+    {
+        PlayerService.QueueChanged += OnQueueChanged;
+        PlayerService.PlaybackStateChanged += OnStateChanged;
+    }
+
+    private void OnQueueChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo("/");
+    }
+
+    private async Task PlayFromQueue(int index)
+    {
+        var song = PlayerService.PlaybackQueue[index];
+        // PlaySong usually resets the queue, but here we just want to JUMP within the existing queue.
+        // The IPlayerService doesn't explicitly expose "JumpToIndex".
+        // However, PlaySong with the SAME list context finds the index and plays it.
+        await PlayerService.PlaySong(song, PlayerService.PlaybackQueue);
+    }
+
+    private void HandleReorder((Song Source, Song Target) args)
+    {
+        var oldIndex = PlayerService.PlaybackQueue.IndexOf(args.Source);
+        var newIndex = PlayerService.PlaybackQueue.IndexOf(args.Target);
+
+        if (oldIndex != -1 && newIndex != -1)
+        {
+            PlayerService.ReorderQueue(oldIndex, newIndex);
+        }
+    }
+
+    private void HandleRemove(Song song)
+    {
+        var index = PlayerService.PlaybackQueue.IndexOf(song);
+        if (index != -1)
+        {
+            PlayerService.RemoveFromQueue(index);
+        }
+    }
+
+    private void OpenOptions(Song song) { _selectedSongForModal = song; _showActionsModal = true; }
+    private void CloseOptions() { _showActionsModal = false; }
+
+    private void OpenMetadataEditor(Song song) { _selectedSongForModal = song; _showMetadataEditor = true; }
+    private void CloseMetadataEditor() { _showMetadataEditor = false; _selectedSongForModal = null; }
+
+    public void Dispose()
+    {
+        PlayerService.QueueChanged -= OnQueueChanged;
+        PlayerService.PlaybackStateChanged -= OnStateChanged;
+    }
+}

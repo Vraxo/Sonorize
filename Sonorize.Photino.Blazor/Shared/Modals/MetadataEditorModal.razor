@@ -1,0 +1,196 @@
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Library
+@using Sonorize.Photino.Blazor.Shared
+@inject LibraryService LibService
+
+<Modal IsVisible="IsVisible"
+       Title="Edit Metadata"
+       ConfirmText="@(_isSaving ? "Saving..." : "Save Changes")"
+       ShowCancelButton="true"
+       OnCancel="Cancel"
+       OnConfirm="Save">
+
+    @if (_isLoading)
+    {
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading tags...</p>
+        </div>
+    }
+    else if (_loadError)
+    {
+        <div class="error-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Failed to load metadata. File may be corrupt or inaccessible.</p>
+        </div>
+    }
+    else if (_meta != null)
+    {
+        <div class="meta-form">
+            <div class="form-group full-width">
+                <label>Title</label>
+                <input type="text" class="form-control" @bind="_meta.Title" placeholder="Track Title" />
+            </div>
+
+            <div class="form-group half">
+                <label>Artist</label>
+                <input type="text" class="form-control" @bind="_meta.Artist" placeholder="Artist Name" />
+            </div>
+
+            <div class="form-group half">
+                <label>Album Artist</label>
+                <input type="text" class="form-control" @bind="_meta.AlbumArtists" placeholder="Album Artist" />
+            </div>
+
+            <div class="form-group full-width">
+                <label>Album</label>
+                <input type="text" class="form-control" @bind="_meta.Album" placeholder="Album Name" />
+            </div>
+
+            <div class="form-group half">
+                <label>Genre</label>
+                <input type="text" class="form-control" @bind="_meta.Genre" placeholder="Genre" />
+            </div>
+
+            <div class="form-group half">
+                <label>Year</label>
+                <input type="number" class="form-control" @bind="_meta.Year" />
+            </div>
+
+            <div class="form-group quarter">
+                <label>Track #</label>
+                <input type="number" class="form-control" @bind="_meta.Track" />
+            </div>
+
+            <div class="form-group quarter">
+                <label>Disc #</label>
+                <input type="number" class="form-control" @bind="_meta.Disc" />
+            </div>
+        </div>
+
+        @if (_saveError != null)
+        {
+            <div class="save-error">
+                <i class="fas fa-times-circle"></i> @_saveError
+            </div>
+        }
+    }
+
+</Modal>
+
+<style>
+    .meta-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+        .form-group label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: bold;
+        }
+
+    .full-width { width: 100%; }
+    .half { width: calc(50% - 7.5px); }
+    .quarter { width: calc(25% - 11.25px); }
+
+    .loading-state, .error-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+    }
+
+    .error-state i {
+        font-size: 2em;
+        color: #ff6b6b;
+        margin-bottom: 10px;
+    }
+
+    .save-error {
+        width: 100%;
+        margin-top: 10px;
+        color: #ff6b6b;
+        font-size: 0.9em;
+        background: rgba(255, 107, 107, 0.1);
+        padding: 10px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public Song? Song { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private SongMetadata? _meta;
+    private bool _isLoading = false;
+    private bool _loadError = false;
+    private bool _isSaving = false;
+    private string? _saveError;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsVisible && Song != null)
+        {
+            await LoadMetadata();
+        }
+        else if (!IsVisible)
+        {
+            // Reset state when closed
+            _meta = null;
+            _saveError = null;
+            _loadError = false;
+        }
+    }
+
+    private async Task LoadMetadata()
+    {
+        if (Song == null) return;
+
+        _isLoading = true;
+        _loadError = false;
+        
+        // Offload to thread to avoid blocking UI on slow disk I/O
+        _meta = await Task.Run(() => LibService.GetSongMetadata(Song));
+        
+        _isLoading = false;
+        if (_meta == null) _loadError = true;
+    }
+
+    private async Task Save()
+    {
+        if (Song == null || _meta == null) return;
+
+        _isSaving = true;
+        _saveError = null;
+
+        bool success = await Task.Run(() => LibService.UpdateSongMetadata(Song, _meta));
+
+        _isSaving = false;
+
+        if (success)
+        {
+            await OnClose.InvokeAsync();
+        }
+        else
+        {
+            _saveError = "Failed to save. File may be in use or read-only.";
+        }
+    }
+
+    private async Task Cancel()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

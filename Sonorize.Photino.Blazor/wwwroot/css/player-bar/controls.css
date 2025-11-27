@@ -1,0 +1,134 @@
+/* --- Center Zone: Transport & Seek --- */
+.player-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%; /* Let the zone container dictate the width */
+    min-width: 200px; /* Prevent complete collapse */
+}
+
+    .player-controls .transport-controls {
+        margin-bottom: 8px;
+    }
+
+.transport-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Slightly wider spacing for clarity */
+}
+
+    .transport-controls button {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary); /* Usually lighter gray */
+        font-size: 1rem;
+        cursor: pointer;
+        position: relative;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        transition: all 0.2s ease;
+    }
+
+        .transport-controls button:hover {
+            color: var(--text-primary); /* White on hover */
+            transform: scale(1.05);
+            background-color: transparent; /* Ensure no bg on hover for standard icons */
+        }
+
+        .transport-controls button:active {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+
+        .transport-controls button.active {
+            color: var(--accent-primary);
+        }
+
+            /* Dot indicator for Shuffle/Repeat */
+            .transport-controls button.active::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 4px;
+                height: 4px;
+                background-color: var(--accent-primary);
+                border-radius: 50%;
+            }
+
+            .transport-controls button.active.repeat-one::after {
+                content: '1';
+                font-size: 0.6em;
+                line-height: 4px;
+                font-weight: bold;
+                color: var(--accent-primary);
+                background-color: transparent;
+                bottom: -2px;
+            }
+
+    /* Play/Pause Button (Primary Action) - RESTORED TO ICON ONLY */
+    .transport-controls .play-pause {
+        background-color: transparent;
+        color: var(--text-primary); /* Default to white */
+        width: 40px; /* Slightly larger hit area */
+        height: 40px;
+        font-size: 1.4em; /* Larger Icon */
+        border-radius: 50%;
+        transition: transform 0.2s ease;
+    }
+
+        .transport-controls .play-pause:hover {
+            transform: scale(1.1);
+            color: var(--text-primary);
+            background-color: var(--hover-bg); /* Subtle highlight only */
+        }
+
+        .transport-controls .play-pause .fa-play {
+            margin-left: 3px; /* Visual centering */
+        }
+
+        /* Remove dot from play button */
+        .transport-controls .play-pause.active::after {
+            display: none;
+        }
+
+
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    color: var(--text-secondary);
+    font-size: 0.95em;
+    font-family: monospace; /* Tabular nums for time */
+    font-variant-numeric: tabular-nums;
+}
+
+.seek-slider {
+    flex-grow: 1;
+    height: 4px;
+    border-radius: 2px;
+    cursor: pointer;
+    min-width: 0; /* Crucial for shrinking inside flex/grid */
+}
+
+/* --- Responsive Behavior --- */
+@media (max-width: 600px) {
+    /* Hide time stamps on small screens to prioritize slider */
+    .progress-bar-container span {
+        display: none;
+    }
+
+    /* Reduce gap on transport controls */
+    .transport-controls {
+        gap: 10px;
+    }
+}

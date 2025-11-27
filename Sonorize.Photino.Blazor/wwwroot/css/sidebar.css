@@ -1,0 +1,216 @@
+.sidebar {
+    background-color: var(--bg-primary);
+    padding: 24px 8px 0 24px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden; /* Important for width transition */
+    /* Default: Border on the right (Left-side sidebar) */
+    border-right: 1px solid var(--border-color);
+}
+
+    /* --- Animation --- */
+    .sidebar.animated {
+        transition: width 0.3s ease, padding 0.3s ease;
+    }
+
+    /* When closed, certain styles might be overridden by inline styles in the razor component,
+   but we handle padding here for smooth transition */
+    .sidebar.closed {
+        padding-left: 0;
+        padding-right: 0;
+        border: none; /* Ensure border vanishes when closed, regardless of side */
+    }
+
+.sidebar-resizer {
+    width: 5px;
+    background-color: transparent; /* Explicitly transparent */
+    cursor: col-resize;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    /* Default: Right side handle */
+    right: 0;
+    left: auto;
+    z-index: 10;
+    transition: background-color 0.2s;
+    border: none; /* Ensure no border on the handle itself */
+}
+
+/* If sidebar is on the right, the resizer should be on its LEFT edge */
+.middle-container.sidebar-pos-right .sidebar-resizer {
+    right: auto;
+    left: 0;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer:active {
+    background-color: var(--accent-primary);
+}
+
+.resize-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    cursor: col-resize;
+    background: transparent;
+    user-select: none;
+}
+
+.sidebar .logo {
+    font-size: 1.7em; /* Relative */
+    font-weight: bold;
+    margin-bottom: 20px;
+    padding-left: 8px;
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+}
+
+    .sidebar .logo .logo-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+        background-color: var(--accent-primary);
+        mask-image: url('../img/icon-256.png');
+        -webkit-mask-image: url('../img/icon-256.png');
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
+    }
+
+.sidebar .nav {
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-nav-item-wrapper {
+    display: flex;
+    align-items: center;
+    border-radius: var(--border-radius);
+    margin-right: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-nav-item {
+    background: transparent;
+    border: none;
+    margin: 0;
+    font: inherit; /* Inherit font */
+    width: 100%;
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: bold;
+    font-size: 1em;
+    /* Use the variable injected by ThemeUtils based on settings */
+    padding: var(--sidebar-item-padding, 10px) 8px;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.sidebar-nav-item-wrapper:hover {
+    background-color: var(--hover-bg); /* UPDATED */
+}
+
+    .sidebar-nav-item-wrapper:hover .sidebar-nav-item,
+    .sidebar-nav-item:hover {
+        color: var(--text-primary);
+    }
+
+.sidebar-nav-item-wrapper.active {
+    background-color: var(--bg-tertiary);
+}
+
+    .sidebar-nav-item-wrapper.active .sidebar-nav-item {
+        color: var(--text-primary);
+    }
+
+
+.sidebar-nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.sidebar .playlists {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#playlist-nav-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.playlists-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    letter-spacing: 1px;
+    font-weight: bold;
+    padding: 0 8px 10px 8px;
+}
+
+.add-playlist-btn {
+    font-size: 1.4em;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+}
+
+    .add-playlist-btn:hover {
+        background-color: var(--hover-bg); /* UPDATED */
+        color: var(--text-primary);
+    }
+
+.delete-playlist-btn {
+    color: var(--text-secondary);
+    font-size: 1em;
+    padding: 0 8px;
+    visibility: hidden;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.sidebar-nav-item-wrapper:hover .delete-playlist-btn {
+    visibility: visible;
+    opacity: 1;
+}
+
+.delete-playlist-btn:hover {
+    color: var(--text-primary);
+}

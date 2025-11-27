@@ -1,0 +1,368 @@
+@using Sonorize.Core
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Components.Pages.SettingsSections.Components
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject IPlayerService PlayerService
+
+<div class="settings-view-container">
+
+    <!-- Audio Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Audio Output</span>
+            <span class="card-desc">Manage playback devices</span>
+        </div>
+        <div class="card-content">
+            <div class="control-row">
+                <label>Output Device</label>
+                <select class="form-control dropdown" @onchange="OnDeviceChanged">
+                    @foreach (var device in _audioDevices)
+                    {
+                        <option value="@device.Index" selected="@IsSelected(device)">
+                            @device.Name @(device.IsDefault ? "(Default)" : "")
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Behavior Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Behavior</span>
+            <span class="card-desc">Interaction and animation preferences</span>
+        </div>
+        <div class="card-content">
+            <label class="toggle-row">
+                <span class="toggle-label">Play song on single click</span>
+                <input type="checkbox" @bind="PlayOnSingleClick" class="toggle-input" />
+            </label>
+
+            <div class="divider"></div>
+
+            <label class="toggle-row">
+                <span class="toggle-label">Animate Sidebar Toggle</span>
+                <input type="checkbox" @bind="EnableSidebarAnimation" class="toggle-input" />
+            </label>
+        </div>
+    </div>
+
+    <!-- Display Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Display</span>
+            <span class="card-desc">Customize lists and scaling</span>
+        </div>
+        <div class="card-content">
+            <!-- UI Zoom -->
+            <div class="control-group">
+                <div class="slider-header">
+                    <span class="group-label">UI Scale (Zoom)</span>
+                    <span class="value-badge">@ZoomInt%</span>
+                </div>
+                <input type="range" min="50" max="150" step="5" @bind="ZoomInt" class="styled-slider" />
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Columns -->
+            <div class="control-group">
+                <span class="group-label">Track List Columns</span>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" @bind="ShowIndex" /> Index (#)</label>
+                    <label><input type="checkbox" @bind="ShowArt" /> Album Art</label>
+                    <label><input type="checkbox" @bind="ShowArtist" /> Artist</label>
+                    <label><input type="checkbox" @bind="ShowAlbum" /> Album</label>
+                    <label><input type="checkbox" @bind="ShowDuration" /> Duration</label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Overflow Mode -->
+            <div class="control-group">
+                <span class="group-label">Text Overflow</span>
+                <div class="radio-row">
+                    <label class="radio-btn @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Wrap ? "active" : "")">
+                        <input type="radio" name="overflow" checked="@(AppSettings.Library.TrackListOverflow == TextOverflowMode.Wrap)"
+                               @onchange="@(() => UpdateOverflow(TextOverflowMode.Wrap))" />
+                        Wrap
+                    </label>
+                    <label class="radio-btn @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Truncate ? "active" : "")">
+                        <input type="radio" name="overflow" checked="@(AppSettings.Library.TrackListOverflow == TextOverflowMode.Truncate)"
+                               @onchange="@(() => UpdateOverflow(TextOverflowMode.Truncate))" />
+                        Truncate
+                    </label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Styling Toggles -->
+            <div class="control-group">
+                <span class="group-label">List Styling</span>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" @bind="EnableZebra" /> Zebra Striping</label>
+                    <label><input type="checkbox" @bind="ShowGridLines" /> Grid Lines</label>
+                    <label><input type="checkbox" @bind="ShowThumbs" /> Slider Thumbs</label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Density Sliders -->
+            <div class="control-group">
+                <span class="group-label">Compactness</span>
+                <div class="slider-stack">
+                    <SettingsSlider Label="Row Padding" @bind-Value="RowPadding" Min="0" Max="40" Step="1" Unit="px" />
+                    <SettingsSlider Label="Art Size" @bind-Value="ListArtSize" Min="20" Max="120" Step="4" Unit="px" />
+                    <SettingsSlider Label="Sidebar Padding" @bind-Value="SidebarItemPadding" Min="2" Max="30" Step="1" Unit="px" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .settings-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-bottom: 30px;
+        max-width: 800px;
+    }
+
+    /* Card Styles */
+    .settings-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .card-title {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    /* Controls */
+    .control-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .control-row label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+    .dropdown {
+        padding: 8px 12px;
+        background-color: rgba(0, 0, 0, 0.2); /* Softened from var(--bg-primary) */
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
+
+    /* Toggles */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px 0;
+    }
+
+    .toggle-label {
+        font-size: 1em;
+        color: var(--text-primary);
+    }
+
+    .toggle-input {
+        transform: scale(1.3);
+        accent-color: var(--accent-primary);
+        cursor: pointer;
+    }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+        opacity: 0.5;
+    }
+
+    /* Sliders */
+    .slider-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .value-badge {
+        font-family: monospace;
+        color: var(--accent-primary);
+        background: rgba(255,255,255,0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+
+    .styled-slider {
+        width: 100%;
+        height: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .slider-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Checkbox Grid */
+    .group-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+        .checkbox-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .checkbox-grid input {
+            accent-color: var(--accent-primary);
+            cursor: pointer;
+        }
+
+    /* Radio Buttons */
+    .radio-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .radio-btn {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid var(--border-color);
+        background: rgba(0, 0, 0, 0.2); /* Softened */
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+    }
+
+        .radio-btn:hover {
+            border-color: var(--text-primary);
+        }
+
+        .radio-btn.active {
+            border-color: var(--accent-primary);
+            background-color: var(--accent-primary);
+            color: var(--bg-primary); /* High contrast against accent */
+            font-weight: bold;
+        }
+
+        .radio-btn input {
+            display: none;
+        }
+</style>
+
+@code {
+    private List<AudioDeviceInfo> _audioDevices = [];
+
+    protected override void OnInitialized()
+    {
+        _audioDevices = PlayerService.GetAvailableAudioDevices();
+    }
+
+    private bool IsSelected(AudioDeviceInfo device)
+    {
+        var storedIndex = AppSettings.Playback.OutputDeviceName;
+        if (string.IsNullOrEmpty(storedIndex)) return device.IsDefault;
+        return storedIndex == device.Index.ToString();
+    }
+
+    private void OnDeviceChanged(ChangeEventArgs e)
+    {
+        string? val = e.Value?.ToString();
+        AppSettings.Playback.OutputDeviceName = val;
+        PlayerService.ChangeOutputDevice(val);
+        Save();
+    }
+
+    private bool PlayOnSingleClick { get => AppSettings.Playback.PlayOnSingleClick; set { AppSettings.Playback.PlayOnSingleClick = value; Save(); } }
+    private bool EnableZebra { get => AppSettings.Theme.EnableZebraStriping; set { AppSettings.Theme.EnableZebraStriping = value; Save(); } }
+    private bool ShowGridLines { get => AppSettings.Theme.ShowGridLines; set { AppSettings.Theme.ShowGridLines = value; Save(); } }
+
+    private int RowPadding { get => AppSettings.Theme.RowVerticalPadding; set { AppSettings.Theme.RowVerticalPadding = value; Save(); } }
+    private int SidebarItemPadding { get => AppSettings.Theme.SidebarItemPadding; set { AppSettings.Theme.SidebarItemPadding = value; Save(); } }
+    private int ListArtSize { get => AppSettings.Library.ListArtSize; set { AppSettings.Library.ListArtSize = value; Save(); } }
+
+    private bool ShowThumbs { get => AppSettings.Window.ShowSliderThumbs; set { AppSettings.Window.ShowSliderThumbs = value; Save(); } }
+    private bool EnableSidebarAnimation { get => AppSettings.Window.EnableSidebarAnimation; set { AppSettings.Window.EnableSidebarAnimation = value; Save(); } }
+
+    private int ZoomInt
+    {
+        get => (int)(AppSettings.Window.ZoomLevel * 100);
+        set { AppSettings.Window.ZoomLevel = value / 100.0; Save(); }
+    }
+
+    private bool ShowIndex { get => AppSettings.Library.Columns.ShowIndex; set { AppSettings.Library.Columns.ShowIndex = value; Save(); } }
+    private bool ShowArt { get => AppSettings.Library.Columns.ShowArt; set { AppSettings.Library.Columns.ShowArt = value; Save(); } }
+    private bool ShowArtist { get => AppSettings.Library.Columns.ShowArtist; set { AppSettings.Library.Columns.ShowArtist = value; Save(); } }
+    private bool ShowAlbum { get => AppSettings.Library.Columns.ShowAlbum; set { AppSettings.Library.Columns.ShowAlbum = value; Save(); } }
+    private bool ShowDuration { get => AppSettings.Library.Columns.ShowDuration; set { AppSettings.Library.Columns.ShowDuration = value; Save(); } }
+
+    private void UpdateOverflow(TextOverflowMode mode) { AppSettings.Library.TrackListOverflow = mode; Save(); }
+    private void Save() => SettingsManager.Save(AppSettings);
+}

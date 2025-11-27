@@ -1,0 +1,7 @@
+﻿@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@inject LayoutStateService LayoutState
+
+<button class="player-btn" title="Speed & Pitch" @onclick="LayoutState.OpenSpeedPitch">
+    <i class="fas fa-tachometer-alt"></i>
+</button>

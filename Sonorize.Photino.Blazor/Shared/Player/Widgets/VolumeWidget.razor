@@ -1,0 +1,99 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<div class="player-volume">
+    <button class="player-btn volume-btn" @onclick="ToggleMute" title="@(PlayerService.Volume == 0 ? "Unmute" : "Mute")">
+        <i class="fas @GetVolumeIcon()"></i>
+    </button>
+
+    <div class="volume-bar-container">
+        <input type="range"
+               class="@VolumeSliderClass"
+               min="0"
+               max="1"
+               step="0.01"
+               value="@PlayerService.Volume"
+               style="@GetVolumeSliderStyle()"
+               @oninput="OnVolumeInput" />
+    </div>
+</div>
+
+<style>
+    /* Specific override for the volume icon button within the flex container */
+    .volume-btn {
+        margin-right: -4px; /* Tighten gap slightly between icon and slider */
+    }
+</style>
+
+@code {
+    private string VolumeSliderClass => !AppSettings.Window.ShowSliderThumbs ? "hide-thumb" : "";
+    private float _lastVolume = 0.5f; // Default restoration level if muted immediately on start
+
+    protected override void OnInitialized()
+    {
+        PlayerService.VolumeChanged += OnVolumeChanged;
+        SettingsManager.SettingsSaved += OnSettingsSaved;
+    }
+
+    private void OnVolumeChanged(float volume)
+    {
+        // If the user manually changes volume to a non-zero value, update our "last known good" state
+        if (volume > 0)
+        {
+            _lastVolume = volume;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnSettingsSaved() => InvokeAsync(StateHasChanged);
+
+    private void OnVolumeInput(ChangeEventArgs e)
+    {
+        if (float.TryParse(e.Value?.ToString(), out float vol))
+        {
+            PlayerService.SetVolume(vol);
+        }
+    }
+
+    private void ToggleMute()
+    {
+        if (PlayerService.Volume > 0)
+        {
+            // Mute: Remember current volume (already tracked via OnVolumeChanged, but ensure it's captured)
+            _lastVolume = PlayerService.Volume;
+            PlayerService.SetVolume(0);
+        }
+        else
+        {
+            // Unmute: Restore last volume. If last volume was somehow 0, default to 0.25 for safety.
+            float target = _lastVolume <= 0 ? 0.25f : _lastVolume;
+            PlayerService.SetVolume(target);
+        }
+    }
+
+    private string GetVolumeIcon()
+    {
+        if (PlayerService.Volume <= 0) return "fa-volume-mute";
+        if (PlayerService.Volume < 0.5f) return "fa-volume-down";
+        return "fa-volume-up";
+    }
+
+    private string GetVolumeSliderStyle() => GenerateGradientStyle(PlayerService.Volume * 100);
+
+    private string GenerateGradientStyle(double percent)
+    {
+        string p = percent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        return $"background: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-primary) {p}%, #535353 {p}%, #535353 100%);";
+    }
+
+    public void Dispose()
+    {
+        PlayerService.VolumeChanged -= OnVolumeChanged;
+        SettingsManager.SettingsSaved -= OnSettingsSaved;
+    }
+}

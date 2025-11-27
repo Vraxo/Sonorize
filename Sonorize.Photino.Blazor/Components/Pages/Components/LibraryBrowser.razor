@@ -1,0 +1,125 @@
+@typeparam TItem
+@using Timer = System.Timers.Timer
+@using Sonorize.Core
+@using Sonorize.Core.Settings
+@inject SonorizeSettings AppSettings
+@inject NavigationManager Nav
+@implements IDisposable
+
+<LibraryHeader Title="@Title"
+               @bind-SearchQuery="_searchQuery"
+               OnSearchKeyUp="OnSearchKeyUp"
+               ViewMode="ViewMode"
+               ViewModeChanged="OnViewModeChangedInternal"
+               OnSettingsClick="GoToSettings" />
+
+@if (!_filteredItems.Any())
+{
+    <div class="empty-message" style="text-align:center; padding: 40px; color: var(--text-secondary);">@EmptyMessage</div>
+}
+else if (ViewMode == LibraryViewMode.Grid)
+{
+    <div class="library-grid-container"
+         style="--grid-min-width: @(AppSettings.Library.GridItemWidth)px; --grid-gap: @(AppSettings.Library.GridGap)px; --card-padding: @(AppSettings.Library.GridItemPadding)px">
+
+        <!-- Wrapped in standard-grid-layout to apply CSS Grid rules -->
+        <div class="standard-grid-layout">
+            @foreach (var item in _filteredItems)
+            {
+                @GridTemplate(item)
+            }
+        </div>
+    </div>
+}
+else
+{
+    <!-- List View: Render directly without grid container constraints to ensure full width -->
+    <div class="track-list" style="--list-art-size: @(AppSettings.Library.ListArtSize)px;">
+        <table>
+            <thead>
+                @TableHeader
+            </thead>
+            <tbody>
+                @foreach (var item in _filteredItems)
+                {
+                    <tr @onclick="() => OnItemClick.InvokeAsync(item)" class="hover-row">
+                        @RowTemplate(item)
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<style>
+    .hover-row:hover {
+        background-color: var(--hover-bg);
+        cursor: pointer;
+    }
+</style>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Library";
+    [Parameter] public string EmptyMessage { get; set; } = "No items found.";
+    [Parameter] public List<TItem> Items { get; set; } = [];
+    [Parameter] public Func<TItem, string, bool> FilterPredicate { get; set; } = (_, _) => true;
+
+    // View Mode State
+    [Parameter] public LibraryViewMode ViewMode { get; set; }
+    [Parameter] public EventCallback<LibraryViewMode> ViewModeChanged { get; set; }
+
+    // Templates
+    [Parameter] public RenderFragment<TItem> GridTemplate { get; set; } = null!;
+    [Parameter] public RenderFragment TableHeader { get; set; } = null!;
+    [Parameter] public RenderFragment<TItem> RowTemplate { get; set; } = null!;
+
+    // Events
+    [Parameter] public EventCallback<TItem> OnItemClick { get; set; }
+
+    private string _searchQuery = "";
+    private List<TItem> _filteredItems = [];
+    private Timer _debounceTimer = new(300) { AutoReset = false };
+
+    protected override void OnInitialized()
+    {
+        _debounceTimer.Elapsed += (s, e) => InvokeAsync(ApplyFilter);
+        ApplyFilter();
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Re-apply filter if the source Items list changes reference
+        ApplyFilter();
+    }
+
+    private void OnSearchKeyUp()
+    {
+        _debounceTimer.Stop();
+        _debounceTimer.Start();
+    }
+
+    private async Task OnViewModeChangedInternal(LibraryViewMode mode)
+    {
+        await ViewModeChanged.InvokeAsync(mode);
+    }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            _filteredItems = Items;
+        }
+        else
+        {
+            _filteredItems = Items.Where(x => FilterPredicate(x, _searchQuery)).ToList();
+        }
+        StateHasChanged();
+    }
+
+    private void GoToSettings() => Nav.NavigateTo("/settings");
+
+    public void Dispose()
+    {
+        _debounceTimer.Dispose();
+    }
+}

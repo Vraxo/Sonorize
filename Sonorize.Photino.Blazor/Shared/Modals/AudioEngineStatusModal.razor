@@ -1,0 +1,140 @@
+﻿@using System.Runtime.InteropServices
+@using System.Diagnostics
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@inject IPlayerService PlayerService
+
+@if (!PlayerService.IsAudioEngineAvailable)
+{
+    <div class="modal-backdrop" style="background-color: rgba(0,0,0,0.9); z-index: 9999;">
+        <div class="modal-container" style="border: 1px solid #ff4d4d; max-width: 500px;">
+            <div class="modal-header" style="color: #ff4d4d;">
+                <i class="fas fa-volume-mute"></i> Audio Engine Not Found
+            </div>
+            <div class="modal-body">
+                <p>To play music, Sonorize needs the <strong>BASS Audio Library</strong>.</p>
+                <p>Please download the core library from the official website:</p>
+
+                <div style="background: #333; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                    <a href="#" @onclick='() => OpenBrowser("https://www.un4seen.com/bass.html")' @onclick:preventDefault style="color: #1DB954; font-weight:bold; display:block; margin-bottom:10px;">
+                        <i class="fas fa-external-link-alt"></i> Open BASS Download Page
+                    </a>
+
+                    @if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        <strong><i class="fab fa-windows"></i> Windows:</strong>
+                        <ol style="margin: 5px 0 0 20px; color: #ddd; line-height: 1.6;">
+                            <li>Download <strong>BASS</strong> (Windows).</li>
+                            <li>Open the zip and go to the <strong>x64</strong> folder.</li>
+                            <li>Copy <code>bass.dll</code> next to <code>Sonorize.exe</code>.</li>
+                        </ol>
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        <strong><i class="fab fa-linux"></i> Linux:</strong>
+                        <ol style="margin: 5px 0 0 20px; color: #ddd; line-height: 1.6;">
+                            <li>Download <strong>BASS</strong> (Linux).</li>
+                            <li>Extract <code>x64/libbass.so</code>.</li>
+                            <li>Place it in the application folder.</li>
+                        </ol>
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        <strong><i class="fab fa-apple"></i> macOS:</strong>
+                        <ol style="margin: 5px 0 0 20px; color: #ddd; line-height: 1.6;">
+                            <li>Download <strong>BASS</strong> (macOS).</li>
+                            <li>Extract <code>libbass.dylib</code>.</li>
+                            <li>Place it in the application folder.</li>
+                        </ol>
+                    }
+                </div>
+
+                <p style="font-size: 0.9em; color: #888; text-align: center;">
+                    Restart the application after placing the file.
+                </p>
+            </div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+}
+else if (!PlayerService.IsFxAvailable && !_fxWarningDismissed)
+{
+    <!-- Non-blocking warning for missing FX lib -->
+    <div class="modal-backdrop" style="background-color: rgba(0,0,0,0.7); z-index: 9998;" @onclick="DismissFxWarning">
+        <div class="modal-container" style="border: 1px solid #ffd700; max-width: 500px;" @onclick:stopPropagation>
+            <div class="modal-header" style="color: #ffd700;">
+                <i class="fas fa-exclamation-triangle"></i> Optional Component Missing
+            </div>
+            <div class="modal-body">
+                <p><strong>BASS_FX</strong> library was not found.</p>
+                <p>Playback will work, but <strong>Speed</strong> and <strong>Pitch</strong> controls will be disabled.</p>
+                
+                <div style="background: #333; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                    <a href="#" @onclick='() => OpenBrowser("https://www.un4seen.com/bass.html#addons")' @onclick:preventDefault style="color: #1DB954; font-weight:bold; display:block; margin-bottom:10px;">
+                        <i class="fas fa-external-link-alt"></i> Open Add-ons Download Page
+                    </a>
+                    <p style="font-size:0.9em; margin-bottom:10px;">Scroll down to <strong>BASS_FX</strong> and download the package for your OS.</p>
+
+                    @if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        <strong><i class="fab fa-windows"></i> Installation:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #ddd;">
+                            <li>Open the zip (x64 folder).</li>
+                            <li>Copy <code>bass_fx.dll</code> next to <code>bass.dll</code>.</li>
+                        </ul>
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        <strong><i class="fab fa-linux"></i> Installation:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #ddd;">
+                            <li>Extract <code>x64/libbass_fx.so</code>.</li>
+                            <li>Place it in the application folder.</li>
+                        </ul>
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        <strong><i class="fab fa-apple"></i> Installation:</strong>
+                        <ul style="margin: 5px 0 0 20px; color: #ddd;">
+                            <li>Extract <code>libbass_fx.dylib</code>.</li>
+                            <li>Place it in the application folder.</li>
+                        </ul>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @onclick="DismissFxWarning">OK, I understand</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _fxWarningDismissed = false;
+
+    private void DismissFxWarning()
+    {
+        _fxWarningDismissed = true;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        PlayerService.PlaybackStateChanged += StateHasChanged;
+    }
+
+    private void OpenBrowser(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to open URL: {ex.Message}");
+        }
+    }
+}

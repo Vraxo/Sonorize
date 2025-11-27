@@ -1,0 +1,225 @@
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject NavigationManager Nav
+@inject LibraryService LibService
+
+<div class="playlists-container">
+    <!-- Main Header Button -->
+    <div class="sidebar-nav-item-wrapper @GetActiveState("playlists")">
+        <div class="sidebar-nav-item" @onclick='() => NavigateTo("playlists")'>
+            <i class="fas fa-list"></i> Playlists
+        </div>
+        <button class="action-icon-btn" title="Create playlist" @onclick="OpenCreateModal" @onclick:stopPropagation>
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <div class="filter-container">
+        <div class="search-wrapper">
+            <input type="text"
+                   class="sidebar-filter-input"
+                   placeholder="Filter..."
+                   @bind="_playlistFilter"
+                   @bind:event="oninput" />
+
+            @if (!string.IsNullOrEmpty(_playlistFilter))
+            {
+                <button class="clear-filter-btn" @onclick="ClearFilter" title="Clear filter">&times;</button>
+            }
+        </div>
+    </div>
+
+    <div id="playlist-nav-container">
+        @foreach (var playlist in FilteredPlaylists)
+        {
+            var url = $"playlist/{playlist.Id}";
+            <div class="sidebar-nav-item-wrapper @GetActiveState(url)">
+                <div class="sidebar-nav-item" @onclick='() => NavigateTo(url)'>
+                    <i class="fas @(playlist.Type == PlaylistType.Manual ? "fa-music" : "fa-file-audio")"></i>
+                    <span class="playlist-name">@playlist.Name</span>
+                </div>
+                @if (playlist.Type == PlaylistType.Manual)
+                {
+                    <button class="action-icon-btn delete" title="Delete Playlist" @onclick="() => PromptDeletePlaylist(playlist)" @onclick:stopPropagation>
+                        <i class="fas fa-times"></i>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- CREATE MODAL -->
+<Modal IsVisible="_showCreateModal" Title="Create Playlist" ConfirmText="Create" OnCancel="CloseCreateModal" OnConfirm="ConfirmCreatePlaylist">
+    <div class="setting-item">
+        <label style="display:block; margin-bottom:5px; color:#ccc;">Name</label>
+        <input type="text" class="form-control" @bind="_newPlaylistName" placeholder="My Awesome Playlist" />
+    </div>
+</Modal>
+
+<!-- DELETE MODAL -->
+<Modal IsVisible="_showDeleteModal" Title="Delete Playlist" ConfirmText="Delete" OnCancel="CloseDeleteModal" OnConfirm="ConfirmDeletePlaylist">
+    <p>Are you sure you want to delete <strong>@(_playlistToDelete?.Name ?? "this playlist")</strong>?</p>
+    <p style="font-size: 0.9em; color: #aaa;">This action cannot be undone.</p>
+</Modal>
+
+<style>
+    .playlists-container {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-container {
+        padding: 8px;
+    }
+
+    .search-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .sidebar-filter-input {
+        width: 100%;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid transparent;
+        border-radius: var(--border-radius);
+        padding: 6px 24px 6px 8px;
+        color: var(--text-primary);
+        font-size: 0.85em;
+        outline: none;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+        .sidebar-filter-input:focus {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .sidebar-filter-input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+
+    .clear-filter-btn {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.2em;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .clear-filter-btn:hover {
+            color: var(--text-primary);
+        }
+
+    .playlist-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Action Buttons (Plus / Delete) */
+    .action-icon-btn {
+        color: var(--text-secondary);
+        font-size: 1em;
+        padding: 0 8px;
+        line-height: 1;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        transition: color 0.2s;
+        opacity: 0.7;
+    }
+
+    /* Always show the plus button for the header, but only show delete on hover for items */
+    .sidebar-nav-item-wrapper .action-icon-btn.delete {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .sidebar-nav-item-wrapper:hover .action-icon-btn.delete {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .action-icon-btn:hover {
+        color: var(--text-primary);
+        opacity: 1;
+    }
+</style>
+
+@code {
+    private string _playlistFilter = "";
+    private bool _showCreateModal = false;
+    private string _newPlaylistName = "";
+    private bool _showDeleteModal = false;
+    private Playlist? _playlistToDelete;
+
+    private IEnumerable<Playlist> FilteredPlaylists => string.IsNullOrWhiteSpace(_playlistFilter)
+        ? LibService.AllPlaylists
+        : LibService.AllPlaylists.Where(p => p.Name.Contains(_playlistFilter, StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        Nav.LocationChanged += OnLocationChanged;
+        LibService.LibraryChanged += OnLibraryChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => StateHasChanged();
+    private void OnLibraryChanged() => InvokeAsync(StateHasChanged);
+    private void NavigateTo(string url) => Nav.NavigateTo(url);
+
+    private string GetActiveState(string href)
+    {
+        var currentUri = Nav.Uri;
+        var targetUri = Nav.ToAbsoluteUri(href).ToString();
+        return currentUri.Equals(targetUri, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    }
+
+    private void ClearFilter() => _playlistFilter = "";
+
+    private void OpenCreateModal() { _newPlaylistName = ""; _showCreateModal = true; }
+    private void CloseCreateModal() { _showCreateModal = false; }
+    private void ConfirmCreatePlaylist()
+    {
+        if (string.IsNullOrWhiteSpace(_newPlaylistName)) return;
+        var newPlaylist = LibService.CreatePlaylist(_newPlaylistName);
+        _showCreateModal = false;
+        Nav.NavigateTo($"playlist/{newPlaylist.Id}");
+    }
+
+    private void PromptDeletePlaylist(Playlist playlist) { _playlistToDelete = playlist; _showDeleteModal = true; }
+    private void CloseDeleteModal() { _showDeleteModal = false; _playlistToDelete = null; }
+    private void ConfirmDeletePlaylist()
+    {
+        if (_playlistToDelete != null)
+        {
+            LibService.DeletePlaylist(_playlistToDelete);
+            if (Nav.Uri.EndsWith($"playlist/{_playlistToDelete.Id}")) Nav.NavigateTo("/");
+        }
+        CloseDeleteModal();
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+        LibService.LibraryChanged -= OnLibraryChanged;
+    }
+}

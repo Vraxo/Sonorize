@@ -1,0 +1,170 @@
+@page "/playlists"
+@using Sonorize.Core.Services
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Components.Pages.Components
+@inject LibraryService LibService
+@inject NavigationManager Nav
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@implements IDisposable
+
+<LibraryBrowser Title="Playlists"
+                TItem="Playlist"
+                Items="_playlists"
+                FilterPredicate="FilterPlaylist"
+                ViewMode="AppSettings.Library.PlaylistsViewMode"
+                ViewModeChanged="OnViewModeChanged"
+                OnItemClick="OpenPlaylist">
+
+    <GridTemplate Context="playlist">
+        <div class="library-grid-item" @onclick="() => OpenPlaylist(playlist)">
+            <div class="art-wrapper">
+                @{
+                    var artPath = GetPlaylistArt(playlist);
+                }
+                @if (artPath != null)
+                {
+                    <img src="@GetArtUrl(artPath)" loading="lazy" />
+                }
+                else
+                {
+                    <div class="art-placeholder"><i class="fas fa-list-music"></i></div>
+                }
+            </div>
+            <p class="item-title" title="@playlist.Name">@playlist.Name</p>
+            <p class="item-subtitle">
+                @playlist.SongFilePaths.Count @(playlist.SongFilePaths.Count == 1 ? "song" : "songs")
+            </p>
+        </div>
+    </GridTemplate>
+
+    <TableHeader>
+        <tr>
+            <th class="col-art"></th>
+            <th class="col-title sortable-header" @onclick='() => Sort("Name")'>
+                Name @RenderSortIcon("Name")
+            </th>
+            <th class="col-artist sortable-header" @onclick='() => Sort("Type")'>
+                Type @RenderSortIcon("Type")
+            </th>
+            <th class="col-duration sortable-header" @onclick='() => Sort("Count")'>
+                Songs @RenderSortIcon("Count")
+            </th>
+        </tr>
+    </TableHeader>
+
+    <RowTemplate Context="playlist">
+        <td class="col-art">
+            <div class="list-art-wrapper">
+                @{
+                    var artPath = GetPlaylistArt(playlist);
+                }
+                @if (artPath != null)
+                {
+                    <img src="@GetArtUrl(artPath)" loading="lazy" />
+                }
+            </div>
+        </td>
+        <td class="col-title">@playlist.Name</td>
+        <td class="col-artist">
+            @(playlist.Type == PlaylistType.Manual ? "Manual" : "File")
+        </td>
+        <td class="col-duration">@playlist.SongFilePaths.Count</td>
+    </RowTemplate>
+
+</LibraryBrowser>
+
+@code {
+    private List<Playlist> _playlists = [];
+    private string _sortColumn = "Name";
+    private bool _isAscending = true;
+
+    protected override void OnInitialized()
+    {
+        LibService.LibraryChanged += OnLibraryChanged;
+        LoadData();
+    }
+
+    private void OnLibraryChanged()
+    {
+        InvokeAsync(() => { LoadData(); StateHasChanged(); });
+    }
+
+    private void LoadData()
+    {
+        var source = LibService.AllPlaylists ?? [];
+        _playlists = ApplySort(source);
+    }
+
+    private bool FilterPlaylist(Playlist playlist, string query)
+    {
+        return playlist.Name.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void Sort(string column)
+    {
+        if (_sortColumn == column) _isAscending = !_isAscending;
+        else { _sortColumn = column; _isAscending = true; }
+
+        LoadData();
+    }
+
+    private List<Playlist> ApplySort(IEnumerable<Playlist> source)
+    {
+        return _sortColumn switch
+        {
+            "Name" => _isAscending ? source.OrderBy(p => p.Name).ToList() : source.OrderByDescending(p => p.Name).ToList(),
+            "Type" => _isAscending ? source.OrderBy(p => p.Type).ThenBy(p => p.Name).ToList() : source.OrderByDescending(p => p.Type).ThenBy(p => p.Name).ToList(),
+            "Count" => _isAscending ? source.OrderBy(p => p.SongFilePaths.Count).ToList() : source.OrderByDescending(p => p.SongFilePaths.Count).ToList(),
+            _ => source.ToList()
+        };
+    }
+
+    private RenderFragment RenderSortIcon(string column)
+    {
+        if (_sortColumn != column) return builder => { };
+        return builder =>
+        {
+            builder.OpenElement(0, "i");
+            builder.AddAttribute(1, "class", _isAscending ? "fas fa-caret-up sort-icon" : "fas fa-caret-down sort-icon");
+            builder.CloseElement();
+        };
+    }
+
+    private void OnViewModeChanged(LibraryViewMode mode)
+    {
+        AppSettings.Library.PlaylistsViewMode = mode;
+        SettingsManager.Save(AppSettings);
+        StateHasChanged();
+    }
+
+    private void OpenPlaylist(Playlist playlist)
+    {
+        Nav.NavigateTo($"/playlist/{playlist.Id}");
+    }
+
+    private string? GetPlaylistArt(Playlist playlist)
+    {
+        foreach (var path in playlist.SongFilePaths.Take(5))
+        {
+            var song = LibService.GetSong(path);
+            if (song != null && song.HasArt)
+            {
+                return song.FilePath;
+            }
+        }
+        return null;
+    }
+
+    private string GetArtUrl(string path)
+    {
+        return $"sonorize://albumart/?path={Uri.EscapeDataString(path)}";
+    }
+
+    public void Dispose()
+    {
+        LibService.LibraryChanged -= OnLibraryChanged;
+    }
+}

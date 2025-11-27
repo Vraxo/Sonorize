@@ -1,0 +1,70 @@
+@using Sonorize.Core
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Components.Pages.Components
+@using Sonorize.Photino.Blazor.Components.Pages.SettingsSections.Components
+@using Sonorize.Photino.Blazor.Shared
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject ThemeService ThemeService
+
+<div class="settings-view-container">
+
+    <!-- Saved Themes -->
+    <SettingsCard Title="Saved Themes" Description="Switch between presets or saved styles">
+        <HeaderAction>
+            <button class="btn-header-action" @onclick="OpenSaveModal" title="Save Current">
+                <i class="fas fa-save"></i> Save As...
+            </button>
+        </HeaderAction>
+        <ChildContent>
+            <ThemeListSection @ref="_themeList" OnLoadTheme="ApplyLoadedTheme" />
+        </ChildContent>
+    </SettingsCard>
+
+    <!-- Player Bar Layout -->
+    <SettingsCard Title="Player Bar Layout" Description="Drag widgets to reorder or move between zones" ContentStyle="padding:0;">
+        <div style="padding: 15px;">
+            <PlayerBarLayoutEditor Config="AppSettings.Theme.PlayerBarLayout" OnChange="Save" />
+        </div>
+    </SettingsCard>
+
+    <!-- Layout & Geometry -->
+    <ThemeLayoutCard />
+
+    <!-- Colors & Background -->
+    <ThemeColorsCard />
+
+</div>
+
+<SaveThemeModal IsVisible="_showSaveModal" OnClose="CloseSaveModal" OnConfirm="ConfirmSaveTheme" />
+
+<style>
+    .settings-view-container { display: flex; flex-direction: column; gap: 24px; padding-bottom: 30px; max-width: 800px; }
+    
+    .btn-header-action {
+        background: rgba(255,255,255,0.1); border: none; color: var(--text-primary); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em; transition: background 0.2s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .btn-header-action:hover { background: rgba(255,255,255,0.2); }
+</style>
+
+@code {
+    private ThemeListSection? _themeList;
+    private bool _showSaveModal = false;
+
+    private void ApplyLoadedTheme(SonorizeTheme theme) { AppSettings.ApplyTheme(theme); Save(); StateHasChanged(); }
+
+    private void OpenSaveModal() => _showSaveModal = true;
+    private void CloseSaveModal() => _showSaveModal = false;
+    
+    private void ConfirmSaveTheme(string name) 
+    { 
+        ThemeService.SaveTheme(name, AppSettings.ExtractTheme()); 
+        _themeList?.RefreshThemes(); 
+        CloseSaveModal(); 
+    }
+
+    private void Save() => SettingsManager.Save(AppSettings);
+}

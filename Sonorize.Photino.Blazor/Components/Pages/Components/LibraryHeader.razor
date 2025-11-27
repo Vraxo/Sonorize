@@ -1,0 +1,111 @@
+@using Sonorize.Core
+
+<div class="header">
+    <div id="header-context-controls">
+        @if (ShowBackButton)
+        {
+            <button class="header-action-btn" title="Back" @onclick="OnBackClick">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        }
+    </div>
+
+    <h1 id="header-title">@Title</h1>
+
+    <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search-input" placeholder="Search..."
+               value="@SearchQuery"
+               @oninput="OnSearchInput"
+               @onkeyup="OnSearchKeyUp" />
+
+        @if (!string.IsNullOrEmpty(SearchQuery))
+        {
+            <button class="clear-search-btn" @onclick="ClearSearch" title="Clear search">&times;</button>
+        }
+    </div>
+
+    <div class="header-controls header-right">
+        <!-- View Toggle: Shows the icon of the view we will switch TO -->
+        <button class="header-action-btn"
+                title="@(ViewMode == LibraryViewMode.List ? "Switch to Grid" : "Switch to List")"
+                @onclick="ToggleViewMode">
+            <i class="fas @(ViewMode == LibraryViewMode.List ? "fa-th-large" : "fa-list")"></i>
+        </button>
+
+        <button class="header-action-btn" @onclick="OnSettingsClick" title="Settings">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .search-container {
+        position: relative;
+        max-width: 400px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #search-input {
+        width: 100%;
+        padding: 8px 30px 8px 40px; /* Extra padding on right for clear btn */
+    }
+
+    .clear-search-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.4em;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .clear-search-btn:hover {
+            color: var(--text-primary);
+        }
+</style>
+
+@code {
+    [Parameter] public string Title { get; set; } = "Your Library";
+    [Parameter] public bool ShowBackButton { get; set; }
+    [Parameter] public EventCallback OnBackClick { get; set; }
+
+    [Parameter] public string SearchQuery { get; set; } = "";
+    [Parameter] public EventCallback<string> SearchQueryChanged { get; set; }
+    [Parameter] public EventCallback OnSearchKeyUp { get; set; }
+
+    [Parameter] public LibraryViewMode ViewMode { get; set; }
+    [Parameter] public EventCallback<LibraryViewMode> ViewModeChanged { get; set; }
+
+    [Parameter] public EventCallback OnSettingsClick { get; set; }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        SearchQuery = e.Value?.ToString() ?? "";
+        await SearchQueryChanged.InvokeAsync(SearchQuery);
+    }
+
+    private async Task ClearSearch()
+    {
+        SearchQuery = "";
+        await SearchQueryChanged.InvokeAsync(SearchQuery);
+        await OnSearchKeyUp.InvokeAsync();
+    }
+
+    private async Task ToggleViewMode()
+    {
+        var newMode = ViewMode == LibraryViewMode.List ? LibraryViewMode.Grid : LibraryViewMode.List;
+        await ViewModeChanged.InvokeAsync(newMode);
+    }
+}

@@ -1,0 +1,265 @@
+﻿@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Shared
+@using System.Globalization
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<Modal IsVisible="IsVisible"
+       Title="Speed & Pitch"
+       ConfirmText="Close"
+       ShowCancelButton="@false"
+       OnCancel="Close"
+       OnConfirm="Close">
+
+    @if (!PlayerService.IsFxAvailable)
+    {
+        <div class="error-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p><strong>BASS_FX library not found.</strong><br />Speed and pitch controls are disabled.</p>
+        </div>
+    }
+    else
+    {
+        <div class="sp-container">
+
+            <!-- Tempo Control -->
+            <div class="sp-card">
+                <div class="sp-header">
+                    <span class="sp-label"><i class="fas fa-tachometer-alt"></i> Tempo</span>
+                    <button class="sp-reset-btn" @onclick="ResetTempo" disabled="@(UiTempo == 100)" title="Reset to 100%">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                </div>
+
+                <div class="sp-slider-row">
+                    <span class="sp-minmax">0%</span>
+                    <input type="range"
+                           min="0" max="200" step="5"
+                           value="@UiTempo"
+                           @oninput="OnTempoInput"
+                           class="sp-slider" />
+                    <span class="sp-minmax">200%</span>
+                </div>
+
+                <div class="sp-value-row">
+                    <span class="sp-value-large">@GetTempoString()</span>
+                    <span class="sp-value-detail">(@((int)UiTempo)%)</span>
+                </div>
+            </div>
+
+            <!-- Pitch Control -->
+            <div class="sp-card">
+                <div class="sp-header">
+                    <span class="sp-label"><i class="fas fa-music"></i> Pitch</span>
+                    <button class="sp-reset-btn" @onclick="ResetPitch" disabled="@(Math.Abs(PitchValue) < 0.1)" title="Reset to 0">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                </div>
+
+                <div class="sp-slider-row">
+                    <span class="sp-minmax">-12</span>
+                    <input type="range"
+                           min="-12" max="12" step="0.5"
+                           value="@PitchValue.ToString(CultureInfo.InvariantCulture)"
+                           @oninput="OnPitchInput"
+                           class="sp-slider" />
+                    <span class="sp-minmax">+12</span>
+                </div>
+
+                <div class="sp-value-row">
+                    <span class="sp-value-large">@PitchValue.ToString("0.0", CultureInfo.InvariantCulture)</span>
+                    <span class="sp-value-detail">semitones</span>
+                </div>
+            </div>
+
+        </div>
+    }
+
+</Modal>
+
+<style>
+    .sp-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sp-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        transition: border-color 0.2s;
+    }
+
+        .sp-card:hover {
+            border-color: var(--text-secondary);
+        }
+
+    .sp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sp-label {
+        font-weight: bold;
+        color: var(--text-primary);
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sp-reset-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1em;
+        padding: 6px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+    }
+
+        .sp-reset-btn:hover:not(:disabled) {
+            background-color: var(--bg-secondary);
+            color: var(--accent-primary);
+        }
+
+        .sp-reset-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+    .sp-slider-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .sp-slider {
+        flex-grow: 1;
+        height: 6px;
+        background: var(--bg-secondary);
+        border-radius: 3px;
+        appearance: none;
+        outline: none;
+        cursor: pointer;
+    }
+
+        .sp-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--bg-tertiary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sp-slider:active::-webkit-slider-thumb {
+            transform: scale(1.1);
+        }
+
+    .sp-minmax {
+        font-size: 0.8em;
+        color: var(--text-secondary);
+        font-family: monospace;
+        min-width: 30px;
+        text-align: center;
+    }
+
+    .sp-value-row {
+        text-align: center;
+        margin-top: -5px;
+    }
+
+    .sp-value-large {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: var(--accent-primary);
+        display: block;
+    }
+
+    .sp-value-detail {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    // Logic:
+    // UI Range: 0 to 200 (Center 100)
+    // BASS Range: -100 to +100 (Center 0)
+    // Mapping: Bass = UI - 100
+    // UI = Bass + 100
+
+    private float UiTempo => AppSettings.Playback.Tempo + 100;
+    private float PitchValue => AppSettings.Playback.Pitch;
+
+    private void OnTempoInput(ChangeEventArgs e)
+    {
+        if (float.TryParse(e.Value?.ToString(), out float val))
+        {
+            float bassValue = val - 100;
+            // BASS limit clamp (BASS usually supports -95 as min)
+            if (bassValue < -95) bassValue = -95;
+
+            AppSettings.Playback.Tempo = bassValue;
+            PlayerService.SetTempo(bassValue);
+            SettingsManager.Save(AppSettings);
+        }
+    }
+
+    private void OnPitchInput(ChangeEventArgs e)
+    {
+        if (float.TryParse(e.Value?.ToString(), NumberStyles.Any, CultureInfo.InvariantCulture, out float val))
+        {
+            AppSettings.Playback.Pitch = val;
+            PlayerService.SetPitch(val);
+            SettingsManager.Save(AppSettings);
+        }
+    }
+
+    private void ResetTempo()
+    {
+        AppSettings.Playback.Tempo = 0; // 0 internally = 100% in UI
+        PlayerService.SetTempo(0);
+        SettingsManager.Save(AppSettings);
+    }
+
+    private void ResetPitch()
+    {
+        AppSettings.Playback.Pitch = 0;
+        PlayerService.SetPitch(0);
+        SettingsManager.Save(AppSettings);
+    }
+
+    private string GetTempoString()
+    {
+        float factor = UiTempo / 100.0f;
+        return $"{factor:0.00}x";
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

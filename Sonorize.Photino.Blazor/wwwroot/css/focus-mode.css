@@ -1,0 +1,127 @@
+.focus-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+    /* Default to White text for immersive feel, overridden by adaptive logic */
+    color: #ffffff;
+    transition: color 0.5s ease;
+}
+
+    /* Adaptive Override: Used when JS detects a light background */
+    .focus-container.adaptive-dark-text {
+        color: #121212 !important;
+    }
+
+        /* Propagate adaptive color to children */
+        .focus-container.adaptive-dark-text .focus-title,
+        .focus-container.adaptive-dark-text .focus-artist,
+        .focus-container.adaptive-dark-text .focus-album,
+        .focus-container.adaptive-dark-text .focus-placeholder {
+            color: #121212 !important;
+            text-shadow: none; /* Remove shadow on light mode for cleaner look */
+        }
+
+.focus-art-wrapper {
+    width: 60vh;
+    height: 60vh;
+    max-width: 500px;
+    max-height: 500px;
+    margin-bottom: 40px;
+    position: relative;
+    border-radius: 12px; /* Slightly more rounded than standard */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    background-color: var(--bg-tertiary);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+    .focus-art-wrapper:hover {
+        transform: scale(1.02);
+    }
+
+    .focus-art-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+.focus-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    color: inherit; /* Inherit from container */
+    opacity: 0.3;
+}
+
+.focus-info {
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.focus-title {
+    font-size: 2.5em;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    color: inherit; /* Matches container */
+    line-height: 1.1;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    transition: color 0.5s ease;
+}
+
+.focus-artist {
+    font-size: 1.5em;
+    font-weight: 500;
+    margin: 0;
+    /* CHANGED: Now inherits to match title (was accent-primary) */
+    color: inherit;
+    opacity: 0.9;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    transition: color 0.5s ease;
+}
+
+.focus-album {
+    font-size: 1.1em;
+    margin-top: 8px;
+    color: inherit;
+    font-weight: 400;
+    opacity: 0.7;
+    transition: color 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-height: 700px) {
+    .focus-art-wrapper {
+        width: 45vh;
+        height: 45vh;
+        margin-bottom: 20px;
+    }
+
+    .focus-title {
+        font-size: 2em;
+    }
+
+    .focus-artist {
+        font-size: 1.2em;
+    }
+}

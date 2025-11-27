@@ -1,0 +1,67 @@
+﻿<div class="slider-wrapper">
+    <span class="slider-label" title="@Label">@Label</span>
+
+    <input type="range"
+           min="@Min"
+           max="@Max"
+           step="@Step"
+           value="@Value"
+           @oninput="HandleInput"
+           class="range-input" />
+
+    @if (ShowNumberInput)
+    {
+        <input type="number"
+               min="@Min"
+               max="@Max"
+               value="@Value"
+               @onchange="HandleNumberChange"
+               class="number-input" />
+    }
+
+    <div class="reset-wrapper">
+        @if (DefaultValue.HasValue && Value != DefaultValue.Value)
+        {
+            <button class="reset-icon-btn" @onclick="Reset" title="Reset to @DefaultValue.Value">
+                <i class="fas fa-undo"></i>
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public required string Label { get; set; }
+    [Parameter] public int Value { get; set; }
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+    [Parameter] public int Min { get; set; } = 0;
+    [Parameter] public int Max { get; set; } = 100;
+    [Parameter] public int Step { get; set; } = 1;
+    [Parameter] public string Unit { get; set; } = ""; // Kept for API compatibility, but not displayed
+    [Parameter] public bool ShowNumberInput { get; set; } = true;
+    [Parameter] public int? DefaultValue { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val))
+        {
+            await ValueChanged.InvokeAsync(val);
+        }
+    }
+
+    private async Task HandleNumberChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val))
+        {
+            val = Math.Clamp(val, Min, Max);
+            await ValueChanged.InvokeAsync(val);
+        }
+    }
+
+    private async Task Reset()
+    {
+        if (DefaultValue.HasValue)
+        {
+            await ValueChanged.InvokeAsync(DefaultValue.Value);
+        }
+    }
+}

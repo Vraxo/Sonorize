@@ -1,0 +1,229 @@
+﻿@inherits LayoutComponentBase
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Services.UI
+@using Sonorize.Core.Services.System
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Shared.Player
+@using Sonorize.Photino.Blazor.Shared.Modals
+@using Microsoft.JSInterop
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject IPlayerService PlayerService
+@inject FileImportService FileImporter
+@inject IJSRuntime JS
+@inject LayoutStateService LayoutState
+@inject NavigationManager Nav
+
+<ThemeController />
+<AudioEngineStatusModal />
+
+<div class="@MainContainerClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave">
+
+    <div class="drag-overlay @(_isDragging ? "active" : "")">
+        <div class="drag-message">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h2>Drop to Play</h2>
+            <p>Release files to start playback</p>
+        </div>
+        @if (_isDragging)
+        {
+            <InputFile OnChange="HandleFileDrop" multiple class="drag-input" />
+        }
+    </div>
+
+    <AmbientBackgroundRenderer />
+
+    <div class="@MiddleContainerClass" style="flex: 1; display: flex; overflow: hidden; position: relative;">
+        <Sidebar IsOpen="@AppSettings.Window.IsSidebarOpen" OnClose="ToggleSidebar" />
+
+        <button class="sidebar-restore-btn @(AppSettings.Window.IsSidebarOpen ? "hidden" : "")"
+                title="Open Sidebar"
+                @onclick="ToggleSidebar">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+
+        <main class="@MainContentClass" style="@MainContentStyle">
+            <div class="main-content-padding">
+                @Body
+            </div>
+        </main>
+    </div>
+
+    <PlayerBar />
+</div>
+
+@if (_showEq)
+{
+    <EqualizerModal IsVisible="true" OnClose="CloseEqualizer" />
+}
+
+@if (_showSpeedPitch)
+{
+    <SpeedPitchModal IsVisible="true" OnClose="CloseSpeedPitch" />
+}
+
+@code {
+    private bool _isDragging = false;
+    private int _dragCounter = 0;
+    private bool _showEq = false;
+    private bool _showSpeedPitch = false;
+    private DotNetObjectReference<MainLayout>? _objRef;
+
+    private string MainContainerClass =>
+        $"layout-root " +
+        $"{(AppSettings.Theme.EnableAmbientBackground ? "ambient-mode" : "")} " +
+        $"bar-pos-{AppSettings.Theme.PlayerBarPosition.ToString().ToLowerInvariant()}";
+
+    private string MiddleContainerClass =>
+        $"middle-container sidebar-pos-{AppSettings.Theme.SidebarPosition.ToString().ToLowerInvariant()}";
+
+    private string MainContentClass => $"main-content {(AppSettings.Window.EnableSidebarAnimation ? "" : "no-anim")}";
+
+    private string MainContentStyle
+    {
+        get
+        {
+            if (AppSettings.Window.IsSidebarOpen)
+            {
+                return "";
+            }
+
+            return AppSettings.Theme.SidebarPosition == SidebarPosition.Left
+                ? "padding-left: 40px;"
+                : "padding-right: 40px;";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        SettingsManager.SettingsSaved += OnSettingsChanged;
+
+        // Hook up LayoutStateService events
+        LayoutState.EqRequested += OpenEqualizer;
+        LayoutState.SpeedPitchRequested += OpenSpeedPitch;
+        LayoutState.FocusModeRequested += ToggleFocus;
+        LayoutState.QueueViewRequested += ToggleQueue;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _objRef = DotNetObjectReference.Create(this);
+                await JS.InvokeVoidAsync("registerZoomHandler", _objRef);
+            }
+            catch { /* Ignore JS init errors */ }
+        }
+    }
+
+    [JSInvokable]
+    public void AdjustZoom(int direction)
+    {
+        if (direction == 0)
+        {
+            AppSettings.Window.ZoomLevel = 1.0;
+        }
+        else
+        {
+            double step = 0.05;
+            double newVal = AppSettings.Window.ZoomLevel + (direction * step);
+            AppSettings.Window.ZoomLevel = Math.Clamp(newVal, 0.5, 1.5);
+        }
+
+        SettingsManager.Save(AppSettings);
+    }
+
+    private void OnSettingsChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleSidebar()
+    {
+        AppSettings.Window.IsSidebarOpen = !AppSettings.Window.IsSidebarOpen;
+        SettingsManager.Save(AppSettings);
+    }
+
+    private void OpenEqualizer() { _showEq = true; StateHasChanged(); }
+    private void CloseEqualizer() { _showEq = false; StateHasChanged(); }
+    private void OpenSpeedPitch() { _showSpeedPitch = true; StateHasChanged(); }
+    private void CloseSpeedPitch() { _showSpeedPitch = false; StateHasChanged(); }
+
+    private void ToggleFocus()
+    {
+        if (Nav.Uri.EndsWith("focus")) Nav.NavigateTo("/");
+        else Nav.NavigateTo("/focus");
+    }
+
+    private void ToggleQueue()
+    {
+        if (Nav.Uri.EndsWith("queue")) Nav.NavigateTo("/");
+        else Nav.NavigateTo("/queue");
+    }
+
+    private void OnDragEnter(DragEventArgs e)
+    {
+        if (LayoutState.IsDraggingInternal) return;
+        _dragCounter++;
+        if (_dragCounter == 1) _isDragging = true;
+    }
+
+    private void OnDragLeave(DragEventArgs e)
+    {
+        if (LayoutState.IsDraggingInternal) return;
+        _dragCounter--;
+        if (_dragCounter <= 0)
+        {
+            _dragCounter = 0;
+            _isDragging = false;
+        }
+    }
+
+    private async Task HandleFileDrop(InputFileChangeEventArgs e)
+    {
+        _dragCounter = 0;
+        _isDragging = false;
+
+        var browserFiles = e.GetMultipleFiles(500);
+        if (browserFiles.Count == 0) return;
+
+        // Prepare streams for core service
+        var fileStreams = new List<(Stream stream, string name)>();
+
+        // Note: We open streams here because BrowserFile lives in Blazor context
+        // We will dispose them after ImportStreamsAsync consumes them
+        foreach (var file in browserFiles)
+        {
+            // 1GB max per file (High-res FLACs/WAVs can exceed 50MB easily)
+            fileStreams.Add((file.OpenReadStream(1_000_000_000), file.Name));
+        }
+
+        try
+        {
+            var songs = await FileImporter.ImportStreamsAsync(fileStreams);
+            if (songs.Count > 0)
+            {
+                await PlayerService.PlayPlaylist(songs);
+            }
+        }
+        finally
+        {
+            foreach (var f in fileStreams) f.stream.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        _objRef?.Dispose();
+        SettingsManager.SettingsSaved -= OnSettingsChanged;
+        LayoutState.EqRequested -= OpenEqualizer;
+        LayoutState.SpeedPitchRequested -= OpenSpeedPitch;
+        LayoutState.FocusModeRequested -= ToggleFocus;
+        LayoutState.QueueViewRequested -= ToggleQueue;
+    }
+}

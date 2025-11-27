@@ -1,0 +1,228 @@
+@using NativeFileDialogs.Net
+@using Sonorize.Core.Services.UI
+@using Sonorize.Core.Settings
+@using Sonorize.Core.Services
+@using Sonorize.Core.Helpers
+@using Sonorize.Photino.Blazor.Components.Pages.SettingsSections.Components
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<SettingsCard Title="Colors & Background" Description="Fine-tune the palette">
+
+    <div class="control-group">
+        <span class="group-label">Custom Background Image</span>
+        <div class="file-input-row">
+            <input type="text" class="form-control readonly-input" value="@AppSettings.Theme.BackgroundImagePath" readonly placeholder="No image selected" />
+            <button class="btn-icon-action" @onclick="PickBackgroundImage" title="Browse">
+                <i class="fas fa-folder-open"></i>
+            </button>
+            @if (!string.IsNullOrEmpty(AppSettings.Theme.BackgroundImagePath))
+            {
+                <button class="btn-icon-action danger" @onclick="ClearBackgroundImage" title="Clear">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="control-group">
+        <span class="group-label">Transparency & Effects</span>
+        <div class="slider-stack">
+            <SettingsSlider Label="Bg Blur" @bind-Value="BackgroundBlur" Min="0" Max="100" Step="5" Unit="px" />
+            <SettingsSlider Label="Bg Brightness" @bind-Value="BgBrightnessInt" Min="0" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Sidebar Opacity" @bind-Value="SidebarOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Content Opacity" @bind-Value="MainContentOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Bar Opacity" @bind-Value="PlayerBarOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Gradient H" @bind-Value="GradientHeightInt" Min="0" Max="800" Step="50" Unit="px" />
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="control-group">
+        <span class="group-label">Palette</span>
+        <div class="color-grid-container">
+            <SettingsColorControl Label="Accent" @bind-Value="AccentColor" OnReset="@(() => Reset(s => s.Theme.AccentColor = _defaults.AccentColor))" />
+            <SettingsColorControl Label="Primary Bg" @bind-Value="BgPrimary" OnReset="@(() => Reset(s => s.Theme.BgPrimary = _defaults.BgPrimary))" />
+            <SettingsColorControl Label="Secondary Bg" @bind-Value="BgSecondary" OnReset="@(() => Reset(s => s.Theme.BgSecondary = _defaults.BgSecondary))" />
+            <SettingsColorControl Label="Tertiary Bg" @bind-Value="BgTertiary" OnReset="@(() => Reset(s => s.Theme.BgTertiary = _defaults.BgTertiary))" />
+            <SettingsColorControl Label="Player Bar" @bind-Value="PlayerBarBg" OnReset="@(() => Reset(s => s.Theme.PlayerBarBg = _defaults.PlayerBarBg))" />
+            <SettingsColorControl Label="Border" @bind-Value="BorderColor" OnReset="@(() => Reset(s => s.Theme.BorderColor = _defaults.BorderColor))" />
+            <SettingsColorControl Label="Text Primary" @bind-Value="TextPrimary" OnReset="@(() => Reset(s => s.Theme.TextPrimary = _defaults.TextPrimary))" />
+            <SettingsColorControl Label="Text Secondary" @bind-Value="TextSecondary" OnReset="@(() => Reset(s => s.Theme.TextSecondary = _defaults.TextSecondary))" />
+        </div>
+    </div>
+</SettingsCard>
+
+<style>
+    .group-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+        opacity: 0.5;
+    }
+
+    .slider-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* File Input */
+    .file-input-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .readonly-input {
+        flex-grow: 1;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        padding: 8px;
+        border-radius: 4px;
+    }
+
+    .btn-icon-action {
+        width: 36px;
+        height: 36px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+        .btn-icon-action:hover {
+            border-color: var(--text-primary);
+        }
+
+        .btn-icon-action.danger:hover {
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.1);
+        }
+
+    /* Color Grid */
+    .color-grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+</style>
+
+@code {
+    private readonly SonorizeTheme _defaults = new();
+    private readonly ActionDebouncer _debouncer = new();
+
+    // --- Proxy Properties for Immediate Saving ---
+
+    private int BackgroundBlur
+    {
+        get => AppSettings.Theme.BackgroundBlur;
+        set { if (AppSettings.Theme.BackgroundBlur != value) { AppSettings.Theme.BackgroundBlur = value; Save(); } }
+    }
+
+    private string AccentColor
+    {
+        get => AppSettings.Theme.AccentColor;
+        set { if (AppSettings.Theme.AccentColor != value) { AppSettings.Theme.AccentColor = value; Save(); } }
+    }
+
+    private string BgPrimary
+    {
+        get => AppSettings.Theme.BgPrimary;
+        set { if (AppSettings.Theme.BgPrimary != value) { AppSettings.Theme.BgPrimary = value; Save(); } }
+    }
+
+    private string BgSecondary
+    {
+        get => AppSettings.Theme.BgSecondary;
+        set { if (AppSettings.Theme.BgSecondary != value) { AppSettings.Theme.BgSecondary = value; Save(); } }
+    }
+
+    private string BgTertiary
+    {
+        get => AppSettings.Theme.BgTertiary;
+        set { if (AppSettings.Theme.BgTertiary != value) { AppSettings.Theme.BgTertiary = value; Save(); } }
+    }
+
+    private string PlayerBarBg
+    {
+        get => AppSettings.Theme.PlayerBarBg;
+        set { if (AppSettings.Theme.PlayerBarBg != value) { AppSettings.Theme.PlayerBarBg = value; Save(); } }
+    }
+
+    private string BorderColor
+    {
+        get => AppSettings.Theme.BorderColor;
+        set { if (AppSettings.Theme.BorderColor != value) { AppSettings.Theme.BorderColor = value; Save(); } }
+    }
+
+    private string TextPrimary
+    {
+        get => AppSettings.Theme.TextPrimary;
+        set { if (AppSettings.Theme.TextPrimary != value) { AppSettings.Theme.TextPrimary = value; Save(); } }
+    }
+
+    private string TextSecondary
+    {
+        get => AppSettings.Theme.TextSecondary;
+        set { if (AppSettings.Theme.TextSecondary != value) { AppSettings.Theme.TextSecondary = value; Save(); } }
+    }
+
+    // --- Existing Proxies ---
+
+    private int SidebarOpacityInt { get => (int)(AppSettings.Theme.SidebarOpacity * 100); set { AppSettings.Theme.SidebarOpacity = Math.Clamp(value / 100f, 0.05f, 1.0f); Save(); } }
+    private int MainContentOpacityInt { get => (int)(AppSettings.Theme.MainContentOpacity * 100); set { AppSettings.Theme.MainContentOpacity = Math.Clamp(value / 100f, 0.05f, 1.0f); Save(); } }
+    private int PlayerBarOpacityInt { get => (int)(AppSettings.Theme.PlayerBarOpacity * 100); set { AppSettings.Theme.PlayerBarOpacity = Math.Clamp(value / 100f, 0.05f, 1.0f); Save(); } }
+    private int BgBrightnessInt { get => (int)(AppSettings.Theme.BackgroundBrightness * 100); set { AppSettings.Theme.BackgroundBrightness = Math.Clamp(value / 100f, 0.0f, 1.0f); Save(); } }
+    private int GradientHeightInt { get => AppSettings.Theme.ContentGradientHeight; set { AppSettings.Theme.ContentGradientHeight = value; Save(); } }
+
+    private void PickBackgroundImage()
+    {
+        var filters = new Dictionary<string, string> { { "Images", "jpg,jpeg,png,gif,webp" } };
+        if (Nfd.OpenDialog(out string path, filters) == NfdStatus.Ok && !string.IsNullOrWhiteSpace(path)) { AppSettings.Theme.BackgroundImagePath = path; Save(immediate: true); }
+    }
+    private void ClearBackgroundImage() { AppSettings.Theme.BackgroundImagePath = null; Save(immediate: true); }
+
+    private void Reset(Action<SonorizeSettings> updateAction) { updateAction(AppSettings); Save(immediate: true); }
+
+    private void Save(bool immediate = false)
+    {
+        if (immediate)
+        {
+            // Cancel pending debounce to avoid overwriting immediate save
+            _debouncer.Debounce(() => { }, 0);
+            SettingsManager.Save(AppSettings);
+            return;
+        }
+
+        _debouncer.Debounce(() =>
+        {
+            try { SettingsManager.Save(AppSettings); } catch { }
+        }, 500);
+    }
+
+    public void Dispose()
+    {
+        _debouncer.Dispose();
+    }
+}

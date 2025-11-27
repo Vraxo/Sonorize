@@ -1,0 +1,192 @@
+@using Sonorize.Core.Services.Scrobbling
+@using Sonorize.Core.Settings
+@using Sonorize.Core.Services
+@using Sonorize.Core
+@using IF.Lastfm.Core.Api
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject LastfmAuthService AuthService
+
+<div class="scrobble-settings-container">
+
+    @if (!AuthService.IsAppIdConfigured)
+    {
+        <div class="warning-banner">
+            <i class="fas fa-code"></i>
+            <div class="warning-content">
+                <strong>Developer Keys Missing</strong>
+                <p>This build does not have Last.fm API keys configured. Scrobbling is disabled.</p>
+                <p class="small">
+                    To fix this, create <code>Secrets.Private.cs</code> in <strong>Sonorize.Core/Configuration</strong> and implement the <code>InjectLastFmKeys</code> partial method.
+                </p>
+            </div>
+        </div>
+    }
+
+    <!-- Global Toggle -->
+    <div class="main-toggle-row">
+        <label class="toggle-switch-label @(!AuthService.IsAppIdConfigured ? "disabled" : "")">
+            <input type="checkbox" @bind="AppSettings.Lastfm.ScrobblingEnabled" @bind:after="Save" disabled="@(!AuthService.IsAppIdConfigured)" />
+            <span class="toggle-text">Enable Last.fm Scrobbling</span>
+        </label>
+    </div>
+
+    <!-- Account Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Account</span>
+            <span class="card-desc">Manage your Last.fm connection</span>
+        </div>
+
+        <div class="card-content">
+            @if (_isSessionActive)
+            {
+                <div class="auth-status success">
+                    <div class="auth-icon-box">
+                        <i class="fab fa-lastfm"></i>
+                    </div>
+                    <div class="auth-details">
+                        <span class="auth-label">Connected as</span>
+                        <span class="auth-username">@AppSettings.Lastfm.Username</span>
+                    </div>
+
+                    @if (_showLogoutConfirmation)
+                    {
+                        <div class="logout-confirm-wrapper">
+                            <span class="confirm-text">Disconnect?</span>
+                            <button class="btn-confirm-logout" @onclick="Logout">Yes</button>
+                            <button class="btn-cancel-logout" @onclick="CancelLogout">No</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <button class="btn-logout" @onclick="RequestLogout">Disconnect</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="login-container">
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Username</label>
+                            <input type="text" class="form-control" @bind="AppSettings.Lastfm.Username" placeholder="Last.fm Username" disabled="@(!AuthService.IsAppIdConfigured)" />
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" @bind="_password" placeholder="Password" disabled="@(!AuthService.IsAppIdConfigured)" />
+                        </div>
+                    </div>
+
+                    <div class="login-actions">
+                        <button class="btn btn-primary login-btn" @onclick="Login" disabled="@(_isAuthenticating || !AuthService.IsAppIdConfigured)">
+                            @(_isAuthenticating ? "Connecting..." : "Connect Account")
+                        </button>
+
+                        @if (_authError != null)
+                        {
+                            <span class="error-msg"><i class="fas fa-exclamation-circle"></i> @_authError</span>
+                        }
+                    </div>
+
+                    <p class="security-note">
+                        <i class="fas fa-lock"></i> Password is used once to request a secure session key and is never stored locally.
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Thresholds Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Scrobble Thresholds</span>
+            <span class="card-desc">Customize when a track is marked as played</span>
+        </div>
+
+        <div class="card-content">
+            <p class="rule-explanation">
+                A scrobble is triggered when <strong>either</strong> of these conditions is met (minimum track length: 30s).
+            </p>
+
+            <div class="slider-row">
+                <div class="slider-info">
+                    <span class="slider-label">Percentage Played</span>
+                    <span class="slider-value">@AppSettings.Lastfm.ScrobbleThresholdPercentage%</span>
+                </div>
+                <input type="range" class="styled-slider" min="1" max="99" @bind="AppSettings.Lastfm.ScrobbleThresholdPercentage" @bind:after="Save" />
+            </div>
+
+            <div class="slider-row">
+                <div class="slider-info">
+                    <span class="slider-label">Absolute Time</span>
+                    <span class="slider-value">@AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds sec</span>
+                </div>
+                <input type="range" class="styled-slider" min="30" max="600" step="10" @bind="AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds" @bind:after="Save" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _isSessionActive => !string.IsNullOrEmpty(AppSettings.Lastfm.SessionKey);
+    private bool _isAuthenticating = false;
+    private bool _showLogoutConfirmation = false;
+    private string? _authError;
+    private string _password = "";
+
+    private void Save() => SettingsManager.Save(AppSettings);
+
+    private async Task Login()
+    {
+        if (!AuthService.IsAppIdConfigured)
+        {
+            _authError = "Missing API Keys.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(AppSettings.Lastfm.Username) || string.IsNullOrWhiteSpace(_password))
+        {
+            _authError = "Please enter username and password.";
+            return;
+        }
+
+        _isAuthenticating = true;
+        _authError = null;
+        StateHasChanged();
+
+        SettingsManager.Save(AppSettings);
+
+        LastfmClient? client = await AuthService.AuthenticateWithCredentialsAsync(_password);
+
+        _isAuthenticating = false;
+        _password = ""; // Clear password from memory immediately
+
+        if (client is not null)
+        {
+            // Success
+        }
+        else
+        {
+            _authError = "Authentication failed. Check credentials.";
+        }
+        StateHasChanged();
+    }
+
+    private void RequestLogout()
+    {
+        _showLogoutConfirmation = true;
+    }
+
+    private void CancelLogout()
+    {
+        _showLogoutConfirmation = false;
+    }
+
+    private void Logout()
+    {
+        AppSettings.Lastfm.SessionKey = null;
+        _showLogoutConfirmation = false;
+        SettingsManager.Save(AppSettings);
+    }
+}

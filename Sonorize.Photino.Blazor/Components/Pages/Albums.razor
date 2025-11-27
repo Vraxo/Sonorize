@@ -1,0 +1,149 @@
+@page "/albums"
+@using Sonorize.Core.Services
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Components.Pages.Components
+@inject LibraryService LibService
+@inject NavigationManager Nav
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@implements IDisposable
+
+<LibraryBrowser Title="Albums"
+                TItem="AlbumGroup"
+                Items="_albums"
+                FilterPredicate="FilterAlbum"
+                ViewMode="AppSettings.Library.AlbumsViewMode"
+                ViewModeChanged="OnViewModeChanged"
+                OnItemClick="OpenAlbum">
+
+    <GridTemplate Context="album">
+        <div class="library-grid-item" @onclick="() => OpenAlbum(album)">
+            <div class="art-wrapper">
+                @if (album.RepresentativeFilePath != null)
+                {
+                    <img src="@GetArtUrl(album.RepresentativeFilePath)" loading="lazy" />
+                }
+                else
+                {
+                    <div class="art-placeholder"><i class="fas fa-compact-disc"></i></div>
+                }
+            </div>
+            <p class="item-title" title="@album.Title">@album.Title</p>
+            <p class="item-subtitle" title="@album.Artist">@album.Artist</p>
+        </div>
+    </GridTemplate>
+
+    <TableHeader>
+        <tr>
+            <th class="col-art"></th>
+            <th class="col-title sortable-header" @onclick='() => Sort("Title")'>
+                Title @RenderSortIcon("Title")
+            </th>
+            <th class="col-artist sortable-header" @onclick='() => Sort("Artist")'>
+                Artist @RenderSortIcon("Artist")
+            </th>
+            <th class="col-duration sortable-header" @onclick='() => Sort("Count")'>
+                Songs @RenderSortIcon("Count")
+            </th>
+        </tr>
+    </TableHeader>
+
+    <RowTemplate Context="album">
+        <td class="col-art">
+            <div class="list-art-wrapper">
+                @if (album.RepresentativeFilePath != null)
+                {
+                    <img src="@GetArtUrl(album.RepresentativeFilePath)" loading="lazy" />
+                }
+            </div>
+        </td>
+        <td class="col-title">@album.Title</td>
+        <td class="col-artist">@album.Artist</td>
+        <td class="col-duration">@album.SongCount</td>
+    </RowTemplate>
+
+</LibraryBrowser>
+
+@code {
+    private List<AlbumGroup> _albums = [];
+    private string _sortColumn = "Title";
+    private bool _isAscending = true;
+
+    protected override void OnInitialized()
+    {
+        LibService.LibraryChanged += OnLibraryChanged;
+        LoadData();
+    }
+
+    private void OnLibraryChanged()
+    {
+        InvokeAsync(() => { LoadData(); StateHasChanged(); });
+    }
+
+    private void LoadData()
+    {
+        // Now returns a read-only list instantly without computation
+        var source = LibService.AllAlbums;
+        _albums = ApplySort(source);
+    }
+
+    private bool FilterAlbum(AlbumGroup album, string query)
+    {
+        return album.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+               album.Artist.Contains(query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void Sort(string column)
+    {
+        if (_sortColumn == column) _isAscending = !_isAscending;
+        else { _sortColumn = column; _isAscending = true; }
+
+        LoadData();
+    }
+
+    private List<AlbumGroup> ApplySort(IEnumerable<AlbumGroup> source)
+    {
+        return _sortColumn switch
+        {
+            "Title" => _isAscending ? source.OrderBy(a => a.Title).ToList() : source.OrderByDescending(a => a.Title).ToList(),
+            "Artist" => _isAscending ? source.OrderBy(a => a.Artist).ThenBy(a => a.Title).ToList() : source.OrderByDescending(a => a.Artist).ThenBy(a => a.Title).ToList(),
+            "Count" => _isAscending ? source.OrderBy(a => a.SongCount).ToList() : source.OrderByDescending(a => a.SongCount).ToList(),
+            _ => source.ToList()
+        };
+    }
+
+    private RenderFragment RenderSortIcon(string column)
+    {
+        if (_sortColumn != column) return builder => { };
+        return builder =>
+        {
+            builder.OpenElement(0, "i");
+            builder.AddAttribute(1, "class", _isAscending ? "fas fa-caret-up sort-icon" : "fas fa-caret-down sort-icon");
+            builder.CloseElement();
+        };
+    }
+
+    private void OnViewModeChanged(LibraryViewMode mode)
+    {
+        AppSettings.Library.AlbumsViewMode = mode;
+        SettingsManager.Save(AppSettings);
+        StateHasChanged();
+    }
+
+    private void OpenAlbum(AlbumGroup album)
+    {
+        Nav.NavigateTo($"/library/album/{Uri.EscapeDataString(album.Title)}");
+    }
+
+    private string GetArtUrl(string path)
+    {
+        return $"sonorize://albumart/?path={Uri.EscapeDataString(path)}";
+    }
+
+    public void Dispose()
+    {
+        LibService.LibraryChanged -= OnLibraryChanged;
+    }
+}

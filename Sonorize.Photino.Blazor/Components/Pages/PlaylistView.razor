@@ -1,0 +1,310 @@
+﻿@page "/playlist/{PlaylistId:guid}"
+@using Sonorize.Core.Services
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@using Sonorize.Core
+@using Sonorize.Photino.Blazor.Shared
+@using Sonorize.Photino.Blazor.Shared.Modals
+@using Sonorize.Photino.Blazor.Components.Pages.Components
+@inject LibraryService LibService
+@inject IPlayerService PlayerService
+@inject NavigationManager Nav
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@implements IDisposable
+
+<div class="header">
+    <div id="header-context-controls"></div>
+
+    <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+        @if (_isEditingName)
+        {
+            <input @bind="_tempName" class="header-input" style="font-size: 32px; background: #333; border: none; color: white; padding: 5px; min-width: 200px;" />
+            <button class="btn-icon" @onclick="SaveName"><i class="fas fa-check"></i></button>
+            <button class="btn-icon" @onclick="CancelEdit"><i class="fas fa-times"></i></button>
+        }
+        else
+        {
+            <h1 id="header-title">@(_currentPlaylist?.Name ?? "Playlist Not Found")</h1>
+            @if (_currentPlaylist != null && _currentPlaylist.Type == PlaylistType.Manual)
+            {
+                <button class="btn-icon" title="Rename" @onclick="StartEdit"><i class="fas fa-pencil-alt"></i></button>
+            }
+            @if (_currentPlaylist?.Type == PlaylistType.File)
+            {
+                <span title="Synced from file" style="font-size: 12px; background: #333; padding: 4px 8px; border-radius: 4px; margin-left: 10px; color: #aaa;">
+                    <i class="fas fa-file-code"></i> FILE
+                </span>
+            }
+        }
+    </div>
+
+    <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search-input" placeholder="Search playlist..."
+               @bind="_searchQuery"
+               @bind:event="oninput"
+               @onkeyup="FilterPlaylist" />
+    </div>
+
+    <div class="header-controls header-right">
+        <button class="header-action-btn"
+                title="@(_viewMode == LibraryViewMode.List ? "Switch to Grid" : "Switch to List")"
+                @onclick="ToggleViewMode">
+            <i class="fas @(_viewMode == LibraryViewMode.List ? "fa-th-large" : "fa-list")"></i>
+        </button>
+
+        <button class="header-action-btn" @onclick="GoToSettings">
+            <i class="fas fa-cog"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .btn-icon {
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+        .btn-icon:hover {
+            color: white;
+        }
+</style>
+
+@if (_currentPlaylist != null)
+{
+    @if (_viewMode == LibraryViewMode.List)
+    {
+        <TrackTable Songs="_filteredSongs"
+                    EmptyMessage="@(string.IsNullOrWhiteSpace(_searchQuery) ? "This playlist is empty." : "No songs found.")"
+                    AllowReorder="@IsReorderAllowed"
+                    CurrentSortColumn="@_sortColumn"
+                    IsAscending="@_isAscending"
+                    OnSort="Sort"
+                    OnPlay="PlayPlaylist"
+                    OnReorder="HandleReorder"
+                    OnOptionsClick="OpenOptions" />
+    }
+    else
+    {
+        <div class="library-grid-container" style="padding-top:0;">
+            <LibraryGrid Songs="_filteredSongs"
+                         OnSongClick="HandleGridClick" />
+        </div>
+    }
+}
+
+<TrackActionsModal IsVisible="_showActionsModal"
+                   Song="_selectedSongForModal"
+                   OnClose="CloseOptions"
+                   OnEditMetadata="OpenMetadataEditor" />
+
+<MetadataEditorModal IsVisible="_showMetadataEditor"
+                     Song="_selectedSongForModal"
+                     OnClose="CloseMetadataEditor" />
+
+@code {
+    [Parameter] public Guid PlaylistId { get; set; }
+    private Playlist? _currentPlaylist;
+
+    private List<Song> _masterPlaylistSongs = new();
+    private List<Song> _filteredSongs = new();
+    private string _searchQuery = "";
+
+    private LibraryViewMode _viewMode;
+
+    // Sorting
+    private SortColumn _sortColumn = SortColumn.None;
+    private bool _isAscending = true;
+
+    // Edit State
+    private bool _isEditingName = false;
+    private string _tempName = "";
+
+    // Modal State
+    private bool _showActionsModal = false;
+    private bool _showMetadataEditor = false;
+    private Song? _selectedSongForModal;
+
+    private bool IsReorderAllowed =>
+        string.IsNullOrWhiteSpace(_searchQuery) &&
+        _sortColumn == SortColumn.None &&
+        _currentPlaylist?.Type == PlaylistType.Manual &&
+        _viewMode == LibraryViewMode.List;
+
+    protected override void OnInitialized()
+    {
+        _viewMode = AppSettings.Library.PlaylistDetailViewMode;
+        LibService.LibraryChanged += OnLibraryChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        _searchQuery = "";
+        _sortColumn = SortColumn.None;
+        LoadPlaylist();
+    }
+
+    private void OnLibraryChanged()
+    {
+        InvokeAsync(() =>
+        {
+            LoadPlaylist();
+            StateHasChanged();
+        });
+    }
+
+    private void ToggleViewMode()
+    {
+        _viewMode = _viewMode == LibraryViewMode.List ? LibraryViewMode.Grid : LibraryViewMode.List;
+        AppSettings.Library.PlaylistDetailViewMode = _viewMode;
+        SettingsManager.Save(AppSettings);
+    }
+
+    private void LoadPlaylist()
+    {
+        _currentPlaylist = LibService.AllPlaylists.FirstOrDefault(p => p.Id == PlaylistId);
+        _masterPlaylistSongs.Clear();
+
+        if (_currentPlaylist == null)
+        {
+            _filteredSongs.Clear();
+            return;
+        }
+
+        var songLookup = LibService.AllSongs.ToDictionary(s => s.FilePath);
+        foreach (var path in _currentPlaylist.SongFilePaths)
+        {
+            if (songLookup.TryGetValue(path, out var song)) _masterPlaylistSongs.Add(song);
+        }
+
+        FilterPlaylist();
+    }
+
+    private void Sort(SortColumn column)
+    {
+        if (_sortColumn == column)
+        {
+            if (_sortColumn != SortColumn.None)
+            {
+                _isAscending = !_isAscending;
+            }
+        }
+        else
+        {
+            _sortColumn = column;
+            _isAscending = true;
+        }
+        FilterPlaylist();
+    }
+
+    private void FilterPlaylist()
+    {
+        IEnumerable<Song> query = _masterPlaylistSongs;
+
+        if (!string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            query = query.Where(s => s.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                                     s.Artist.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                                     s.Album.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (_sortColumn != SortColumn.None)
+        {
+            switch (_sortColumn)
+            {
+                case SortColumn.Title:
+                    query = _isAscending ? query.OrderBy(s => s.Title) : query.OrderByDescending(s => s.Title);
+                    break;
+                case SortColumn.Artist:
+                    query = _isAscending
+                       ? query.OrderBy(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title)
+                       : query.OrderByDescending(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title);
+                    break;
+                case SortColumn.Album:
+                    query = _isAscending
+                        ? query.OrderBy(s => s.Album).ThenBy(s => s.Title)
+                        : query.OrderByDescending(s => s.Album).ThenBy(s => s.Title);
+                    break;
+                case SortColumn.Duration:
+                    query = _isAscending ? query.OrderBy(s => s.Duration) : query.OrderByDescending(s => s.Duration);
+                    break;
+            }
+        }
+
+        _filteredSongs = query.ToList();
+    }
+
+    private void GoToSettings() => Nav.NavigateTo("/settings");
+
+    private void StartEdit()
+    {
+        _tempName = _currentPlaylist?.Name ?? "";
+        _isEditingName = true;
+    }
+
+    private void CancelEdit()
+    {
+        _isEditingName = false;
+    }
+
+    private void SaveName()
+    {
+        if (_currentPlaylist != null && !string.IsNullOrWhiteSpace(_tempName))
+        {
+            _currentPlaylist.Name = _tempName;
+            LibService.SavePlaylist(_currentPlaylist);
+            _isEditingName = false;
+        }
+    }
+
+    private async Task PlayPlaylist(int startIndex)
+    {
+        if (!_filteredSongs.Any()) return;
+        await PlayerService.PlaySong(_filteredSongs[startIndex], _filteredSongs);
+    }
+
+    private async Task HandleGridClick(Song song)
+    {
+        // For grid click, we find the index in the filtered list and play from there
+        int index = _filteredSongs.IndexOf(song);
+        if (index != -1)
+        {
+            await PlayPlaylist(index);
+        }
+    }
+
+    private void HandleReorder((Song Source, Song Target) args)
+    {
+        if (_currentPlaylist == null) return;
+
+        var oldIndex = _masterPlaylistSongs.IndexOf(args.Source);
+        var newIndex = _masterPlaylistSongs.IndexOf(args.Target);
+
+        if (oldIndex != -1 && newIndex != -1)
+        {
+            _masterPlaylistSongs.RemoveAt(oldIndex);
+            _masterPlaylistSongs.Insert(newIndex, args.Source);
+
+            _currentPlaylist.SongFilePaths = _masterPlaylistSongs.Select(s => s.FilePath).ToList();
+            LibService.SavePlaylist(_currentPlaylist);
+            FilterPlaylist();
+        }
+    }
+
+    private void OpenOptions(Song song) { _selectedSongForModal = song; _showActionsModal = true; }
+    private void CloseOptions() { _showActionsModal = false; }
+
+    private void OpenMetadataEditor(Song song) { _selectedSongForModal = song; _showMetadataEditor = true; }
+    private void CloseMetadataEditor() { _showMetadataEditor = false; _selectedSongForModal = null; }
+
+    public void Dispose()
+    {
+        LibService.LibraryChanged -= OnLibraryChanged;
+    }
+}

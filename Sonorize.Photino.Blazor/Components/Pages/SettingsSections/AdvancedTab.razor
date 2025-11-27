@@ -1,0 +1,176 @@
+@using Sonorize.Core
+@using Sonorize.Core.Helpers
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject LibraryService LibraryService
+
+<div class="settings-view-container">
+
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Custom CSS</span>
+            <span class="card-desc">Inject raw styles to override the application theme</span>
+        </div>
+        <div class="card-content">
+            <textarea class="code-editor"
+                      @bind="CustomCss"
+                      @bind:event="oninput"
+                      spellcheck="false"
+                      placeholder="/* e.g. .sidebar { display: none; } */"></textarea>
+
+            <div class="warning-text">
+                <i class="fas fa-exclamation-triangle"></i> Advanced feature. Use responsibly.
+            </div>
+        </div>
+    </div>
+
+    <!-- Developer Tools -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Developer Tools</span>
+            <span class="card-desc">Utilities for testing and screenshots</span>
+        </div>
+        <div class="card-content">
+            <button class="btn btn-outline" @onclick="LoadDemoData">
+                <i class="fas fa-vial"></i> Populate Demo Library
+            </button>
+            <p class="helper-text">
+                Replaces your current library with generated fake data. Restart app to restore real library.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .settings-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-bottom: 30px;
+        max-width: 800px;
+    }
+
+    .settings-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .card-title {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .code-editor {
+        width: 100%;
+        min-height: 300px;
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 13px;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        outline: none;
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+        .code-editor:focus {
+            border-color: var(--accent-primary);
+        }
+
+    .warning-text {
+        margin-top: 10px;
+        font-size: 0.85em;
+        color: #eab308;
+    }
+
+    .btn-outline {
+        padding: 10px 20px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+
+        .btn-outline:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+    .helper-text {
+        margin-top: 10px;
+        font-size: 0.85em;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+</style>
+
+@code {
+    private readonly ActionDebouncer _debouncer = new();
+
+    private string CustomCss
+    {
+        get => AppSettings.Theme.CustomCss;
+        set
+        {
+            if (AppSettings.Theme.CustomCss != value)
+            {
+                AppSettings.Theme.CustomCss = value;
+                DebounceSave();
+            }
+        }
+    }
+
+    private void DebounceSave()
+    {
+        _debouncer.Debounce(() =>
+        {
+            try { SettingsManager.Save(AppSettings); } catch { }
+        }, 500);
+    }
+
+    private void LoadDemoData()
+    {
+        LibraryService.LoadDemoData();
+    }
+
+    public void Dispose()
+    {
+        _debouncer.Dispose();
+    }
+}

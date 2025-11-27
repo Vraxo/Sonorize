@@ -1,0 +1,85 @@
+@using Sonorize.Core
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+@if (_hasCustomBg)
+{
+    <div class="custom-bg-layer" style="@CustomBgStyle"></div>
+}
+
+<div class="@AmbientLayerClass" style="@AmbientLayerStyle"></div>
+
+@code {
+    private string? _currentArtSrc;
+    private string? _lastSongPath;
+    private bool _hasArt;
+    private bool _hasCustomBg;
+
+    private string AmbientLayerClass => $"ambient-background-layer {(_hasArt && AppSettings.Theme.EnableAmbientBackground && !_hasCustomBg ? "active" : "")}";
+
+    private string AmbientLayerStyle => _currentArtSrc != null
+        ? $"background-image: url('{_currentArtSrc}');"
+        : "";
+
+    private string CustomBgStyle
+    {
+        get
+        {
+            if (!_hasCustomBg) return "";
+            string encoded = Uri.EscapeDataString(AppSettings.Theme.BackgroundImagePath ?? "");
+            return $"background-image: url('sonorize://localfile/?path={encoded}');";
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        PlayerService.PlaybackStateChanged += OnStateChanged;
+        SettingsManager.SettingsSaved += OnStateChanged;
+        CheckState();
+    }
+
+    // Remove OnParametersSet dependency, rely on explicit events
+
+    private void OnStateChanged()
+    {
+        InvokeAsync(() =>
+        {
+            CheckState();
+            StateHasChanged();
+        });
+    }
+
+    private void CheckState()
+    {
+        string? bgPath = AppSettings.Theme.BackgroundImagePath;
+        _hasCustomBg = !string.IsNullOrWhiteSpace(bgPath) && System.IO.File.Exists(bgPath);
+
+        var song = PlayerService.CurrentSong;
+        if (song?.FilePath != _lastSongPath)
+        {
+            _lastSongPath = song?.FilePath;
+            if (song != null && song.HasArt)
+            {
+                var encodedPath = Uri.EscapeDataString(song.FilePath);
+                _currentArtSrc = $"sonorize://albumart/?path={encodedPath}";
+                _hasArt = true;
+            }
+            else
+            {
+                _hasArt = false;
+                _currentArtSrc = null;
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        PlayerService.PlaybackStateChanged -= OnStateChanged;
+        SettingsManager.SettingsSaved -= OnStateChanged;
+    }
+}

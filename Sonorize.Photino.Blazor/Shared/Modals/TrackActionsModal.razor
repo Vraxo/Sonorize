@@ -1,0 +1,195 @@
+@using Sonorize.Core.Models
+@using Sonorize.Core
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Services.System
+@using Sonorize.Photino.Blazor.Shared
+@inject LibraryService LibService
+@inject FileExplorerService FileExplorer
+
+<Modal IsVisible="IsVisible"
+       Title="Track Actions"
+       ConfirmText="Close"
+       ShowCancelButton="false"
+       OnCancel="Cancel"
+       OnConfirm="Cancel">
+
+    <div class="track-info-header">
+        <i class="fas fa-music"></i>
+        <div>
+            <strong>@Song?.Title</strong>
+            <br />
+            <span class="artist-name">@Song?.Artist</span>
+        </div>
+    </div>
+
+    <div class="actions-container">
+        <div class="section-label">Add to Playlist</div>
+        <div class="playlist-selection-list">
+            @if (!ManualPlaylists.Any())
+            {
+                <p class="text-muted">No playlists found.</p>
+            }
+            @foreach (var playlist in ManualPlaylists)
+            {
+                <button class="playlist-item-btn" @onclick="() => AddTo(playlist)">
+                    <i class="fas fa-list-music"></i> @playlist.Name
+                </button>
+            }
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-label">Manage</div>
+
+        <button class="action-btn" @onclick="TriggerEdit">
+            <i class="fas fa-tag"></i> Edit Metadata
+        </button>
+
+        <button class="action-btn" @onclick="OpenInExplorer">
+            <i class="fas fa-folder-open"></i> Show in File Explorer
+        </button>
+    </div>
+
+</Modal>
+
+<style>
+    .track-info-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+        .track-info-header i {
+            font-size: 1.5em;
+            color: var(--accent-primary);
+            background: var(--bg-secondary);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+    .artist-name {
+        color: var(--text-secondary);
+        font-size: 0.9em;
+    }
+
+    .section-label {
+        font-size: 0.8em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: bold;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+        margin-top: 5px;
+    }
+
+    .playlist-selection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    .playlist-item-btn {
+        background: var(--bg-secondary);
+        border: 1px solid transparent;
+        color: var(--text-primary);
+        padding: 10px;
+        text-align: left;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .playlist-item-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--border-color);
+        }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+        opacity: 0.5;
+    }
+
+    .action-btn {
+        width: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 12px;
+        text-align: left;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s;
+        margin-bottom: 8px;
+    }
+
+        .action-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-primary);
+        }
+
+    .text-muted {
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public Song? Song { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<Song> OnEditMetadata { get; set; } // NEW
+
+    private IEnumerable<Playlist> ManualPlaylists =>
+        LibService.AllPlaylists.Where(p => p.Type == PlaylistType.Manual);
+
+    private void AddTo(Playlist playlist)
+    {
+        if (Song != null)
+        {
+            LibService.AddSongToPlaylist(playlist, Song);
+        }
+        Cancel();
+    }
+
+    private void OpenInExplorer()
+    {
+        if (Song != null)
+        {
+            FileExplorer.ShowInFolder(Song.FilePath);
+        }
+        Cancel();
+    }
+
+    private async Task TriggerEdit()
+    {
+        if (Song != null)
+        {
+            await OnEditMetadata.InvokeAsync(Song);
+        }
+        await Cancel();
+    }
+
+    private async Task Cancel()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

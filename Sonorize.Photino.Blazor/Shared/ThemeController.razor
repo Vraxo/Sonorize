@@ -1,0 +1,91 @@
+@using Microsoft.JSInterop
+@using Sonorize.Core
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@using Sonorize.Core.Settings
+@using System.Globalization
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject IJSRuntime JS
+
+<style id="dynamic-css">
+    @_dynamicCss
+</style>
+
+<!-- Removed CSS zoom block to allow Native WebView zoom to handle scaling without artifacts -->
+@if (_useTransparency)
+{
+    <style id="layout-transparency">
+        .sidebar {
+            backdrop-filter: blur(var(--bg-blur));
+            -webkit-backdrop-filter: blur(var(--bg-blur));
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .player-bar {
+            backdrop-filter: blur(var(--bg-blur));
+            -webkit-backdrop-filter: blur(var(--bg-blur));
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+}
+
+@code {
+    private MarkupString _dynamicCss;
+    private bool _hasCustomBg;
+    private bool _useTransparency;
+
+    protected override void OnInitialized()
+    {
+        SettingsManager.SettingsSaved += OnSettingsChanged;
+        UpdateState();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ApplyJsUpdates();
+        }
+    }
+
+    private void OnSettingsChanged()
+    {
+        InvokeAsync(async () =>
+        {
+            UpdateState();
+            await ApplyJsUpdates();
+            StateHasChanged();
+        });
+    }
+
+    private void UpdateState()
+    {
+        string? bgPath = AppSettings.Theme.BackgroundImagePath;
+        _hasCustomBg = !string.IsNullOrWhiteSpace(bgPath) && System.IO.File.Exists(bgPath);
+        _useTransparency = _hasCustomBg || AppSettings.Theme.EnableAmbientBackground;
+
+        string css = ThemeUtils.GenerateRootCss(AppSettings.Theme, _useTransparency);
+        _dynamicCss = new MarkupString(css);
+    }
+
+    private async Task ApplyJsUpdates()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("updateThemeClasses",
+                AppSettings.Theme.EnableZebraStriping,
+                AppSettings.Theme.EnableCustomScrollbars,
+                AppSettings.Theme.ShowGridLines);
+
+            await JS.InvokeVoidAsync("applyCustomCss", AppSettings.Theme.CustomCss ?? "");
+        }
+        catch { }
+    }
+
+    public void Dispose()
+    {
+        SettingsManager.SettingsSaved -= OnSettingsChanged;
+    }
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Music player icon: circle with transparent equalizer bars (already subtracted) -->
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg">
+  <g id="layer1">
+    <!-- Circle with transparent rectangles cut out -->
+    <path
+       id="circle-with-holes"
+       style="fill:#d9bbfb;stroke:none"
+       fill-rule="evenodd"
+       d="
+          M256,0
+          A256,256 0 1,1 255.999,0
+          Z
+          M176,192
+          h32 v128 h-32 Z
+          M240,160
+          h32 v192 h-32 Z
+          M304,128
+          h32 v256 h-32 Z
+       " />
+  </g>
+</svg>

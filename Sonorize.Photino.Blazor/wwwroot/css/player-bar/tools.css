@@ -1,0 +1,81 @@
+/* --- Right Zone: Tools & Volume --- */
+
+/* Volume Group */
+.player-volume {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Allow shrinking */
+    min-width: auto;
+    flex-shrink: 1; /* Allow this entire group to shrink if needed */
+}
+
+    /* Shared Icon Button Style */
+    .player-btn,
+    .player-volume button {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease;
+        padding: 0;
+        flex-shrink: 0; /* Icons shouldn't shrink */
+    }
+
+        .player-btn:hover,
+        .player-volume button:hover {
+            color: var(--text-primary);
+        }
+
+        .player-btn.active,
+        .player-volume button.active {
+            color: var(--accent-primary);
+        }
+
+    .player-volume .volume-icon {
+        color: var(--text-secondary);
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+/* UPDATED: Responsive Volume Bar */
+.volume-bar-container {
+    width: 100%; /* Fill available space */
+    max-width: 150px; /* Max width on large screens */
+    min-width: 50px; /* Allow shrinking down to 50px on small screens */
+    flex-shrink: 1; /* Allow shrinking */
+    display: flex;
+    align-items: center;
+    transition: width 0.2s ease;
+}
+
+    .volume-bar-container input {
+        width: 100%;
+        height: 4px;
+    }
+
+/* Mobile/Small Screen Adjustment */
+@media (max-width: 800px) {
+    .volume-bar-container {
+        max-width: 80px; /* Force smaller max width on tablets */
+    }
+}
+
+@media (max-width: 600px) {
+    /* On very small screens, hide the volume bar, keep icon */
+    .volume-bar-container {
+        display: none;
+    }
+
+    /* Hide some extra tool buttons on very small screens if necessary */
+    .player-btn {
+        width: 28px; /* Tighter touch targets */
+    }
+}

@@ -1,0 +1,62 @@
+@using System.Text.RegularExpressions
+
+<div class="color-control">
+    <div class="color-label-row">
+        <span class="color-label">@Label</span>
+        <button class="reset-btn" @onclick="OnReset" title="Reset to default">
+            <i class="fas fa-undo"></i>
+        </button>
+    </div>
+    <div class="color-input-row">
+        <div class="color-swatch-wrapper">
+            <input type="color" value="@Value" @onchange="HandleColorChange" class="color-picker-input" />
+        </div>
+        <input type="text"
+               value="@Value"
+               @onchange="HandleTextChange"
+               class="hex-input"
+               spellcheck="false"
+               maxlength="7" />
+    </div>
+</div>
+
+@code {
+    [Parameter] public required string Label { get; set; }
+    [Parameter] public string Value { get; set; } = "#000000";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback OnReset { get; set; }
+
+    private async Task HandleColorChange(ChangeEventArgs e)
+    {
+        var val = e.Value?.ToString() ?? "#000000";
+        await UpdateValue(val);
+    }
+
+    private async Task HandleTextChange(ChangeEventArgs e)
+    {
+        string input = e.Value?.ToString()?.Trim() ?? "";
+
+        // Auto-add hash if missing
+        if (!input.StartsWith("#")) input = "#" + input;
+
+        // Basic Hex Validation (6 hex digits)
+        if (Regex.IsMatch(input, "^#[0-9A-Fa-f]{6}$"))
+        {
+            await UpdateValue(input);
+        }
+        else
+        {
+            // If invalid, force UI refresh to revert to valid Value
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateValue(string val)
+    {
+        if (!string.Equals(Value, val, StringComparison.OrdinalIgnoreCase))
+        {
+            Value = val;
+            await ValueChanged.InvokeAsync(val);
+        }
+    }
+}

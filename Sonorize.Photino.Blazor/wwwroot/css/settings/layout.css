@@ -1,0 +1,212 @@
+.main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.layout-root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- Drag & Drop Overlay --- */
+.drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Let events pass through initially */
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+    .drag-overlay.active {
+        opacity: 1;
+        pointer-events: auto; /* Catch drops when active */
+    }
+
+.drag-message {
+    text-align: center;
+    color: var(--text-primary);
+}
+
+    .drag-message i {
+        font-size: 4em;
+        margin-bottom: 20px;
+        color: var(--accent-primary);
+    }
+
+    .drag-message h2 {
+        font-size: 2em;
+        margin: 0;
+    }
+
+    .drag-message p {
+        color: var(--text-secondary);
+        font-size: 1.1em;
+        margin-top: 10px;
+    }
+
+/* The invisible input that catches the actual drop */
+.drag-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: copy;
+}
+
+/* --- Background Layers --- */
+.ambient-background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    /* Updated: Use global variables, default to high blur if unset in older logic */
+    filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
+    opacity: 0;
+    transition: opacity 1s ease, background-image 1s ease, filter 0.3s;
+    z-index: 0;
+    pointer-events: none;
+}
+
+    .ambient-background-layer.active {
+        opacity: 1;
+    }
+
+.custom-bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    /* Updated: Use global variables */
+    filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
+    transition: filter 0.3s;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* --- Z-Indexing --- */
+.sidebar, .main-content, .player-bar {
+    position: relative;
+    z-index: 1;
+}
+
+/* --- Main Content & Sidebar Wrapper --- */
+.main-content {
+    flex-grow: 1;
+    background: var(--main-content-bg); /* Dynamic Gradient or Flat */
+    overflow-y: auto;
+    transition: padding-left 0.3s ease, padding-right 0.3s ease;
+}
+
+    .main-content.no-anim {
+        transition: none !important;
+    }
+
+/* --- Player Bar --- */
+.player-bar {
+    height: var(--player-bar-height); /* UPDATED: Dynamic Height */
+    background-color: var(--player-bar-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    box-sizing: border-box;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+/* --- Sidebar Restore Button --- */
+.sidebar-restore-btn {
+    position: absolute !important; /* Force absolute to prevent flex stretching */
+    z-index: 100;
+    top: 15px;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+    color: #ccc;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+    .sidebar-restore-btn.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-10px);
+    }
+
+    .sidebar-restore-btn:hover {
+        background: #333;
+        color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+
+/* --- Layout Archetypes (Flex Order Magic) --- */
+
+/* 1. Player Bar Positioning */
+.layout-root.bar-pos-top .player-bar {
+    order: -1; /* Moves visually to top */
+    border-top: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 2. Sidebar Positioning */
+.middle-container.sidebar-pos-right .sidebar {
+    order: 1; /* Moves visually to right */
+    border-right: none;
+    border-left: 1px solid var(--border-color);
+}
+
+/* Update Sidebar Restore Button Position based on layout */
+.layout-root.bar-pos-top .sidebar-restore-btn {
+    /* UPDATED: Dynamic top position (Bar Height + 15px margin) */
+    top: calc(var(--player-bar-height) + 15px);
+}
+
+/* If sidebar is on the right, move restore button to right */
+.middle-container.sidebar-pos-right .sidebar-restore-btn {
+    left: auto;
+    right: 10px;
+    transform: translateX(10px); /* Slide in from right */
+}
+
+    .middle-container.sidebar-pos-right .sidebar-restore-btn.hidden {
+        transform: translateX(10px);
+    }
+
+    .middle-container.sidebar-pos-right .sidebar-restore-btn:not(.hidden) {
+        transform: translateX(0);
+    }
+
+    /* Flip the icon for right-side sidebar */
+    .middle-container.sidebar-pos-right .sidebar-restore-btn i {
+        transform: rotate(180deg);
+    }

@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11217.181
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sonorize.Core", "Sonorize.Core\Sonorize.Core.csproj", "{F21FCA4B-C0B8-4170-989B-55C23063EAA5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sonorize.Core.Tests", "Sonorize.Core.Tests\Sonorize.Core.Tests.csproj", "{9DCE29EB-D0DF-4208-B73D-CB77A41206DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sonorize.Photino.Blazor", "Sonorize.Photino.Blazor\Sonorize.Photino.Blazor.csproj", "{FE495668-D98B-4851-9DB6-231AA037BBEC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F21FCA4B-C0B8-4170-989B-55C23063EAA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F21FCA4B-C0B8-4170-989B-55C23063EAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F21FCA4B-C0B8-4170-989B-55C23063EAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F21FCA4B-C0B8-4170-989B-55C23063EAA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DCE29EB-D0DF-4208-B73D-CB77A41206DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DCE29EB-D0DF-4208-B73D-CB77A41206DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DCE29EB-D0DF-4208-B73D-CB77A41206DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DCE29EB-D0DF-4208-B73D-CB77A41206DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE495668-D98B-4851-9DB6-231AA037BBEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE495668-D98B-4851-9DB6-231AA037BBEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE495668-D98B-4851-9DB6-231AA037BBEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE495668-D98B-4851-9DB6-231AA037BBEC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A80465EC-0C72-48EA-878C-A52C18073F93}
+	EndGlobalSection
+EndGlobal

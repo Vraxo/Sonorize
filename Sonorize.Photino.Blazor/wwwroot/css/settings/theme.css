@@ -1,0 +1,60 @@
+/* --- Theme Color Grid --- */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* --- Theme List Actions --- */
+.theme-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.theme-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-tertiary);
+    padding: 10px 16px;
+    border-radius: var(--border-radius);
+    border: 1px solid transparent;
+}
+
+    .theme-row:hover {
+        border-color: var(--border-color);
+        background-color: var(--hover-bg);
+    }
+
+.theme-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.theme-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Helper Buttons for Theme Lists */
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 0.85em;
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+    .btn-sm:hover {
+        background-color: var(--border-color);
+        color: var(--text-primary);
+        transform: none;
+    }
+
+.btn-danger:hover {
+    background-color: #3f1818;
+    border-color: #ff4d4d;
+    color: #ff4d4d;
+}

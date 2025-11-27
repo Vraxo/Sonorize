@@ -1,0 +1,29 @@
+@if (IsVisible)
+{
+    <div class="modal-backdrop" @onclick="OnCancel">
+        <div class="modal-container" @onclick:stopPropagation>
+            <div class="modal-header">@Title</div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            <div class="modal-footer">
+                @if (ShowCancelButton)
+                {
+                    <button class="btn" @onclick="OnCancel">Cancel</button>
+                }
+                <button class="btn btn-primary" @onclick="OnConfirm">@ConfirmText</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Title { get; set; } = "Modal";
+    [Parameter] public string ConfirmText { get; set; } = "OK";
+    [Parameter] public bool ShowCancelButton { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnConfirm { get; set; }
+}

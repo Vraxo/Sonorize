@@ -1,0 +1,102 @@
+/* --- Main Grid Layout --- */
+.header {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    height: 40px;
+}
+
+.header-left, .header-center, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-right {
+    justify-content: flex-end;
+}
+
+/* --- Title --- */
+.header #header-title {
+    font-size: 2.2em;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+/* --- Context Controls --- */
+#header-context-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* --- Action Buttons --- */
+.header-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 1.4em;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+    .header-action-btn:hover {
+        background-color: var(--hover-bg); /* UPDATED */
+        color: var(--text-primary);
+    }
+
+    .header-action-btn i {
+        pointer-events: none;
+    }
+
+/* --- Search Bar --- */
+.search-container {
+    position: relative;
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+#search-input {
+    width: 100%;
+    padding: 8px 12px 8px 40px;
+    background: var(--bg-tertiary);
+    border: 1px solid transparent;
+    color: var(--text-primary);
+    border-radius: var(--btn-radius);
+    font-family: inherit;
+    font-size: 1em;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    box-sizing: border-box;
+    outline: none;
+    height: 36px;
+}
+
+    #search-input:focus {
+        background-color: var(--bg-secondary);
+        border-color: var(--accent-primary);
+    }
+
+.search-container .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    font-size: 1em;
+}

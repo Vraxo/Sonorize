@@ -1,0 +1,328 @@
+﻿@using Sonorize.Core.Models
+@using Sonorize.Core
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject LayoutStateService LayoutState
+
+@if (Songs == null || !Songs.Any())
+{
+    <div class="empty-library-message">
+        @EmptyMessage
+    </div>
+}
+else
+{
+    <div class="track-list" style="--list-art-size: @(AppSettings.Library.ListArtSize)px;">
+        <table>
+            <thead>
+                <tr>
+                    @if (AppSettings.Library.Columns.ShowIndex)
+                    {
+                        <th class="col-index">#</th>
+                    }
+                    @if (AppSettings.Library.Columns.ShowArt)
+                    {
+                        <th class="col-art"></th>
+                    }
+
+                    <th class="col-title sortable-header" @onclick="() => HandleSort(SortColumn.Title)">
+                        Title @RenderSortIcon(SortColumn.Title)
+                    </th>
+
+                    @if (AppSettings.Library.Columns.ShowArtist)
+                    {
+                        <th class="col-artist sortable-header" @onclick="() => HandleSort(SortColumn.Artist)">
+                            Artist @RenderSortIcon(SortColumn.Artist)
+                        </th>
+                    }
+                    @if (AppSettings.Library.Columns.ShowAlbum)
+                    {
+                        <th class="col-album sortable-header" @onclick="() => HandleSort(SortColumn.Album)">
+                            Album @RenderSortIcon(SortColumn.Album)
+                        </th>
+                    }
+                    @if (AppSettings.Library.Columns.ShowDuration)
+                    {
+                        <th class="col-duration sortable-header" @onclick="() => HandleSort(SortColumn.Duration)">
+                            <i class="far fa-clock"></i> @RenderSortIcon(SortColumn.Duration)
+                        </th>
+                    }
+                    <th class="col-options"></th>
+                    @if (ShowRemoveButton)
+                    {
+                        <th style="width:40px;"></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Songs.Count <= 500)
+                {
+                    @foreach (var song in Songs)
+                    {
+                        @RenderRow(song)
+                    }
+                }
+                else
+                {
+                    <Virtualize Items="@Songs" Context="song" SpacerElement="tr" OverscanCount="10" ItemSize="@_calculatedRowHeight">
+                        @RenderRow(song)
+                    </Virtualize>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter] public List<Song> Songs { get; set; } = [];
+    [Parameter] public Song? ActiveSong { get; set; } // The currently PLAYING song (Speaker Icon)
+    [Parameter] public Song? SelectedSong { get; set; } // The currently SELECTED/FOCUSED song (Highlight)
+    [Parameter] public string EmptyMessage { get; set; } = "No songs found.";
+    [Parameter] public bool AllowReorder { get; set; } = false;
+    [Parameter] public bool ShowRemoveButton { get; set; } = false;
+
+    [Parameter] public SortColumn CurrentSortColumn { get; set; } = SortColumn.None;
+    [Parameter] public bool IsAscending { get; set; } = true;
+
+    [Parameter] public EventCallback<int> OnPlay { get; set; }
+    [Parameter] public EventCallback<Song> OnRowClick { get; set; }
+    [Parameter] public EventCallback<Song> OnRowDoubleClick { get; set; }
+    [Parameter] public EventCallback<SortColumn> OnSort { get; set; }
+    [Parameter] public EventCallback<(Song Source, Song Target)> OnReorder { get; set; }
+    [Parameter] public EventCallback<Song> OnOptionsClick { get; set; }
+    [Parameter] public EventCallback<Song> OnRemove { get; set; }
+
+    private Song? _draggedSong;
+    private Song? _targetSong;
+    private float _calculatedRowHeight => CalculateRowHeight();
+
+    protected override void OnInitialized()
+    {
+        SettingsManager.SettingsSaved += OnSettingsChanged;
+    }
+
+    private void OnSettingsChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private RenderFragment RenderRow(Song song) => builder =>
+    {
+        int index = Songs.IndexOf(song); // Note: IndexOf can be O(N), but for Virtualize rendering only visible items, impact is mitigated.
+        bool isActive = ActiveSong != null && song == ActiveSong;
+        bool isSelected = SelectedSong != null && song == SelectedSong;
+        bool isDragging = AllowReorder && song == _draggedSong;
+        bool isDragOver = AllowReorder && song == _targetSong;
+
+        string rowClass = $"hover-row {(isActive ? "active-track" : "")} {(isSelected ? "selected-track" : "")} {(isDragging ? "dragging" : "")} {(isDragOver ? "drag-over" : "")}";
+
+        builder.OpenElement(0, "tr");
+        builder.SetKey(song.FilePath); // React-like key for diffing
+        builder.AddAttribute(1, "class", rowClass);
+
+        if (AllowReorder)
+        {
+            builder.AddAttribute(2, "draggable", "true");
+            builder.AddAttribute(3, "ondragstart", EventCallback.Factory.Create<DragEventArgs>(this, () => HandleDragStart(song)));
+            builder.AddAttribute(4, "ondragenter", EventCallback.Factory.Create<DragEventArgs>(this, () => HandleDragEnter(song)));
+            builder.AddAttribute(5, "ondragend", EventCallback.Factory.Create<DragEventArgs>(this, HandleDragEnd));
+            builder.AddEventPreventDefaultAttribute(6, "ondragover", true);
+        }
+
+        // Virtualization Height Enforcement
+        if (Songs.Count > 500)
+        {
+            builder.AddAttribute(7, "style", $"height: {_calculatedRowHeight}px; max-height: {_calculatedRowHeight}px; overflow: hidden;");
+        }
+
+        // Click Handlers
+        // If OnPlay is hooked (Queue/Playlist), use index. If OnRowClick (Library), use song.
+        // We unify to calling OnRowClick passing the song, consumer handles logic.
+        // For compatibility with QueueView (OnPlay<int>), we handle internally:
+        builder.AddAttribute(8, "onclick", EventCallback.Factory.Create(this, async () =>
+        {
+            if (OnRowClick.HasDelegate) await OnRowClick.InvokeAsync(song);
+            if (OnPlay.HasDelegate && AppSettings.Playback.PlayOnSingleClick) await OnPlay.InvokeAsync(index);
+        }));
+
+        builder.AddAttribute(9, "ondblclick", EventCallback.Factory.Create(this, async () =>
+        {
+            if (OnRowDoubleClick.HasDelegate) await OnRowDoubleClick.InvokeAsync(song);
+            else if (OnPlay.HasDelegate) await OnPlay.InvokeAsync(index);
+        }));
+
+        // 1. Index
+        if (AppSettings.Library.Columns.ShowIndex)
+        {
+            builder.OpenElement(10, "td");
+            builder.AddAttribute(11, "class", "col-index");
+            if (isActive)
+            {
+                builder.OpenElement(12, "i");
+                builder.AddAttribute(13, "class", "fas fa-volume-up");
+                builder.AddAttribute(14, "style", "color: var(--accent-primary)");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.AddContent(15, index + 1);
+            }
+            builder.CloseElement();
+        }
+
+        // 2. Art
+        if (AppSettings.Library.Columns.ShowArt)
+        {
+            builder.OpenElement(20, "td");
+            builder.AddAttribute(21, "class", "col-art");
+            if (song.HasArt)
+            {
+                builder.OpenElement(22, "div");
+                builder.AddAttribute(23, "class", "list-art-wrapper");
+                builder.OpenElement(24, "img");
+                builder.AddAttribute(25, "src", GetArtUrl(song));
+                builder.AddAttribute(26, "loading", "lazy");
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+            builder.CloseElement();
+        }
+
+        // 3. Title
+        builder.OpenElement(30, "td");
+        builder.AddAttribute(31, "class", "col-title");
+        builder.AddContent(32, song.Title);
+        builder.CloseElement();
+
+        // 4. Artist
+        if (AppSettings.Library.Columns.ShowArtist)
+        {
+            builder.OpenElement(40, "td");
+            builder.AddAttribute(41, "class", "col-artist");
+            builder.AddContent(42, song.Artist);
+            builder.CloseElement();
+        }
+
+        // 5. Album
+        if (AppSettings.Library.Columns.ShowAlbum)
+        {
+            builder.OpenElement(50, "td");
+            builder.AddAttribute(51, "class", "col-album");
+            builder.AddContent(52, song.Album);
+            builder.CloseElement();
+        }
+
+        // 6. Duration
+        if (AppSettings.Library.Columns.ShowDuration)
+        {
+            builder.OpenElement(60, "td");
+            builder.AddAttribute(61, "class", "col-duration");
+            builder.AddContent(62, song.DurationString);
+            builder.CloseElement();
+        }
+
+        // 7. Options
+        builder.OpenElement(70, "td");
+        builder.AddAttribute(71, "class", "col-options");
+        builder.OpenElement(72, "button");
+        builder.AddAttribute(73, "class", "track-options-btn");
+        builder.AddAttribute(74, "onclick", EventCallback.Factory.Create(this, () => OnOptionsClick.InvokeAsync(song)));
+        builder.AddEventStopPropagationAttribute(75, "onclick", true);
+        builder.AddContent(76, "...");
+        builder.CloseElement();
+        builder.CloseElement();
+
+        // 8. Remove Button
+        if (ShowRemoveButton)
+        {
+            builder.OpenElement(80, "td");
+            builder.AddAttribute(81, "class", "col-remove");
+            builder.OpenElement(82, "button");
+            builder.AddAttribute(83, "class", "remove-track-btn");
+            builder.AddAttribute(84, "title", "Remove from queue");
+            builder.AddAttribute(85, "onclick", EventCallback.Factory.Create(this, () => OnRemove.InvokeAsync(song)));
+            builder.AddEventStopPropagationAttribute(86, "onclick", true);
+            builder.OpenElement(87, "i");
+            builder.AddAttribute(88, "class", "fas fa-times");
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.CloseElement();
+        }
+
+        builder.CloseElement(); // tr
+    };
+
+    private async Task HandleSort(SortColumn column)
+    {
+        if (OnSort.HasDelegate)
+        {
+            await OnSort.InvokeAsync(column);
+        }
+    }
+
+    private RenderFragment RenderSortIcon(SortColumn column)
+    {
+        if (CurrentSortColumn != column) return builder => { };
+
+        return builder =>
+        {
+            builder.OpenElement(0, "i");
+            builder.AddAttribute(1, "class", IsAscending ? "fas fa-caret-up sort-icon" : "fas fa-caret-down sort-icon");
+            builder.CloseElement();
+        };
+    }
+
+    private void HandleDragStart(Song song)
+    {
+        if (!AllowReorder) return;
+        LayoutState.SetInternalDrag(true);
+        _draggedSong = song;
+    }
+
+    private void HandleDragEnter(Song target)
+    {
+        if (!AllowReorder) return;
+        if (_draggedSong != null && target != _draggedSong)
+        {
+            _targetSong = target;
+        }
+    }
+
+    private async Task HandleDragEnd()
+    {
+        LayoutState.SetInternalDrag(false);
+        if (!AllowReorder) return;
+
+        if (_draggedSong != null && _targetSong != null)
+        {
+            await OnReorder.InvokeAsync((_draggedSong, _targetSong));
+        }
+
+        _draggedSong = null;
+        _targetSong = null;
+    }
+
+    private float CalculateRowHeight()
+    {
+        float verticalPadding = AppSettings.Theme.RowVerticalPadding * 2;
+        float textHeight = AppSettings.Theme.BaseFontSize * 1.2f;
+        float minTextRowHeight = verticalPadding + textHeight;
+        float artHeight = AppSettings.Library.Columns.ShowArt ? AppSettings.Library.ListArtSize + 4 : 0;
+
+        return (float)Math.Ceiling(Math.Max(minTextRowHeight, artHeight) + 1);
+    }
+
+    private string GetArtUrl(Song song)
+    {
+        return $"sonorize://albumart/?path={Uri.EscapeDataString(song.FilePath)}";
+    }
+
+    public void Dispose()
+    {
+        SettingsManager.SettingsSaved -= OnSettingsChanged;
+    }
+}

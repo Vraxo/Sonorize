@@ -1,0 +1,215 @@
+:root {
+    /* Fallbacks */
+    --bg-primary: #000000;
+    --bg-secondary: #121212;
+    --bg-tertiary: #242424;
+    --player-bar-bg: #181818;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --accent-primary: #1DB954;
+    --accent-primary-hover: #1ED760;
+    --border-color: #282828;
+    --scrollbar-thumb: #535353;
+    --border-radius: 4px;
+    --btn-radius: 500px; /* Default pill shape */
+    /* Default font stack */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* New: Global Font Scaling Fallback */
+    --base-font-size: 14px;
+}
+
+html {
+    /* CRITICAL: Enforce instant scrolling. Smooth scrolling causes lag when dragging scrollbars. */
+    scroll-behavior: auto !important;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--base-font-size); /* Responsive base size */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: var(--text-primary);
+    }
+
+/* --- General UI Elements --- */
+.btn {
+    padding: 5px 15px; /* Aggressively reduced for compact desktop feel */
+    border: 1px solid var(--accent-primary);
+    background-color: var(--accent-primary); /* Solid Accent */
+    color: var(--bg-primary); /* Dark Text (Contrast) */
+    border-radius: var(--btn-radius);
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.2s ease;
+    font-size: inherit; /* Inherit global scale */
+    line-height: 1.2;
+}
+
+    .btn:hover {
+        background-color: var(--accent-primary-hover);
+        border-color: var(--accent-primary-hover);
+        color: var(--bg-primary);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+/* .btn-primary is now effectively the default, but kept for semantic compatibility */
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: var(--bg-primary);
+    border-color: var(--accent-primary);
+}
+
+    .btn-primary:hover {
+        background-color: var(--accent-primary-hover);
+        border-color: var(--accent-primary-hover);
+        color: var(--bg-primary);
+    }
+
+
+/* --- Range Slider --- */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #535353;
+    height: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    input[type="range"]::-webkit-slider-runnable-track {
+        background: transparent;
+        height: 4px;
+        border-radius: 4px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        margin-top: -6px;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background-color: var(--text-primary);
+        border: none;
+        transition: background-color 0.2s ease, opacity 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb {
+        background-color: var(--accent-primary);
+    }
+
+    input[type="range"].hide-thumb::-webkit-slider-thumb {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        box-shadow: none;
+    }
+
+/* --- Custom Scrollbar Styling (Scoped) --- */
+.custom-scrollbars ::-webkit-scrollbar {
+    width: 12px;
+}
+
+.custom-scrollbars ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.custom-scrollbars ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 6px;
+    border: 2px solid var(--bg-secondary);
+}
+
+    .custom-scrollbars ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--text-secondary);
+    }
+
+/* --- Modal Styles --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Extremely high Z-index to stay above player bars */
+}
+
+.modal-container {
+    background-color: var(--modal-bg); /* Opaque background */
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    width: 450px; /* Slightly wider for EQ */
+    max-width: 90%;
+    max-height: 90vh; /* Prevent overflow on small screens */
+    overflow-y: auto; /* Scroll if too tall */
+    display: flex;
+    flex-direction: column;
+    color: var(--text-primary);
+    position: relative; /* Ensure z-index context */
+}
+
+.modal-header {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 10px 0;
+    color: var(--text-secondary);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    margin-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius);
+    font-size: inherit;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+    .form-control:focus {
+        border-color: var(--accent-primary);
+        background-color: var(--bg-secondary);
+    }

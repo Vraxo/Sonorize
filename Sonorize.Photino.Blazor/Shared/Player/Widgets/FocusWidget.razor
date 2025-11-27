@@ -1,0 +1,17 @@
+﻿@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@inject NavigationManager Nav
+@inject LayoutStateService LayoutState
+@implements IDisposable
+
+<button class="player-btn @(IsInFocusMode ? "active" : "")" title="Focus Mode" @onclick="LayoutState.ToggleFocus">
+    <i class="fas fa-expand-alt"></i>
+</button>
+
+@code {
+    private bool IsInFocusMode => Nav.Uri.EndsWith("focus");
+
+    protected override void OnInitialized() => Nav.LocationChanged += OnLocationChanged;
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => StateHasChanged();
+    public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
+}

@@ -1,0 +1,226 @@
+﻿@using Sonorize.Core
+@using Sonorize.Core.Services.Library
+@using Sonorize.Core.Settings
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject LibraryService LibraryService
+
+<div class="extension-settings-container">
+    <p class="description">Manage which file types are imported into your library.</p>
+
+    <!-- Standard Formats Section -->
+    <label class="sub-label">Standard Formats</label>
+    <div class="standard-extensions-grid">
+        @foreach (var ext in _knownExtensions)
+        {
+            bool isActive = IsActive(ext);
+            <button class="extension-toggle @(isActive ? "active" : "")" @onclick="() => ToggleExtension(ext)">
+                @ext
+            </button>
+        }
+    </div>
+
+    <!-- Custom Formats Section -->
+    <label class="sub-label">Custom Formats</label>
+    <div class="extension-list">
+        @foreach (var ext in GetCustomExtensions())
+        {
+            <span class="extension-tag">
+                @ext
+                <button class="remove-tag-btn" @onclick="() => RemoveExtension(ext)">&times;</button>
+            </span>
+        }
+        @if (!GetCustomExtensions().Any())
+        {
+            <span class="text-muted" style="font-size:0.9em;">No custom extensions added.</span>
+        }
+    </div>
+
+    <div class="add-extension-row">
+        <input type="text"
+               @bind="_newExtension"
+               placeholder=".ape"
+               class="extension-input"
+               @onkeyup="HandleExtensionKeyUp" />
+        <button class="btn" @onclick="AddExtension">Add</button>
+    </div>
+</div>
+
+<style>
+    .description {
+        font-size: 0.9em;
+        color: var(--text-secondary);
+        margin: 0 0 15px 0;
+    }
+
+    .sub-label {
+        display: block;
+        font-weight: 600;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: var(--text-primary);
+        font-size: 0.95em;
+    }
+
+    /* Standard Toggles */
+    .standard-extensions-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .extension-toggle {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        padding: 6px 14px;
+        border-radius: var(--btn-radius);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9em;
+        font-weight: 500;
+    }
+
+        .extension-toggle:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+            background-color: var(--hover-bg);
+        }
+
+        .extension-toggle.active {
+            background-color: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+    /* Custom Tags */
+    .extension-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+        min-height: 30px;
+        align-items: center;
+    }
+
+    .extension-tag {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        padding: 4px 10px;
+        border-radius: var(--border-radius);
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-primary);
+    }
+
+    .remove-tag-btn {
+        background: none;
+        border: none;
+        color: #aaa;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1.1em;
+        line-height: 1;
+        padding: 0;
+    }
+
+        .remove-tag-btn:hover {
+            color: #ff6b6b;
+        }
+
+    .add-extension-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .extension-input {
+        padding: 8px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: var(--border-radius);
+        width: 100px;
+        outline: none;
+    }
+
+        .extension-input:focus {
+            background-color: var(--bg-secondary);
+            border-color: var(--accent-primary);
+        }
+</style>
+
+@code {
+    private readonly List<string> _knownExtensions =
+    [
+        ".mp3", ".flac", ".wav", ".m4a", ".aac", ".ogg", ".wma", ".opus", ".aiff"
+    ];
+
+    private string _newExtension = "";
+
+    private bool IsActive(string ext)
+    {
+        return AppSettings.Library.SupportedFileExtensions.Contains(ext);
+    }
+
+    private void ToggleExtension(string ext)
+    {
+        if (IsActive(ext))
+        {
+            AppSettings.Library.SupportedFileExtensions.Remove(ext);
+        }
+        else
+        {
+            AppSettings.Library.SupportedFileExtensions.Add(ext);
+        }
+
+        SaveAndRefresh();
+    }
+
+    private IEnumerable<string> GetCustomExtensions()
+    {
+        return AppSettings.Library.SupportedFileExtensions
+            .Where(e => !_knownExtensions.Contains(e))
+            .OrderBy(e => e);
+    }
+
+    private void HandleExtensionKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            AddExtension();
+        }
+    }
+
+    private void AddExtension()
+    {
+        if (string.IsNullOrWhiteSpace(_newExtension)) return;
+
+        string formatted = _newExtension.Trim().ToLowerInvariant();
+        if (!formatted.StartsWith(".")) formatted = "." + formatted;
+
+        if (!AppSettings.Library.SupportedFileExtensions.Contains(formatted))
+        {
+            AppSettings.Library.SupportedFileExtensions.Add(formatted);
+            SaveAndRefresh();
+        }
+        _newExtension = "";
+    }
+
+    private void RemoveExtension(string ext)
+    {
+        AppSettings.Library.SupportedFileExtensions.Remove(ext);
+        SaveAndRefresh();
+    }
+
+    private void SaveAndRefresh()
+    {
+        SettingsManager.Save(AppSettings);
+        // Trigger a refresh so the new file types are picked up immediately
+        _ = LibraryService.RefreshLibraryAsync();
+    }
+}

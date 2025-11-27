@@ -1,0 +1,36 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Audio
+@implements IDisposable
+@inject IPlayerService PlayerService
+
+<div class="transport-controls">
+    <button class="@ShuffleClass" @onclick="PlayerService.ToggleShuffle"><i class="fas fa-random"></i></button>
+    <button @onclick="PlayerService.PlayPrevious"><i class="fas fa-step-backward"></i></button>
+
+    <button class="play-pause" @onclick="PlayerService.TogglePlayback">
+        <i class="fas @(PlayerService.IsPlaying ? "fa-pause" : "fa-play")"></i>
+    </button>
+
+    <button @onclick="PlayerService.PlayNext"><i class="fas fa-step-forward"></i></button>
+    <button class="@RepeatClass" @onclick="PlayerService.ToggleRepeat"><i class="fas fa-redo"></i></button>
+</div>
+
+@code {
+    private string ShuffleClass => PlayerService.IsShuffle ? "active" : "";
+    private string RepeatClass => PlayerService.RepeatMode != RepeatMode.None ? "active" : "";
+
+    protected override void OnInitialized()
+    {
+        PlayerService.PlaybackStateChanged += UpdateUi;
+        PlayerService.PlaybackModesChanged += (s, m) => UpdateUi();
+    }
+
+    private void UpdateUi() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        PlayerService.PlaybackStateChanged -= UpdateUi;
+        PlayerService.PlaybackModesChanged -= (s, m) => UpdateUi();
+    }
+}

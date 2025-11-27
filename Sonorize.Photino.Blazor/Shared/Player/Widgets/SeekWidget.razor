@@ -1,0 +1,82 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<div class="progress-bar-container">
+    <span>@FormatTime(PlayerService.CurrentTime)</span>
+
+    <input type="range"
+           class="@SeekSliderClass"
+           min="0"
+           max="@(PlayerService.TotalTime.TotalSeconds <= 0 ? 1 : PlayerService.TotalTime.TotalSeconds)"
+           value="@(PlayerService.IsSeeking? _dragSeekValue : PlayerService.CurrentTime.TotalSeconds)"
+           style="@GetSeekSliderStyle()"
+           @onmousedown="BeginSeek"
+           @oninput="OnSeekInput"
+           @onchange="OnSeekChange"
+           step="0.1" />
+
+    <span>@FormatTime(PlayerService.TotalTime)</span>
+</div>
+
+@code {
+    private double _dragSeekValue;
+    private string SeekSliderClass => $"seek-slider {(!AppSettings.Window.ShowSliderThumbs ? "hide-thumb" : "")}";
+
+    protected override void OnInitialized()
+    {
+        PlayerService.PlaybackStateChanged += UpdateUi;
+        PlayerService.PlaybackProgressed += UpdateUi;
+        SettingsManager.SettingsSaved += UpdateUi;
+    }
+
+    private void UpdateUi() => InvokeAsync(StateHasChanged);
+    private string FormatTime(TimeSpan t) => $"{t.Minutes}:{t.Seconds:D2}";
+
+    private void BeginSeek()
+    {
+        _dragSeekValue = PlayerService.CurrentTime.TotalSeconds;
+        PlayerService.StartSeek();
+    }
+
+    private void OnSeekInput(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double val)) _dragSeekValue = val;
+    }
+
+    private void OnSeekChange(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double val))
+        {
+            var total = PlayerService.TotalTime.TotalSeconds;
+            if (total > 0) PlayerService.Seek(val / total);
+        }
+        PlayerService.EndSeek();
+    }
+
+    private string GetSeekSliderStyle()
+    {
+        double current = PlayerService.IsSeeking ? _dragSeekValue : PlayerService.CurrentTime.TotalSeconds;
+        double total = PlayerService.TotalTime.TotalSeconds;
+        double pct = total > 0 ? (current / total) * 100 : 0;
+        return GenerateGradientStyle(pct);
+    }
+
+    private string GenerateGradientStyle(double percent)
+    {
+        string p = percent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+        return $"background: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-primary) {p}%, #535353 {p}%, #535353 100%);";
+    }
+
+    public void Dispose()
+    {
+        PlayerService.PlaybackStateChanged -= UpdateUi;
+        PlayerService.PlaybackProgressed -= UpdateUi;
+        SettingsManager.SettingsSaved -= UpdateUi;
+    }
+}

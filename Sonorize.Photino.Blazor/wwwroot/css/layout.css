@@ -1,0 +1,211 @@
+.main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.layout-root {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* --- Drag & Drop Overlay --- */
+.drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+    .drag-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+.drag-message {
+    text-align: center;
+    color: var(--text-primary);
+}
+
+    .drag-message i {
+        font-size: 4em;
+        margin-bottom: 20px;
+        color: var(--accent-primary);
+    }
+
+    .drag-message h2 {
+        font-size: 2em;
+        margin: 0;
+    }
+
+    .drag-message p {
+        color: var(--text-secondary);
+        font-size: 1.1em;
+        margin-top: 10px;
+    }
+
+.drag-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: copy;
+}
+
+/* --- Background Layers --- */
+.ambient-background-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
+    opacity: 0;
+    transition: opacity 1s ease, background-image 1s ease, filter 0.3s;
+    z-index: 0;
+    pointer-events: none;
+    will-change: opacity, transform;
+    transform: translateZ(0);
+}
+
+    .ambient-background-layer.active {
+        opacity: 1;
+    }
+
+.custom-bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
+    transition: filter 0.3s;
+    z-index: 0;
+    pointer-events: none;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* --- Z-Indexing --- */
+.sidebar, .main-content, .player-bar {
+    position: relative;
+    z-index: 1;
+}
+
+/* --- Main Content & Sidebar Wrapper --- */
+.main-content {
+    flex-grow: 1;
+    background: var(--main-content-bg);
+    overflow-y: auto;
+    transition: padding-left 0.3s ease, padding-right 0.3s ease;
+    /* PERFORMANCE: Enforce instant scrolling */
+    scroll-behavior: auto !important;
+    /* CRITICAL FIX: Disable scroll anchoring to prevent jumping during virtualization updates */
+    overflow-anchor: none;
+    will-change: scroll-position;
+}
+
+    .main-content.no-anim {
+        transition: none !important;
+    }
+
+/* --- Player Bar --- */
+.player-bar {
+    height: var(--player-bar-height);
+    background-color: var(--player-bar-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    box-sizing: border-box;
+    z-index: 10;
+    flex-shrink: 0;
+    gap: 16px;
+}
+
+/* --- Sidebar Restore Button --- */
+.sidebar-restore-btn {
+    position: absolute !important;
+    z-index: 100;
+    top: 15px;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+    color: #ccc;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+    .sidebar-restore-btn.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-10px);
+    }
+
+    .sidebar-restore-btn:hover {
+        background: #333;
+        color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+/* --- Layout Archetypes --- */
+.layout-root.bar-pos-top .player-bar {
+    order: -1;
+    border-top: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.middle-container.sidebar-pos-right .sidebar {
+    order: 1;
+    border-right: none;
+    border-left: 1px solid var(--border-color);
+}
+
+.layout-root.bar-pos-top .sidebar-restore-btn {
+    top: calc(var(--player-bar-height) + 15px);
+}
+
+.middle-container.sidebar-pos-right .sidebar-restore-btn {
+    left: auto;
+    right: 10px;
+    transform: translateX(10px);
+}
+
+    .middle-container.sidebar-pos-right .sidebar-restore-btn.hidden {
+        transform: translateX(10px);
+    }
+
+    .middle-container.sidebar-pos-right .sidebar-restore-btn:not(.hidden) {
+        transform: translateX(0);
+    }
+
+    .middle-container.sidebar-pos-right .sidebar-restore-btn i {
+        transform: rotate(180deg);
+    }

@@ -1,0 +1,241 @@
+﻿@using Sonorize.Core.Models
+@using Sonorize.Core.Services
+
+<div class="eq-preset-bar">
+    <div class="eq-enable-wrapper">
+        <label class="toggle-switch">
+            <input type="checkbox" checked="@IsEnabled" @onchange="OnToggle" />
+            <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">EQ On</span>
+    </div>
+
+    <div class="eq-actions">
+        <select class="preset-select" value="@CurrentPresetName" @onchange="OnSelectChange">
+            @if (CurrentPresetName == "__custom__")
+            {
+                <option value="__custom__">Custom</option>
+            }
+            <optgroup label="My Presets">
+                @foreach (var p in UserPresets)
+                {
+                    <option value="@p.Name">@p.Name</option>
+                }
+            </optgroup>
+            <optgroup label="Defaults">
+                @foreach (var p in DefaultPresets)
+                {
+                    <option value="@p.Name">@p.Name</option>
+                }
+            </optgroup>
+        </select>
+
+        <div class="save-wrapper">
+            <input type="text"
+                   class="preset-name-input"
+                   placeholder="Name..."
+                   @bind="_saveName"
+                   @bind:event="oninput" />
+
+            <button class="icon-btn save"
+                    disabled="@string.IsNullOrWhiteSpace(_saveName)"
+                    @onclick="HandleSave"
+                    title="Save Preset">
+                <i class="fas fa-save"></i>
+            </button>
+        </div>
+
+        <button class="icon-btn delete"
+                disabled="@(!CanDelete)"
+                @onclick="HandleDelete"
+                title="Delete Preset">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+    .eq-preset-bar {
+        background-color: var(--bg-secondary);
+        padding: 12px;
+        border-radius: var(--border-radius);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* Toggle Switch */
+    .eq-enable-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 36px;
+        height: 20px;
+    }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        transition: .3s;
+        border-radius: 20px;
+    }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-secondary);
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+    input:checked + .toggle-slider {
+        background-color: var(--accent-primary);
+        border-color: var(--accent-primary);
+    }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(16px);
+            background-color: var(--bg-primary);
+        }
+
+    .toggle-label {
+        font-weight: bold;
+        color: var(--text-primary);
+        font-size: 0.9em;
+    }
+
+    /* Actions Area */
+    .eq-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-grow: 1;
+        justify-content: flex-end;
+    }
+
+    .preset-select {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 4px 8px;
+        border-radius: var(--border-radius);
+        max-width: 140px;
+        outline: none;
+    }
+
+    .save-wrapper {
+        display: flex;
+        align-items: center;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding-left: 8px;
+        overflow: hidden;
+    }
+
+    .preset-name-input {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        width: 80px;
+        font-size: 0.9em;
+        outline: none;
+    }
+
+    .icon-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 6px 10px;
+        color: var(--text-secondary);
+        transition: color 0.2s, background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .icon-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .icon-btn.save:hover:not(:disabled) {
+            color: var(--accent-primary);
+            background-color: var(--bg-secondary);
+        }
+
+        .icon-btn.delete:hover:not(:disabled) {
+            color: #ff4d4d;
+        }
+</style>
+
+@code {
+    [Parameter] public bool IsEnabled { get; set; }
+    [Parameter] public EventCallback<bool> IsEnabledChanged { get; set; }
+
+    [Parameter] public string CurrentPresetName { get; set; } = "";
+    [Parameter] public IEnumerable<EqPreset> UserPresets { get; set; } = [];
+    [Parameter] public IEnumerable<EqPreset> DefaultPresets { get; set; } = [];
+
+    [Parameter] public bool CanDelete { get; set; }
+
+    [Parameter] public EventCallback<string> OnPresetSelected { get; set; }
+    [Parameter] public EventCallback<string> OnSave { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private string _saveName = "";
+
+    private async Task OnToggle(ChangeEventArgs e)
+    {
+        bool val = (bool)(e.Value ?? false);
+        await IsEnabledChanged.InvokeAsync(val);
+    }
+
+    private async Task OnSelectChange(ChangeEventArgs e)
+    {
+        string? val = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(val))
+        {
+            await OnPresetSelected.InvokeAsync(val);
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        if (!string.IsNullOrWhiteSpace(_saveName))
+        {
+            await OnSave.InvokeAsync(_saveName);
+            _saveName = "";
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync();
+    }
+}

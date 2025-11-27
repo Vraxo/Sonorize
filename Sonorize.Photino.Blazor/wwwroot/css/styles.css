@@ -1,0 +1,19 @@
+@import url('base.css');
+@import url('layout.css');
+@import url('sidebar.css');
+@import url('player-bar/index.css');
+@import url('main-content.css');
+
+/* Component-specific styles */
+@import url('header.css');
+@import url('track-list.css');
+@import url('library-grid.css');
+@import url('focus-mode.css');
+
+/* Settings Modules */
+@import url('settings/common.css'); /* NEW: Shared patterns */
+@import url('settings/layout.css');
+@import url('settings/controls.css');
+@import url('settings/library.css');
+@import url('settings/theme.css');
+@import url('settings/scrobbling.css');

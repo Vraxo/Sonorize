@@ -1,0 +1,82 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Models
+@using Sonorize.Core
+@using Sonorize.Core.Services.Audio
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject IPlayerService PlayerService
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<div class="player-song-info">
+    <div class="@AlbumArtClass">
+        @if (_albumArtSrc != null)
+        {
+            <img src="@_albumArtSrc" alt="Album Art" id="player-album-art" />
+        }
+        else
+        {
+            <div class="album-art-placeholder">
+                <i class="fas fa-music"></i>
+            </div>
+        }
+    </div>
+
+    @if (PlayerService.CurrentSong != null)
+    {
+        <div class="song-details">
+            <p class="song-title">@PlayerService.CurrentSong.Title</p>
+            <p class="song-artist">@PlayerService.CurrentSong.Artist</p>
+        </div>
+    }
+    else
+    {
+        <div class="song-details">
+            <p class="song-title">No Song Playing</p>
+        </div>
+    }
+</div>
+
+@code {
+    private string? _albumArtSrc;
+
+    private string AlbumArtClass => $"album-art-container {(_albumArtSrc != null ? "has-art" : "")}";
+
+    protected override void OnInitialized()
+    {
+        PlayerService.PlaybackStateChanged += OnStateChanged;
+        PlayerService.QueueChanged += OnStateChanged;
+        SettingsManager.SettingsSaved += OnStateChanged;
+        UpdateState();
+    }
+
+    private async void OnStateChanged()
+    {
+        await InvokeAsync(() =>
+        {
+            UpdateState();
+            StateHasChanged();
+        });
+    }
+
+    private void UpdateState()
+    {
+        var currentSong = PlayerService.CurrentSong;
+
+        if (currentSong != null && currentSong.HasArt)
+        {
+            var encodedPath = Uri.EscapeDataString(currentSong.FilePath);
+            _albumArtSrc = $"sonorize://albumart/?path={encodedPath}";
+        }
+        else
+        {
+            _albumArtSrc = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        PlayerService.PlaybackStateChanged -= OnStateChanged;
+        PlayerService.QueueChanged -= OnStateChanged;
+        SettingsManager.SettingsSaved -= OnStateChanged;
+    }
+}

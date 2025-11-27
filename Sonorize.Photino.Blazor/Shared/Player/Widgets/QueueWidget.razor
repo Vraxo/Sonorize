@@ -1,0 +1,17 @@
+@using Sonorize.Core.Services
+@using Sonorize.Core.Services.UI
+@inject NavigationManager Nav
+@inject LayoutStateService LayoutState
+@implements IDisposable
+
+<button class="player-btn @(IsInQueueView ? "active" : "")" title="Queue" @onclick="LayoutState.ToggleQueue">
+    <i class="fas fa-list-ol"></i>
+</button>
+
+@code {
+    private bool IsInQueueView => Nav.Uri.EndsWith("queue");
+
+    protected override void OnInitialized() => Nav.LocationChanged += OnLocationChanged;
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => StateHasChanged();
+    public void Dispose() => Nav.LocationChanged -= OnLocationChanged;
+}
