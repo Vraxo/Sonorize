@@ -143,10 +143,28 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private void ToggleSidebar()
+    private async Task ToggleSidebar()
     {
+        // PERFORMANCE CRITICAL:
+        // Before triggering the state change (which starts the CSS transition),
+        // we lock the inner content width via JS.
+        // This prevents the browser from reflowing the heavy grid/table during the animation.
+        // It converts an O(N) operation to O(1).
+        if (AppSettings.Window.EnableSidebarAnimation)
+        {
+            await JS.InvokeVoidAsync("startLayoutLock", true);
+        }
+
         AppSettings.Window.IsSidebarOpen = !AppSettings.Window.IsSidebarOpen;
         SettingsManager.Save(AppSettings);
+
+        if (AppSettings.Window.EnableSidebarAnimation)
+        {
+            // Wait for transition to finish (300ms in CSS + buffer)
+            // Then unlock to allow a single snap-to-fit reflow.
+            await Task.Delay(320);
+            await JS.InvokeVoidAsync("startLayoutLock", false);
+        }
     }
 
     private void OpenEqualizer() { _showEq = true; StateHasChanged(); }
@@ -192,14 +210,10 @@
         var browserFiles = e.GetMultipleFiles(500);
         if (browserFiles.Count == 0) return;
 
-        // Prepare streams for core service
         var fileStreams = new List<(Stream stream, string name)>();
 
-        // Note: We open streams here because BrowserFile lives in Blazor context
-        // We will dispose them after ImportStreamsAsync consumes them
         foreach (var file in browserFiles)
         {
-            // 1GB max per file (High-res FLACs/WAVs can exceed 50MB easily)
             fileStreams.Add((file.OpenReadStream(1_000_000_000), file.Name));
         }
 

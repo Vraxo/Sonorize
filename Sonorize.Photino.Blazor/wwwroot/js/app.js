@@ -61,13 +61,17 @@ window.observeResize = (element, dotNetRef) => {
         element._resizeObserver.disconnect();
     }
 
+    // Performance Fix: Debounce the observer to prevent Layout Thrashing during animations.
+    let debounceTimer;
+
     const observer = new ResizeObserver(entries => {
         if (entries.length > 0) {
             const width = entries[0].contentRect.width;
-            // Use requestAnimationFrame to throttle slightly and prevent loop errors
-            requestAnimationFrame(() => {
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
                 dotNetRef.invokeMethodAsync('OnContainerResize', width);
-            });
+            }, 200);
         }
     });
 
@@ -79,5 +83,38 @@ window.unobserveResize = (element) => {
     if (element && element._resizeObserver) {
         element._resizeObserver.disconnect();
         delete element._resizeObserver;
+    }
+};
+
+// --- Layout Locking (The "Zero Difference" Guarantee) ---
+// Prevents heavy DOM reflows during sidebar animation by freezing content width.
+window.startLayoutLock = (shouldLock) => {
+    const main = document.querySelector('.main-content');
+    if (!main) return;
+
+    // We target the immediate child (the page component wrapper)
+    // Note: In Blazor, this is usually the first div inside main-content
+    const content = main.firstElementChild;
+    if (!content) return;
+
+    if (shouldLock) {
+        // Capture current geometry
+        const currentWidth = main.offsetWidth;
+
+        // Force fixed dimensions to stop the browser from recalculating layout
+        // as the parent container shrinks/grows.
+        // This turns a complex O(N) reflow into a simple O(1) crop/paint operation.
+        content.style.boxSizing = "border-box";
+        content.style.width = currentWidth + "px";
+        content.style.minWidth = currentWidth + "px";
+        content.style.maxWidth = currentWidth + "px";
+        content.style.overflow = "hidden"; // Ensure clean clipping
+    } else {
+        // Release the lock
+        content.style.boxSizing = "";
+        content.style.width = "";
+        content.style.minWidth = "";
+        content.style.maxWidth = "";
+        content.style.overflow = "";
     }
 };

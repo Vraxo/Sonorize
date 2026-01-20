@@ -9,6 +9,11 @@
     overflow: hidden; /* Important for width transition */
     /* Default: Border on the right (Left-side sidebar) */
     border-right: 1px solid var(--border-color);
+    /* PERFORMANCE OPTIMIZATIONS */
+    /* Isolate internal layout so width changes don't cause deep re-calcs */
+    contain: layout style;
+    /* Hint for the width transition */
+    will-change: width;
 }
 
     /* --- Animation --- */

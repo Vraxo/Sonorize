@@ -24,14 +24,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: none;
+    pointer-events: none; /* Let events pass through initially */
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
     .drag-overlay.active {
         opacity: 1;
-        pointer-events: auto;
+        pointer-events: auto; /* Catch drops when active */
     }
 
 .drag-message {
@@ -56,6 +56,7 @@
         margin-top: 10px;
     }
 
+/* The invisible input that catches the actual drop */
 .drag-input {
     position: absolute;
     top: 0;
@@ -75,13 +76,12 @@
     height: 100%;
     background-size: cover;
     background-position: center;
+    /* Updated: Use global variables, default to high blur if unset in older logic */
     filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
     opacity: 0;
     transition: opacity 1s ease, background-image 1s ease, filter 0.3s;
     z-index: 0;
     pointer-events: none;
-    will-change: opacity, transform;
-    transform: translateZ(0);
 }
 
     .ambient-background-layer.active {
@@ -96,12 +96,11 @@
     height: 100%;
     background-size: cover;
     background-position: center;
+    /* Updated: Use global variables */
     filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
     transition: filter 0.3s;
     z-index: 0;
     pointer-events: none;
-    will-change: transform;
-    transform: translateZ(0);
 }
 
 /* --- Z-Indexing --- */
@@ -113,14 +112,17 @@
 /* --- Main Content & Sidebar Wrapper --- */
 .main-content {
     flex-grow: 1;
-    background: var(--main-content-bg);
+    background: var(--main-content-bg); /* Dynamic Gradient or Flat */
     overflow-y: auto;
+    /* CRITICAL: overflow-x hidden is required for the Layout Locking technique.
+       When the sidebar opens, the main content container shrinks. 
+       Because we lock the inner content width, it becomes wider than the container.
+       We want it to clip (hide), not show a horizontal scrollbar. */
+    overflow-x: hidden;
     transition: padding-left 0.3s ease, padding-right 0.3s ease;
-    /* PERFORMANCE: Enforce instant scrolling */
-    scroll-behavior: auto !important;
-    /* CRITICAL FIX: Disable scroll anchoring to prevent jumping during virtualization updates */
-    overflow-anchor: none;
-    will-change: scroll-position;
+    /* PERFORMANCE OPTIMIZATIONS */
+    contain: layout size;
+    will-change: padding-left, padding-right;
 }
 
     .main-content.no-anim {
@@ -129,7 +131,7 @@
 
 /* --- Player Bar --- */
 .player-bar {
-    height: var(--player-bar-height);
+    height: var(--player-bar-height); /* UPDATED: Dynamic Height */
     background-color: var(--player-bar-bg);
     border-top: 1px solid var(--border-color);
     display: flex;
@@ -139,12 +141,11 @@
     box-sizing: border-box;
     z-index: 10;
     flex-shrink: 0;
-    gap: 16px;
 }
 
 /* --- Sidebar Restore Button --- */
 .sidebar-restore-btn {
-    position: absolute !important;
+    position: absolute !important; /* Force absolute to prevent flex stretching */
     z-index: 100;
     top: 15px;
     left: 10px;
@@ -175,27 +176,34 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
 
-/* --- Layout Archetypes --- */
+
+/* --- Layout Archetypes (Flex Order Magic) --- */
+
+/* 1. Player Bar Positioning */
 .layout-root.bar-pos-top .player-bar {
-    order: -1;
+    order: -1; /* Moves visually to top */
     border-top: none;
     border-bottom: 1px solid var(--border-color);
 }
 
+/* 2. Sidebar Positioning */
 .middle-container.sidebar-pos-right .sidebar {
-    order: 1;
+    order: 1; /* Moves visually to right */
     border-right: none;
     border-left: 1px solid var(--border-color);
 }
 
+/* Update Sidebar Restore Button Position based on layout */
 .layout-root.bar-pos-top .sidebar-restore-btn {
+    /* UPDATED: Dynamic top position (Bar Height + 15px margin) */
     top: calc(var(--player-bar-height) + 15px);
 }
 
+/* If sidebar is on the right, move restore button to right */
 .middle-container.sidebar-pos-right .sidebar-restore-btn {
     left: auto;
     right: 10px;
-    transform: translateX(10px);
+    transform: translateX(10px); /* Slide in from right */
 }
 
     .middle-container.sidebar-pos-right .sidebar-restore-btn.hidden {
@@ -206,6 +214,7 @@
         transform: translateX(0);
     }
 
+    /* Flip the icon for right-side sidebar */
     .middle-container.sidebar-pos-right .sidebar-restore-btn i {
         transform: rotate(180deg);
     }
