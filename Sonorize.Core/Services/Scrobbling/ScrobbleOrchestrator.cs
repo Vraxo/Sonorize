@@ -37,7 +37,7 @@ public class ScrobbleOrchestrator : IDisposable
             _currentTrack = _player.CurrentSong;
             _hasScrobbledCurrentTrack = false;
 
-            if (_currentTrack != null && _settings.Lastfm.ScrobblingEnabled)
+            if (_currentTrack is not null && _settings.Lastfm.ScrobblingEnabled)
             {
                 _ = _scrobblingService.UpdateNowPlayingAsync(_currentTrack);
             }
@@ -46,7 +46,7 @@ public class ScrobbleOrchestrator : IDisposable
 
     private void OnPlaybackProgressed()
     {
-        if (_currentTrack == null || _hasScrobbledCurrentTrack || !_player.IsPlaying)
+        if (_currentTrack is null || _hasScrobbledCurrentTrack || !_player.IsPlaying)
         {
             return;
         }

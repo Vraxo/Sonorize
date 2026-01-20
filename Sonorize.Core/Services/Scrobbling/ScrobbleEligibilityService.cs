@@ -9,7 +9,7 @@ public class ScrobbleEligibilityService
 
     public bool ShouldScrobble(Song song, TimeSpan playedDuration, LastfmSettings settings)
     {
-        if (song == null || song.Duration.TotalSeconds <= MinTrackLengthForScrobbleSeconds)
+        if (song is null || song.Duration.TotalSeconds <= MinTrackLengthForScrobbleSeconds)
         {
             return false;
         }

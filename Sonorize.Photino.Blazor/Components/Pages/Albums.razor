@@ -21,7 +21,7 @@
     <GridTemplate Context="album">
         <div class="library-grid-item" @onclick="() => OpenAlbum(album)">
             <div class="art-wrapper">
-                @if (album.RepresentativeFilePath != null)
+                @if (album.RepresentativeFilePath is not null)
                 {
                     <img src="@GetArtUrl(album.RepresentativeFilePath)" loading="lazy" />
                 }
@@ -53,7 +53,7 @@
     <RowTemplate Context="album">
         <td class="col-art">
             <div class="list-art-wrapper">
-                @if (album.RepresentativeFilePath != null)
+                @if (album.RepresentativeFilePath is not null)
                 {
                     <img src="@GetArtUrl(album.RepresentativeFilePath)" loading="lazy" />
                 }

@@ -30,7 +30,7 @@ public class EqPresetService
             {
                 string json = File.ReadAllText(file);
                 var preset = JsonSerializer.Deserialize<EqPreset>(json);
-                if (preset != null)
+                if (preset is not null)
                 {
                     // Ensure name matches filename to prevent drift, or trust file content?
                     // Trusting content is safer for rename operations, but let's ensure consistency.

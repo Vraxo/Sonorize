@@ -20,7 +20,7 @@ public class ScrobblingService
 
     public async Task UpdateNowPlayingAsync(Song song)
     {
-        if (!_settings.Lastfm.ScrobblingEnabled || song == null)
+        if (!_settings.Lastfm.ScrobblingEnabled || song is null)
         {
             return;
         }
@@ -31,7 +31,7 @@ public class ScrobblingService
         }
 
         var client = await _authService.GetAuthenticatedClientAsync();
-        if (client == null)
+        if (client is null)
         {
             return;
         }
@@ -49,7 +49,7 @@ public class ScrobblingService
 
     public async Task ScrobbleAsync(Song song, DateTime timePlayed)
     {
-        if (!_settings.Lastfm.ScrobblingEnabled || song == null)
+        if (!_settings.Lastfm.ScrobblingEnabled || song is null)
         {
             return;
         }
@@ -60,7 +60,7 @@ public class ScrobblingService
         }
 
         var client = await _authService.GetAuthenticatedClientAsync();
-        if (client == null)
+        if (client is null)
         {
             return;
         }

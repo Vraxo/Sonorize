@@ -59,7 +59,7 @@ public class ThemeService
             ? []
             : Directory.EnumerateFiles(_themesDir, "*.json")
                         .Select(Path.GetFileNameWithoutExtension)
-                        .Where(x => x != null)
+                        .Where(x => x is not null)
                         .OrderBy(x => x)
                         .ToList()!;
     }

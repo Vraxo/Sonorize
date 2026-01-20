@@ -28,7 +28,7 @@
         else
         {
             <h1 id="header-title">@(_currentPlaylist?.Name ?? "Playlist Not Found")</h1>
-            @if (_currentPlaylist != null && _currentPlaylist.Type == PlaylistType.Manual)
+            @if (_currentPlaylist is not null && _currentPlaylist.Type == PlaylistType.Manual)
             {
                 <button class="btn-icon" title="Rename" @onclick="StartEdit"><i class="fas fa-pencil-alt"></i></button>
             }
@@ -76,7 +76,7 @@
         }
 </style>
 
-@if (_currentPlaylist != null)
+@if (_currentPlaylist is not null)
 {
     @if (_viewMode == LibraryViewMode.List)
     {
@@ -171,7 +171,7 @@
         _currentPlaylist = LibService.AllPlaylists.FirstOrDefault(p => p.Id == PlaylistId);
         _masterPlaylistSongs.Clear();
 
-        if (_currentPlaylist == null)
+        if (_currentPlaylist is null)
         {
             _filteredSongs.Clear();
             return;
@@ -255,7 +255,7 @@
 
     private void SaveName()
     {
-        if (_currentPlaylist != null && !string.IsNullOrWhiteSpace(_tempName))
+        if (_currentPlaylist is not null && !string.IsNullOrWhiteSpace(_tempName))
         {
             _currentPlaylist.Name = _tempName;
             LibService.SavePlaylist(_currentPlaylist);
@@ -281,7 +281,7 @@
 
     private void HandleReorder((Song Source, Song Target) args)
     {
-        if (_currentPlaylist == null) return;
+        if (_currentPlaylist is null) return;
 
         var oldIndex = _masterPlaylistSongs.IndexOf(args.Source);
         var newIndex = _masterPlaylistSongs.IndexOf(args.Target);

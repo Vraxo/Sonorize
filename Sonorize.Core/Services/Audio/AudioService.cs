@@ -119,7 +119,7 @@ public class AudioService : IAudioService
             {
                 // Just accessing this property checks if the DLL is loaded/accessible
                 Version fxVersion = BassFx.Version;
-                IsFxAvailable = fxVersion != null;
+                IsFxAvailable = fxVersion is not null;
             }
             catch
             {
@@ -186,7 +186,7 @@ public class AudioService : IAudioService
 
             if (Bass.Init(deviceIndex, 44100, DeviceInitFlags.Default, IntPtr.Zero))
             {
-                if (currentFile != null)
+                if (currentFile is not null)
                 {
                     Load(currentFile);
                     CurrentTime = currentPos;

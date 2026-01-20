@@ -24,7 +24,7 @@
                 @{
                     var artPath = GetPlaylistArt(playlist);
                 }
-                @if (artPath != null)
+                @if (artPath is not null)
                 {
                     <img src="@GetArtUrl(artPath)" loading="lazy" />
                 }
@@ -61,7 +61,7 @@
                 @{
                     var artPath = GetPlaylistArt(playlist);
                 }
-                @if (artPath != null)
+                @if (artPath is not null)
                 {
                     <img src="@GetArtUrl(artPath)" loading="lazy" />
                 }
@@ -150,7 +150,7 @@
         foreach (var path in playlist.SongFilePaths.Take(5))
         {
             var song = LibService.GetSong(path);
-            if (song != null && song.HasArt)
+            if (song is not null && song.HasArt)
             {
                 return song.FilePath;
             }

@@ -71,7 +71,7 @@
         if (!string.IsNullOrEmpty(_selectedTheme))
         {
             var theme = ThemeService.LoadTheme(_selectedTheme);
-            if (theme != null)
+            if (theme is not null)
             {
                 await OnLoadTheme.InvokeAsync(theme);
             }

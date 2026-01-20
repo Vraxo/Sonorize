@@ -28,7 +28,7 @@ public static class FileSystemHelper
             catch (UnauthorizedAccessException) { /* Skip locked folders */ }
             catch (Exception) { /* Skip other errors */ }
 
-            if (files != null)
+            if (files is not null)
             {
                 foreach (string file in files)
                 {

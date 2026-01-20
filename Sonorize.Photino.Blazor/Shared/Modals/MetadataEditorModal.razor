@@ -25,7 +25,7 @@
             <p>Failed to load metadata. File may be corrupt or inaccessible.</p>
         </div>
     }
-    else if (_meta != null)
+    else if (_meta is not null)
     {
         <div class="meta-form">
             <div class="form-group full-width">
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        @if (_saveError != null)
+        @if (_saveError is not null)
         {
             <div class="save-error">
                 <i class="fas fa-times-circle"></i> @_saveError
@@ -141,7 +141,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (IsVisible && Song != null)
+        if (IsVisible && Song is not null)
         {
             await LoadMetadata();
         }
@@ -156,7 +156,7 @@
 
     private async Task LoadMetadata()
     {
-        if (Song == null) return;
+        if (Song is null) return;
 
         _isLoading = true;
         _loadError = false;
@@ -165,12 +165,12 @@
         _meta = await Task.Run(() => LibService.GetSongMetadata(Song));
         
         _isLoading = false;
-        if (_meta == null) _loadError = true;
+        if (_meta is null) _loadError = true;
     }
 
     private async Task Save()
     {
-        if (Song == null || _meta == null) return;
+        if (Song is null || _meta is null) return;
 
         _isSaving = true;
         _saveError = null;

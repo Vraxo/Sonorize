@@ -92,7 +92,7 @@ public class LibraryService : IDisposable
         }
 
         var song = await _musicLibrary.CreateSongFromFileAsync(path);
-        if (song != null)
+        if (song is not null)
         {
             if (_songsByPath.TryAdd(path, song))
             {

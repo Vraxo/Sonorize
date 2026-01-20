@@ -47,7 +47,7 @@ public class FileImportService
                 }
 
                 var song = await _libraryService.CreateSongFromFileAsync(tempPath);
-                if (song != null)
+                if (song is not null)
                 {
                     // Fallback metadata for loose files
                     if (song.Artist == "Unknown Artist")

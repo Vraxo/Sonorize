@@ -100,7 +100,7 @@
 
     private void HandleItemDrop(List<PlayerBarWidget> targetList, int targetIndex)
     {
-        if (_sourceList == null || _sourceIndex == -1) return;
+        if (_sourceList is null || _sourceIndex == -1) return;
 
         var item = _sourceList[_sourceIndex];
         _sourceList.RemoveAt(_sourceIndex);
@@ -129,7 +129,7 @@
 
     private void HandleZoneDrop(List<PlayerBarWidget> targetList)
     {
-        if (_sourceList == null || _sourceIndex == -1) return;
+        if (_sourceList is null || _sourceIndex == -1) return;
 
         var item = _sourceList[_sourceIndex];
         _sourceList.RemoveAt(_sourceIndex);

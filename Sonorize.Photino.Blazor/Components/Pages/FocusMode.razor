@@ -19,7 +19,7 @@
 
 <div class="@ContainerClass">
     <div class="focus-art-wrapper">
-        @if (_artSrc != null)
+        @if (_artSrc is not null)
         {
             <img src="@_artSrc" alt="Album Art" />
         }
@@ -34,7 +34,7 @@
     <div class="focus-info">
         <h1 class="focus-title">@(_currentSong?.Title ?? "Ready to Play")</h1>
         <h2 class="focus-artist">@(_currentSong?.Artist ?? "Sonorize")</h2>
-        @if (_currentSong != null)
+        @if (_currentSong is not null)
         {
             <p class="focus-album">@_currentSong.Album</p>
         }
@@ -68,11 +68,11 @@
     private async Task UpdateState()
     {
         var song = PlayerService.CurrentSong;
-        if (song == _currentSong && _currentSong != null) return; // Debounce if song hasn't changed
+        if (song == _currentSong && _currentSong is not null) return; // Debounce if song hasn't changed
 
         _currentSong = song;
 
-        if (_currentSong != null && _currentSong.HasArt)
+        if (_currentSong is not null && _currentSong.HasArt)
         {
             var encodedPath = Uri.EscapeDataString(_currentSong.FilePath);
             _artSrc = $"sonorize://albumart/?path={encodedPath}";

@@ -29,7 +29,7 @@ public class LogService
 
     public void Error(string message, Exception? ex = null)
     {
-        string msg = ex == null ? message : $"{message}\n{ex}";
+        string msg = ex is null ? message : $"{message}\n{ex}";
         Write("ERROR", msg);
     }
 

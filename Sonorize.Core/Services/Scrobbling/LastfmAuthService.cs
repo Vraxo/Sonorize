@@ -70,7 +70,7 @@ public class LastfmAuthService
         {
             var response = await auth.GetSessionTokenAsync(_settings.Lastfm.Username!, password);
 
-            if (response.Success && auth.Authenticated && auth.UserSession != null)
+            if (response.Success && auth.Authenticated && auth.UserSession is not null)
             {
                 _settings.Lastfm.SessionKey = auth.UserSession.Token;
                 _settingsManager.Save(_settings);

@@ -21,7 +21,7 @@
     <GridTemplate Context="artist">
         <div class="library-grid-item" @onclick="() => OpenArtist(artist)">
             <div class="art-wrapper" style="border-radius: 50%;">
-                @if (artist.RepresentativeFilePath != null)
+                @if (artist.RepresentativeFilePath is not null)
                 {
                     <img src="@GetArtUrl(artist.RepresentativeFilePath)" loading="lazy" style="border-radius: 50%;" />
                 }
@@ -55,7 +55,7 @@
     <RowTemplate Context="artist">
         <td class="col-art">
             <div class="list-art-wrapper" style="border-radius: 50%;">
-                @if (artist.RepresentativeFilePath != null)
+                @if (artist.RepresentativeFilePath is not null)
                 {
                     <img src="@GetArtUrl(artist.RepresentativeFilePath)" loading="lazy" />
                 }

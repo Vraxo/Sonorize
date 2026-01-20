@@ -40,7 +40,7 @@ public class PlaylistPersistenceService
             {
                 string json = File.ReadAllText(file);
                 var playlist = JsonSerializer.Deserialize<Playlist>(json);
-                if (playlist != null)
+                if (playlist is not null)
                 {
                     // Ensure the type is forced to Manual for these files
                     playlist.Type = PlaylistType.Manual;

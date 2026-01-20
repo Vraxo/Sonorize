@@ -15,7 +15,7 @@ public class ImageAnalysisService
                 using var file = TagLib.File.Create(audioFilePath);
                 var pic = file.Tag.Pictures.FirstOrDefault();
 
-                if (pic == null || pic.Data.Data.Length == 0)
+                if (pic is null || pic.Data.Data.Length == 0)
                 {
                     return false;
                 }

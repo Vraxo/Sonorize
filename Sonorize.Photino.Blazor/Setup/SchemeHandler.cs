@@ -67,7 +67,7 @@ public static class SchemeHandlers
             using TagLib.File tfile = TagLib.File.Create(filePath);
             TagLib.IPicture? pic = tfile.Tag.Pictures.FirstOrDefault();
 
-            if (pic != null)
+            if (pic is not null)
             {
                 contentType = "image/jpeg";
                 return new MemoryStream(pic.Data.Data);

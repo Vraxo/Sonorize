@@ -163,7 +163,7 @@
 
     private void AddTo(Playlist playlist)
     {
-        if (Song != null)
+        if (Song is not null)
         {
             LibService.AddSongToPlaylist(playlist, Song);
         }
@@ -172,7 +172,7 @@
 
     private void OpenInExplorer()
     {
-        if (Song != null)
+        if (Song is not null)
         {
             FileExplorer.ShowInFolder(Song.FilePath);
         }
@@ -181,7 +181,7 @@
 
     private async Task TriggerEdit()
     {
-        if (Song != null)
+        if (Song is not null)
         {
             await OnEditMetadata.InvokeAsync(Song);
         }

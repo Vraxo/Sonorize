@@ -67,7 +67,7 @@ public class MusicLibraryService : IMusicLibraryService
                 if (IsFileValid(file))
                 {
                     Playlist? playlist = ProcessPlaylistFile(file);
-                    if (playlist != null)
+                    if (playlist is not null)
                     {
                         playlists.Add(playlist);
                     }
@@ -231,7 +231,7 @@ public class MusicLibraryService : IMusicLibraryService
 
     private static Song CreateSongFromTags(TagLib.File tagFile, string filePath)
     {
-        bool hasArt = tagFile.Tag.Pictures != null && tagFile.Tag.Pictures.Length > 0;
+        bool hasArt = tagFile.Tag.Pictures is not null && tagFile.Tag.Pictures.Length > 0;
 
         return new()
         {

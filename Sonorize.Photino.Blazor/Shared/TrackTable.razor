@@ -8,7 +8,7 @@
 @inject ISettingsManager<SonorizeSettings> SettingsManager
 @inject LayoutStateService LayoutState
 
-@if (Songs == null || !Songs.Any())
+@if (Songs is null || !Songs.Any())
 {
     <div class="empty-library-message">
         @EmptyMessage
@@ -113,8 +113,8 @@ else
     private RenderFragment RenderRow(Song song) => builder =>
     {
         int index = Songs.IndexOf(song); // Note: IndexOf can be O(N), but for Virtualize rendering only visible items, impact is mitigated.
-        bool isActive = ActiveSong != null && song == ActiveSong;
-        bool isSelected = SelectedSong != null && song == SelectedSong;
+        bool isActive = ActiveSong is not null && song == ActiveSong;
+        bool isSelected = SelectedSong is not null && song == SelectedSong;
         bool isDragging = AllowReorder && song == _draggedSong;
         bool isDragOver = AllowReorder && song == _targetSong;
 
@@ -286,7 +286,7 @@ else
     private void HandleDragEnter(Song target)
     {
         if (!AllowReorder) return;
-        if (_draggedSong != null && target != _draggedSong)
+        if (_draggedSong is not null && target != _draggedSong)
         {
             _targetSong = target;
         }
@@ -297,7 +297,7 @@ else
         LayoutState.SetInternalDrag(false);
         if (!AllowReorder) return;
 
-        if (_draggedSong != null && _targetSong != null)
+        if (_draggedSong is not null && _targetSong is not null)
         {
             await OnReorder.InvokeAsync((_draggedSong, _targetSong));
         }

@@ -37,7 +37,7 @@ public class FileExplorerService
             {
                 // Linux (xdg-open) generally opens the parent directory
                 string? folder = Path.GetDirectoryName(path);
-                if (folder != null)
+                if (folder is not null)
                 {
                     var info = new ProcessStartInfo("xdg-open")
                     {

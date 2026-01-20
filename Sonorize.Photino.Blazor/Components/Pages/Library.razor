@@ -22,7 +22,7 @@
                ViewModeChanged="OnViewModeChanged"
                OnSettingsClick="GoToSettings"
                Title="@GetPageTitle()"
-               ShowBackButton="@(AlbumName != null || ArtistName != null)"
+               ShowBackButton="@(AlbumName is not null || ArtistName is not null)"
                OnBackClick="ClearFilters" />
 
 <div id="library-container" class="library-container @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Truncate ? "truncate-track-text" : "")">
@@ -94,8 +94,8 @@
 
     protected override void OnParametersSet()
     {
-        AlbumName = AlbumName != null ? Uri.UnescapeDataString(AlbumName) : null;
-        ArtistName = ArtistName != null ? Uri.UnescapeDataString(ArtistName) : null;
+        AlbumName = AlbumName is not null ? Uri.UnescapeDataString(AlbumName) : null;
+        ArtistName = ArtistName is not null ? Uri.UnescapeDataString(ArtistName) : null;
         ApplyFilterAndSort();
     }
 

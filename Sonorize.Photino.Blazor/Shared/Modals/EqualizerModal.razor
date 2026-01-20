@@ -47,7 +47,7 @@
         {
             if (string.IsNullOrEmpty(_currentPresetName) || _currentPresetName == "__custom__") return false;
             var preset = _cachedPresets.FirstOrDefault(p => p.Name == _currentPresetName);
-            return preset != null && !preset.IsDefault;
+            return preset is not null && !preset.IsDefault;
         }
     }
 
@@ -72,7 +72,7 @@
     {
         if (string.IsNullOrEmpty(name) || name == "__custom__") return;
         var preset = _cachedPresets.FirstOrDefault(p => p.Name == name);
-        if (preset != null) ApplyPreset(preset);
+        if (preset is not null) ApplyPreset(preset);
     }
 
     private void ApplyPreset(EqPreset preset)
@@ -97,7 +97,7 @@
         var existing = _cachedPresets.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         // Recursively handle default collisions
-        if (existing != null && existing.IsDefault)
+        if (existing is not null && existing.IsDefault)
         {
             OnSavePreset(name + " 1");
             return;
@@ -108,7 +108,7 @@
         // Update content
         Array.Copy(AppSettings.Playback.EqGains, presetToSave.Gains, 10);
 
-        if (existing == null) _cachedPresets.Add(presetToSave);
+        if (existing is null) _cachedPresets.Add(presetToSave);
 
         PresetService.SavePreset(presetToSave);
         ReloadPresets(); // Refresh from disk/source
@@ -120,7 +120,7 @@
     private void OnDeletePreset()
     {
         var preset = _cachedPresets.FirstOrDefault(p => p.Name == _currentPresetName);
-        if (preset != null && !preset.IsDefault)
+        if (preset is not null && !preset.IsDefault)
         {
             PresetService.DeletePreset(preset);
             ReloadPresets();

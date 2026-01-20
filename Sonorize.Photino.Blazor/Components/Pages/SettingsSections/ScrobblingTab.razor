@@ -83,7 +83,7 @@
                             @(_isAuthenticating ? "Connecting..." : "Connect Account")
                         </button>
 
-                        @if (_authError != null)
+                        @if (_authError is not null)
                         {
                             <span class="error-msg"><i class="fas fa-exclamation-circle"></i> @_authError</span>
                         }

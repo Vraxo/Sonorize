@@ -9,7 +9,7 @@
 
 <div class="player-song-info">
     <div class="@AlbumArtClass">
-        @if (_albumArtSrc != null)
+        @if (_albumArtSrc is not null)
         {
             <img src="@_albumArtSrc" alt="Album Art" id="player-album-art" />
         }
@@ -21,7 +21,7 @@
         }
     </div>
 
-    @if (PlayerService.CurrentSong != null)
+    @if (PlayerService.CurrentSong is not null)
     {
         <div class="song-details">
             <p class="song-title">@PlayerService.CurrentSong.Title</p>
@@ -39,7 +39,7 @@
 @code {
     private string? _albumArtSrc;
 
-    private string AlbumArtClass => $"album-art-container {(_albumArtSrc != null ? "has-art" : "")}";
+    private string AlbumArtClass => $"album-art-container {(_albumArtSrc is not null ? "has-art" : "")}";
 
     protected override void OnInitialized()
     {
@@ -62,7 +62,7 @@
     {
         var currentSong = PlayerService.CurrentSong;
 
-        if (currentSong != null && currentSong.HasArt)
+        if (currentSong is not null && currentSong.HasArt)
         {
             var encodedPath = Uri.EscapeDataString(currentSong.FilePath);
             _albumArtSrc = $"sonorize://albumart/?path={encodedPath}";
