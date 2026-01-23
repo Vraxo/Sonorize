@@ -24,17 +24,3 @@
         }
     }
 </div>
-
-@code {
-    protected override void OnInitialized()
-    {
-        LibService.LibraryChanged += OnLibraryChanged;
-    }
-
-    private void OnLibraryChanged() => InvokeAsync(StateHasChanged);
-
-    public void Dispose()
-    {
-        LibService.LibraryChanged -= OnLibraryChanged;
-    }
-}
