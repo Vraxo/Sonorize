@@ -1,0 +1,15 @@
+.folder-view-container {
+    padding: 0 10px;
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 40px;
+}
+
+    .empty-message .small {
+        font-size: 0.9em;
+        opacity: 0.7;
+        margin-top: 10px;
+    }

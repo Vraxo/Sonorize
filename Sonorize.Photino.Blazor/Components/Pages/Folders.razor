@@ -1,0 +1,40 @@
+@page "/folders"
+@using Sonorize.Core.Services.Library
+@using Sonorize.Photino.Blazor.Components.Pages.Components
+@implements IDisposable
+@inject LibraryService LibService
+
+<div class="header">
+    <h1 id="header-title">Folders</h1>
+</div>
+
+<div class="folder-view-container">
+    @if (!LibService.FolderRootNodes.Any())
+    {
+        <div class="empty-message">
+            <p>No music folders found.</p>
+            <p class="small">Add a music source in Settings > Library to get started.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var rootNode in LibService.FolderRootNodes)
+        {
+            <FolderNodeView Node="rootNode" />
+        }
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        LibService.LibraryChanged += OnLibraryChanged;
+    }
+
+    private void OnLibraryChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        LibService.LibraryChanged -= OnLibraryChanged;
+    }
+}

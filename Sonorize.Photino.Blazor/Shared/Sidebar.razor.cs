@@ -111,6 +111,7 @@ public partial class Sidebar
 
         bool isActive = (href == "albums" && currentUri.Contains("/albums")) ||
                         (href == "artists" && currentUri.Contains("/artists")) ||
+                        (href == "folders" && currentUri.Contains("/folders")) ||
                         (href == "playlists" && currentUri.EndsWith("/playlists")) ||
                         currentUri.Equals(targetUri, StringComparison.OrdinalIgnoreCase);
 

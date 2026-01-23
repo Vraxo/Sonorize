@@ -10,6 +10,7 @@ public class LibraryService : IDisposable
     public IReadOnlyList<Song> AllSongs { get; private set; } = [];
     public IReadOnlyList<AlbumGroup> AllAlbums { get; private set; } = [];
     public IReadOnlyList<ArtistGroup> AllArtists { get; private set; } = [];
+    public IReadOnlyList<FolderNode> FolderRootNodes { get; private set; } = [];
 
     private List<Playlist>? _demoPlaylists;
 
@@ -198,20 +199,95 @@ public class LibraryService : IDisposable
     {
         await Task.Run(async () =>
         {
-            var songs = _songsByPath.Values.OrderBy(s => s.Title).ToList();
+            var songs = _songsByPath.Values.ToList();
             var (albums, artists) = _aggregator.Aggregate(songs);
+            var folderTree = BuildFolderTree(songs);
 
-            AllSongs = songs;
+            AllSongs = songs.OrderBy(s => s.Title, StringComparer.OrdinalIgnoreCase).ToList();
             AllAlbums = albums;
             AllArtists = artists;
+            FolderRootNodes = folderTree;
 
             LibraryChanged?.Invoke();
 
             if (saveCache)
             {
-                await _cacheService.SaveCacheAsync(songs);
+                await _cacheService.SaveCacheAsync(AllSongs);
             }
         });
+    }
+
+    private List<FolderNode> BuildFolderTree(ICollection<Song> songs)
+    {
+        var rootNodes = new List<FolderNode>();
+
+        // Initialize root nodes from settings, ensuring they exist
+        foreach (var rootPath in _settings.Library.MusicFolderPaths.Where(Directory.Exists))
+        {
+            var rootNode = new FolderNode { Name = Path.GetFileName(rootPath), Path = rootPath };
+            rootNodes.Add(rootNode);
+        }
+
+        if (rootNodes.Count == 0)
+        {
+            return [];
+        }
+
+        // Process each song
+        foreach (var song in songs.Where(s => !s.FilePath.StartsWith("demo://")))
+        {
+            string? dirPath = Path.GetDirectoryName(song.FilePath);
+            if (string.IsNullOrEmpty(dirPath))
+            {
+                continue;
+            }
+
+            // Find which root this song belongs to
+            var rootNode = rootNodes.FirstOrDefault(r => dirPath.StartsWith(r.Path, StringComparison.OrdinalIgnoreCase));
+            if (rootNode == null)
+            {
+                continue;
+            }
+
+            // Traverse or create nodes from the root down to the song's directory
+            string relativePath = dirPath[rootNode.Path.Length..];
+            var segments = relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+            var currentNode = rootNode;
+            foreach (var segment in segments)
+            {
+                var childNode = currentNode.Children.FirstOrDefault(c => c.Name.Equals(segment, StringComparison.OrdinalIgnoreCase));
+
+                if (childNode == null)
+                {
+                    string newPath = Path.Combine(currentNode.Path, segment);
+                    childNode = new FolderNode { Name = segment, Path = newPath };
+                    currentNode.Children.Add(childNode);
+                }
+                currentNode = childNode;
+            }
+
+            // Add song to the final directory node
+            currentNode.Songs.Add(song);
+        }
+
+        // Recursive sort for all nodes
+        static void SortNode(FolderNode node)
+        {
+            node.Children = [.. node.Children.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase)];
+            node.Songs = [.. node.Songs.OrderBy(s => s.Title, StringComparer.OrdinalIgnoreCase)];
+            foreach (var child in node.Children)
+            {
+                SortNode(child);
+            }
+        }
+
+        foreach (var root in rootNodes)
+        {
+            SortNode(root);
+        }
+
+        return rootNodes.OrderBy(n => n.Name, StringComparer.OrdinalIgnoreCase).ToList();
     }
 
     private void SyncFilePlaylists(List<Playlist> foundPlaylists)

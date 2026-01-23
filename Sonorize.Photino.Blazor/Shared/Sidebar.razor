@@ -37,6 +37,11 @@
                     <i class="fas fa-microphone"></i> Artists
                 </div>
             </div>
+            <div class="sidebar-nav-item-wrapper @GetActiveState("folders")">
+                <div class="sidebar-nav-item" @onclick='() => NavigateTo("folders")'>
+                    <i class="fas fa-folder"></i> Folders
+                </div>
+            </div>
         </nav>
 
         <div class="playlists-wrapper">

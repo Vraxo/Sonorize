@@ -1,0 +1,46 @@
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Audio
+@inject IPlayerService PlayerService
+
+<div class="folder-node">
+    <div class="node-header @(_isExpanded ? "expanded" : "")" @onclick="ToggleExpand">
+        <i class="fas @(_isExpanded ? "fa-chevron-down" : "fa-chevron-right") node-caret"></i>
+        <i class="fas fa-folder node-icon"></i>
+        <span class="node-name">@Node.Name</span>
+        <span class="node-count">(@(Node.Children.Count + Node.Songs.Count))</span>
+    </div>
+
+    @if (_isExpanded)
+    {
+        <div class="node-content">
+            @foreach (var child in Node.Children)
+            {
+                <FolderNodeView Node="child" />
+            }
+            @foreach (var song in Node.Songs)
+            {
+                <div class="song-item" @onclick="() => PlaySong(song)">
+                    <i class="fas fa-music song-icon"></i>
+                    <span class="song-name">@song.Title</span>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public required FolderNode Node { get; set; }
+
+    private bool _isExpanded = false;
+
+    private void ToggleExpand()
+    {
+        _isExpanded = !_isExpanded;
+    }
+
+    private async Task PlaySong(Song song)
+    {
+        // The context is all songs in the current folder node
+        await PlayerService.PlaySong(song, Node.Songs);
+    }
+}
