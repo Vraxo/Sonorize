@@ -1,4 +1,38 @@
-/* 
-    Player Bar Layout Rules
-    (Currently handled by Flexbox in base.css and PlayerBar.razor)
+/* Player Bar Zone Layout */
+
+.player-zone {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 100%;
+}
+
+    /* 
+   Left/Right zones share remaining space.
+   min-width: 0 is required to allow flex items to shrink below their content size if needed (e.g. text truncation).
 */
+    .player-zone.left {
+        flex: 1;
+        min-width: 0;
+        justify-content: flex-start;
+    }
+
+    /* 
+   Center zone prefers 40% width but clamps between 220px and 720px.
+   It creates the stable center anchor for transport controls.
+*/
+    .player-zone.center {
+        flex: 0 1 40%;
+        min-width: 220px;
+        max-width: 720px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* 
+   Right zone aligns tools to the end.
+*/
+    .player-zone.right {
+        flex: 1;
+        justify-content: flex-end;
+    }

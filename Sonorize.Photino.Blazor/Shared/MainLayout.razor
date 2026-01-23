@@ -4,6 +4,7 @@
 @using Sonorize.Core.Services.Audio
 @using Sonorize.Core.Services.UI
 @using Sonorize.Core.Services.System
+@using Sonorize.Core.Services.Update
 @using Sonorize.Core.Settings
 @using Sonorize.Photino.Blazor.Shared.Player
 @using Sonorize.Photino.Blazor.Shared.Modals
@@ -16,9 +17,11 @@
 @inject IJSRuntime JS
 @inject LayoutStateService LayoutState
 @inject NavigationManager Nav
+@inject GitHubUpdateService UpdateService
 
 <ThemeController />
 <AudioEngineStatusModal />
+<UpdateAvailableModal /> <!-- NEW -->
 
 <div class="@MainContainerClass" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave">
 

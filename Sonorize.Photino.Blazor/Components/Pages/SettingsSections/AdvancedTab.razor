@@ -1,14 +1,35 @@
 @using Sonorize.Core
 @using Sonorize.Core.Helpers
 @using Sonorize.Core.Services.Library
+@using Sonorize.Core.Services.Update
 @using Sonorize.Core.Settings
 @implements IDisposable
 @inject SonorizeSettings AppSettings
 @inject ISettingsManager<SonorizeSettings> SettingsManager
 @inject LibraryService LibraryService
+@inject GitHubUpdateService UpdateService
 
 <div class="settings-view-container">
 
+    <!-- Updates Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Updates</span>
+            <span class="card-desc">Application versioning</span>
+        </div>
+        <div class="card-content">
+            <label class="toggle-row">
+                <span class="toggle-label">Automatically check for updates</span>
+                <input type="checkbox" @bind="AppSettings.Updates.CheckForUpdates" @bind:after="Save" class="toggle-input" />
+            </label>
+
+            <p class="helper-text" style="margin-top:10px;">
+                Current Version: <strong>@System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version</strong>
+            </p>
+        </div>
+    </div>
+
+    <!-- Custom CSS -->
     <div class="settings-card">
         <div class="card-header">
             <span class="card-title">Custom CSS</span>
@@ -31,14 +52,22 @@
     <div class="settings-card">
         <div class="card-header">
             <span class="card-title">Developer Tools</span>
-            <span class="card-desc">Utilities for testing and screenshots</span>
+            <span class="card-desc">Utilities for testing and debugging</span>
         </div>
         <div class="card-content">
-            <button class="btn btn-outline" @onclick="LoadDemoData">
-                <i class="fas fa-vial"></i> Populate Demo Library
-            </button>
+            <div class="dev-actions">
+                <button class="btn btn-outline" @onclick="LoadDemoData">
+                    <i class="fas fa-vial"></i> Populate Demo Library
+                </button>
+
+                <button class="btn btn-outline" @onclick="SimulateUpdate">
+                    <i class="fas fa-cloud-download-alt"></i> Test Update Flow
+                </button>
+            </div>
+
             <p class="helper-text">
-                Replaces your current library with generated fake data. Restart app to restore real library.
+                <strong>Populate Demo:</strong> Replaces library with fake data.<br />
+                <strong>Test Update:</strong> Simulates a release download and restart cycle.
             </p>
         </div>
     </div>
@@ -112,6 +141,12 @@
         color: #eab308;
     }
 
+    .dev-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
     .btn-outline {
         padding: 10px 20px;
         background: transparent;
@@ -133,10 +168,31 @@
         }
 
     .helper-text {
-        margin-top: 10px;
+        margin-top: 15px;
         font-size: 0.85em;
         color: var(--text-secondary);
         font-style: italic;
+        line-height: 1.5;
+    }
+
+    /* Toggles */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px 0;
+    }
+
+    .toggle-label {
+        font-size: 1em;
+        color: var(--text-primary);
+    }
+
+    .toggle-input {
+        transform: scale(1.3);
+        accent-color: var(--accent-primary);
+        cursor: pointer;
     }
 </style>
 
@@ -164,9 +220,16 @@
         }, 500);
     }
 
+    private void Save() => SettingsManager.Save(AppSettings);
+
     private void LoadDemoData()
     {
         LibraryService.LoadDemoData();
+    }
+
+    private void SimulateUpdate()
+    {
+        UpdateService.TriggerMockUpdate();
     }
 
     public void Dispose()

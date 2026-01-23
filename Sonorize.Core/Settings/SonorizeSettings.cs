@@ -7,16 +7,15 @@ public class SonorizeSettings
     public LibrarySettings Library { get; set; } = new();
     public WindowSettings Window { get; set; } = new();
     public LastfmSettings Lastfm { get; set; } = new();
+    public UpdateSettings Updates { get; set; } = new(); // NEW
 
     public void ApplyTheme(SonorizeTheme theme)
     {
-        // Replace the current theme instance
         Theme = theme;
     }
 
     public SonorizeTheme ExtractTheme()
     {
-        // Return a deep copy to avoid reference issues if the caller modifies it.
         return Theme.Clone();
     }
 }

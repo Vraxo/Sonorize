@@ -1,0 +1,188 @@
+@using Sonorize.Core.Models
+@using Sonorize.Core.Services.Update
+@using Sonorize.Core.Settings
+@using Sonorize.Photino.Blazor.Shared
+@using System.IO
+@implements IDisposable
+@inject GitHubUpdateService UpdateService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+@if (_release is not null && !_isDismissed)
+{
+    <Modal IsVisible="true"
+           Title="Update Available"
+           ConfirmText="@_confirmText"
+           ShowCancelButton="@(!_isDownloading)"
+           OnCancel="Dismiss"
+           OnConfirm="HandleConfirm">
+
+        @if (_isDownloading)
+        {
+            <div class="download-state">
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar-fill" style="width: @(_downloadProgress * 100)%"></div>
+                </div>
+                <p class="progress-text">Downloading... @(_downloadProgress.ToString("P0"))</p>
+            </div>
+        }
+        else
+        {
+            <div class="update-info">
+                <div class="version-badge">@_release.Version</div>
+                <p class="notes">@_release.ReleaseNotes</p>
+                <p class="size-info">Size: @FormatBytes(_release.SizeBytes)</p>
+                <div class="warning-box">
+                    <i class="fas fa-info-circle"></i>
+                    <span>The app will restart automatically to apply the update.</span>
+                </div>
+            </div>
+        }
+
+    </Modal>
+}
+
+<style>
+    .update-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .version-badge {
+        background-color: var(--accent-primary);
+        color: var(--bg-primary);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        align-self: flex-start;
+    }
+
+    .notes {
+        background-color: rgba(0,0,0,0.2);
+        padding: 10px;
+        border-radius: 4px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 0.9em;
+        white-space: pre-wrap;
+    }
+
+    .size-info {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .warning-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #eab308; /* Yellow */
+        font-size: 0.9em;
+        margin-top: 10px;
+    }
+
+    .progress-bar-wrapper {
+        width: 100%;
+        height: 8px;
+        background-color: var(--bg-secondary);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background-color: var(--accent-primary);
+        transition: width 0.2s ease;
+    }
+
+    .progress-text {
+        text-align: center;
+        font-size: 0.9em;
+        color: var(--text-secondary);
+    }
+</style>
+
+@code {
+    private ReleaseInfo? _release;
+    private bool _isDismissed = false;
+    private bool _isDownloading = false;
+    private double _downloadProgress = 0;
+
+    private string _confirmText => _isDownloading ? "Downloading..." : "Update & Restart";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Listen for events (Real or Mock)
+        UpdateService.UpdateDetected += OnUpdateDetected;
+
+        // Perform initial real check silently if enabled
+        if (AppSettings.Updates.CheckForUpdates)
+        {
+            await UpdateService.CheckForUpdateAsync();
+        }
+    }
+
+    private void OnUpdateDetected(ReleaseInfo release)
+    {
+        _release = release;
+        _isDismissed = false;
+
+        AppSettings.Updates.LastCheckTime = DateTime.Now;
+        SettingsManager.Save(AppSettings);
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleConfirm()
+    {
+        if (_isDownloading || _release is null) return;
+
+        _isDownloading = true;
+        StateHasChanged();
+
+        try
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), $"sonorize_update_{Guid.NewGuid()}.zip");
+            var progress = new Progress<double>(p =>
+            {
+                _downloadProgress = p;
+                StateHasChanged();
+            });
+
+            await UpdateService.DownloadUpdateAsync(_release.DownloadUrl, tempPath, progress);
+
+            // Launch script
+            ScriptUpdateInstaller.InstallAndRestart(tempPath);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Update failed: {ex.Message}");
+            Dismiss();
+        }
+    }
+
+    private void Dismiss()
+    {
+        _isDismissed = true;
+    }
+
+    private string FormatBytes(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len /= 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    public void Dispose()
+    {
+        UpdateService.UpdateDetected -= OnUpdateDetected;
+    }
+}

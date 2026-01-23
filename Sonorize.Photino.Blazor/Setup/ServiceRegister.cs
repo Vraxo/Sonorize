@@ -4,6 +4,7 @@ using Sonorize.Core.Services.Library;
 using Sonorize.Core.Services.Scrobbling;
 using Sonorize.Core.Services.System;
 using Sonorize.Core.Services.UI;
+using Sonorize.Core.Services.Update; // NEW
 using Sonorize.Core.Settings;
 
 namespace Sonorize.Photino.Blazor.Setup;
@@ -37,6 +38,9 @@ public static class ServiceRegistrar
         _ = services.AddSingleton<QueueController>();
         _ = services.AddSingleton<FileImportService>();
         _ = services.AddSingleton<ImageAnalysisService>();
+
+        // Update Service
+        _ = services.AddSingleton<GitHubUpdateService>(); // NEW
 
         // Platform Integrations
         _ = services.AddSingleton<FileExplorerService>();
