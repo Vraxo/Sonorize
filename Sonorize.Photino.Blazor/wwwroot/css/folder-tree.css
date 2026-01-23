@@ -1,6 +1,7 @@
 .folder-node {
     padding-left: 20px;
     position: relative;
+    display: block;
 }
 
     /* Vertical line for tree structure */
@@ -8,28 +9,35 @@
         content: '';
         position: absolute;
         left: 10px;
-        top: 24px;
+        top: 28px;
         bottom: 0;
         width: 1px;
         background-color: var(--border-color);
+        pointer-events: none; /* Ensure clicks pass through */
     }
 
+    /* Stop line at last child to form an elbow */
     .folder-node:last-child::before {
-        height: 10px;
+        bottom: auto;
+        height: 14px; /* Approximate half-height of header */
     }
 
 .node-header {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 4px;
+    padding: 6px 8px;
     cursor: pointer;
     border-radius: 4px;
     color: var(--text-secondary);
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.1s ease, color 0.1s ease;
 }
 
     .node-header:hover {
-        background-color: var(--hover-bg);
+        background-color: var(--hover-bg, rgba(255, 255, 255, 0.1));
         color: var(--text-primary);
     }
 
@@ -38,10 +46,13 @@
     width: 10px;
     text-align: center;
     opacity: 0.7;
+    flex-shrink: 0;
 }
 
 .node-icon {
     color: var(--text-secondary);
+    transition: color 0.2s;
+    flex-shrink: 0;
 }
 
 .node-header:hover .node-icon,
@@ -49,53 +60,65 @@
     color: var(--accent-primary);
 }
 
-
 .node-name {
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .node-count {
     font-size: 0.85em;
     margin-left: 4px;
     opacity: 0.7;
+    flex-shrink: 0;
 }
 
 .node-content {
-    border-left: 1px solid var(--border-color);
-    margin-left: 10px;
+    /* No border here, we use the ::before on children */
+    margin-left: 0;
+    display: block;
 }
 
 .song-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 4px;
-    padding-left: 24px; /* Indent songs further */
+    padding: 6px 8px 6px 28px; /* Left padding accommodates tree lines */
     cursor: pointer;
     border-radius: 4px;
     color: var(--text-secondary);
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.1s ease, color 0.1s ease;
 }
 
+    /* Horizontal connector for songs */
     .song-item::before {
         content: '';
         position: absolute;
         left: 10px;
         top: 50%;
-        width: 10px;
+        width: 12px;
         height: 1px;
         background-color: var(--border-color);
+        pointer-events: none;
     }
 
     .song-item:hover {
-        background-color: var(--hover-bg);
+        background-color: var(--hover-bg, rgba(255, 255, 255, 0.1));
         color: var(--text-primary);
     }
 
 .song-icon {
     font-size: 0.9em;
+    flex-shrink: 0;
 }
 
 .song-name {
     font-size: 0.95em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

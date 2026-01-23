@@ -9,6 +9,7 @@
 @import url('track-list.css');
 @import url('library-grid.css');
 @import url('focus-mode.css');
+@import url('folder-tree.css');
 
 /* Settings Modules */
 @import url('settings/common.css'); /* NEW: Shared patterns */
