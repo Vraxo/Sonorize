@@ -1,0 +1,119 @@
+.settings-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-bottom: 30px;
+        max-width: 800px;
+    }
+
+    .settings-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .card-title {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .code-editor {
+        width: 100%;
+        min-height: 300px;
+        background-color: rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 13px;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        outline: none;
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+        .code-editor:focus {
+            border-color: var(--accent-primary);
+        }
+
+    .warning-text {
+        margin-top: 10px;
+        font-size: 0.85em;
+        color: #eab308;
+    }
+
+    .dev-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-outline {
+        padding: 10px 20px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+
+        .btn-outline:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+    .helper-text {
+        margin-top: 15px;
+        font-size: 0.85em;
+        color: var(--text-secondary);
+        font-style: italic;
+        line-height: 1.5;
+    }
+
+    /* Toggles */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px 0;
+    }
+
+    .toggle-label {
+        font-size: 1em;
+        color: var(--text-primary);
+    }
+
+    .toggle-input {
+        transform: scale(1.3);
+        accent-color: var(--accent-primary);
+        cursor: pointer;
+    }

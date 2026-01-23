@@ -46,7 +46,7 @@ Start-Process '{appExe}'
 ";
         File.WriteAllText(scriptPath, script);
 
-        var startInfo = new ProcessStartInfo
+        ProcessStartInfo startInfo = new()
         {
             FileName = "powershell.exe",
             Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"",
@@ -74,7 +74,7 @@ rm ""{zipPath}""
         // Make executable
         Process.Start("chmod", $"+x \"{scriptPath}\"").WaitForExit();
 
-        var startInfo = new ProcessStartInfo
+        ProcessStartInfo startInfo = new()
         {
             FileName = "/bin/bash",
             Arguments = scriptPath,
