@@ -1,0 +1,118 @@
+.sp-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sp-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        transition: border-color 0.2s;
+    }
+
+        .sp-card:hover {
+            border-color: var(--text-secondary);
+        }
+
+    .sp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sp-label {
+        font-weight: bold;
+        color: var(--text-primary);
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sp-reset-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1em;
+        padding: 6px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+    }
+
+        .sp-reset-btn:hover:not(:disabled) {
+            background-color: var(--bg-secondary);
+            color: var(--accent-primary);
+        }
+
+        .sp-reset-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+    .sp-slider-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .sp-slider {
+        flex-grow: 1;
+        height: 6px;
+        background: var(--bg-secondary);
+        border-radius: 3px;
+        appearance: none;
+        outline: none;
+        cursor: pointer;
+    }
+
+        .sp-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--bg-tertiary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sp-slider:active::-webkit-slider-thumb {
+            transform: scale(1.1);
+        }
+
+    .sp-minmax {
+        font-size: 0.8em;
+        color: var(--text-secondary);
+        font-family: monospace;
+        min-width: 30px;
+        text-align: center;
+    }
+
+    .sp-value-row {
+        text-align: center;
+        margin-top: -5px;
+    }
+
+    .sp-value-large {
+        font-size: 1.4em;
+        font-weight: bold;
+        color: var(--accent-primary);
+        display: block;
+    }
+
+    .sp-value-detail {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }

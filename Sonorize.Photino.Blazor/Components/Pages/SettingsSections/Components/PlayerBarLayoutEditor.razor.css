@@ -1,0 +1,46 @@
+.editor-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .editor-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 4px;
+    }
+
+    .editor-label {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .reset-layout-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 0.85em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: var(--border-radius);
+        transition: color 0.2s, background 0.2s;
+    }
+
+        .reset-layout-btn:hover {
+            color: var(--accent-primary);
+            background-color: var(--bg-tertiary);
+        }
+
+    .layout-editor {
+        display: flex;
+        gap: 15px;
+        background: var(--bg-tertiary);
+        padding: 15px;
+        border-radius: var(--border-radius);
+        overflow-x: auto;
+    }

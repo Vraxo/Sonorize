@@ -1,0 +1,20 @@
+.theme-selector-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .theme-select {
+        flex-grow: 1;
+        padding: 6px 10px;
+        height: 32px;
+    }
+
+    .btn-danger {
+        min-width: 32px;
+        padding: 0 10px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }

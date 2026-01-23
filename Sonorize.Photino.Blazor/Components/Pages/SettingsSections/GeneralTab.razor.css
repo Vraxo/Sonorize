@@ -1,0 +1,186 @@
+.settings-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-bottom: 30px;
+        max-width: 800px;
+    }
+
+    /* Card Styles */
+    .settings-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .card-title {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    /* Controls */
+    .control-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .control-row label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+    .dropdown {
+        padding: 8px 12px;
+        background-color: rgba(0, 0, 0, 0.2); /* Softened from var(--bg-primary) */
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+    }
+
+    /* Toggles */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px 0;
+    }
+
+    .toggle-label {
+        font-size: 1em;
+        color: var(--text-primary);
+    }
+
+    .toggle-input {
+        transform: scale(1.3);
+        accent-color: var(--accent-primary);
+        cursor: pointer;
+    }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+        opacity: 0.5;
+    }
+
+    /* Sliders */
+    .slider-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    .value-badge {
+        font-family: monospace;
+        color: var(--accent-primary);
+        background: rgba(255,255,255,0.05);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+
+    .styled-slider {
+        width: 100%;
+        height: 6px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .slider-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Checkbox Grid */
+    .group-label {
+        display: block;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+
+        .checkbox-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .checkbox-grid input {
+            accent-color: var(--accent-primary);
+            cursor: pointer;
+        }
+
+    /* Radio Buttons */
+    .radio-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .radio-btn {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid var(--border-color);
+        background: rgba(0, 0, 0, 0.2); /* Softened */
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+    }
+
+        .radio-btn:hover {
+            border-color: var(--text-primary);
+        }
+
+        .radio-btn.active {
+            border-color: var(--accent-primary);
+            background-color: var(--accent-primary);
+            color: var(--bg-primary); /* High contrast against accent */
+            font-weight: bold;
+        }
+
+        .radio-btn input {
+            display: none;
+        }

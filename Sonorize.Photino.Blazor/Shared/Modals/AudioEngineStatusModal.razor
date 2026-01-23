@@ -107,34 +107,3 @@ else if (!PlayerService.IsFxAvailable && !_fxWarningDismissed)
         </div>
     </div>
 }
-
-@code {
-    private bool _fxWarningDismissed = false;
-
-    private void DismissFxWarning()
-    {
-        _fxWarningDismissed = true;
-        StateHasChanged();
-    }
-
-    protected override void OnInitialized()
-    {
-        PlayerService.PlaybackStateChanged += StateHasChanged;
-    }
-
-    private void OpenBrowser(string url)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = url,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to open URL: {ex.Message}");
-        }
-    }
-}

@@ -1,0 +1,96 @@
+.track-info-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+        .track-info-header i {
+            font-size: 1.5em;
+            color: var(--accent-primary);
+            background: var(--bg-secondary);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+    .artist-name {
+        color: var(--text-secondary);
+        font-size: 0.9em;
+    }
+
+    .section-label {
+        font-size: 0.8em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        font-weight: bold;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+        margin-top: 5px;
+    }
+
+    .playlist-selection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-height: 180px;
+        overflow-y: auto;
+    }
+
+    .playlist-item-btn {
+        background: var(--bg-secondary);
+        border: 1px solid transparent;
+        color: var(--text-primary);
+        padding: 10px;
+        text-align: left;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .playlist-item-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--border-color);
+        }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+        opacity: 0.5;
+    }
+
+    .action-btn {
+        width: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 12px;
+        text-align: left;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s;
+        margin-bottom: 8px;
+    }
+
+        .action-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-primary);
+        }
+
+    .text-muted {
+        color: var(--text-secondary);
+        font-style: italic;
+    }

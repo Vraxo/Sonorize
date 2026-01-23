@@ -1,0 +1,40 @@
+.library-grid-container {
+        display: block;
+        width: 100%;
+        padding-top: 20px;
+        padding-bottom: 40px;
+    }
+
+    /* Standard Layout (CSS Grid) */
+    .standard-grid-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width, 180px), 1fr));
+        gap: var(--grid-gap, 24px);
+    }
+
+    /* Virtualized Layout (Flex Rows) */
+    .grid-virtual-row {
+        display: flex;
+        gap: var(--grid-gap, 24px);
+        margin-bottom: var(--grid-gap, 24px);
+        /* Changed to center to support the requested 'horizontally centered' requirement
+               Since we pad the last row with invisible spacers, this keeps the grid perfectly aligned */
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* Item Styles */
+    /* In Standard mode, the grid handles width. In Virtual mode, we force flex-basis. */
+    .standard-grid-layout .library-grid-item {
+        width: 100%;
+    }
+
+    .grid-virtual-row .library-grid-item {
+        flex: 0 0 var(--grid-min-width, 180px);
+        width: var(--grid-min-width, 180px);
+    }
+
+    .invisible-spacer {
+        visibility: hidden;
+        pointer-events: none;
+    }

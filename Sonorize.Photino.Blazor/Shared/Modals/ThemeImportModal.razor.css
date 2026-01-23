@@ -1,0 +1,14 @@
+.theme-textarea {
+        min-height: 200px;
+        font-family: monospace;
+        font-size: 12px;
+        resize: none;
+        white-space: pre;
+    }
+
+    .error-text {
+        color: #ff6b6b;
+        font-size: 12px;
+        margin-top: 8px;
+        font-weight: bold;
+    }

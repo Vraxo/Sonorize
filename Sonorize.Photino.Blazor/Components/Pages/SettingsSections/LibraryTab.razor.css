@@ -1,0 +1,162 @@
+/* Reuse container & card styles from SettingsGeneral for consistency */
+    .settings-view-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-bottom: 30px;
+        max-width: 800px;
+    }
+
+    .settings-card {
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: rgba(255,255,255,0.03);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .card-title {
+        font-size: 1em;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .slider-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+        opacity: 0.5;
+    }
+
+    /* Toggle */
+    .toggle-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 5px 0;
+    }
+
+    .toggle-label {
+        font-size: 1em;
+        color: var(--text-primary);
+    }
+
+    .toggle-input {
+        transform: scale(1.3);
+        accent-color: var(--accent-primary);
+        cursor: pointer;
+    }
+
+    /* Folders */
+    .folder-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .folder-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background-color: rgba(0, 0, 0, 0.2); /* Softened */
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+    }
+
+    .folder-icon {
+        color: var(--text-secondary);
+    }
+
+    .folder-path {
+        flex: 1;
+        font-family: monospace;
+        font-size: 0.9em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-primary);
+    }
+
+    .btn-remove {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 1.2em;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        transition: color 0.2s;
+    }
+
+        .btn-remove:hover {
+            background-color: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+        }
+
+    .empty-state {
+        padding: 20px;
+        text-align: center;
+        color: var(--text-secondary);
+        background: rgba(255,255,255,0.02);
+        border-radius: 6px;
+        border: 1px dashed var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .empty-state i {
+            font-size: 24px;
+            opacity: 0.5;
+        }
+
+    .btn-outline {
+        width: 100%;
+        padding: 10px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .btn-outline:hover {
+            border-color: var(--text-primary);
+            background: rgba(255,255,255,0.05);
+        }
