@@ -80,17 +80,57 @@ public class EqPresetService
     {
         var defaults = new List<EqPreset>
         {
-            new() { Name = "Flat", IsDefault = true, Gains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] },
-            new() { Name = "Bass Boost", IsDefault = true, Gains = [6, 5, 4, 2, 0, 0, 0, 0, 0, 0] },
-            new() { Name = "Treble Boost", IsDefault = true, Gains = [0, 0, 0, 0, 0, 1, 2, 4, 5, 6] },
-            new() { Name = "Rock", IsDefault = true, Gains = [4, 3, 1, -1, -2, -2, -1, 1, 3, 4] },
-            new() { Name = "Pop", IsDefault = true, Gains = [2, 1, 3, 2, 0, -1, 0, 1, 2, 1] },
-            new() { Name = "Vocal", IsDefault = true, Gains = [-2, -2, -1, 1, 3, 4, 3, 1, 0, -1] },
-            new() { Name = "Jazz", IsDefault = true, Gains = [3, 2, 0, 2, -1, -1, 0, 2, 3, 4] },
-            new() { Name = "Classical", IsDefault = true, Gains = [4, 3, 2, 1, -1, -1, 0, 2, 3, 3] }
+            new()
+            {
+                Name = "Flat",
+                IsDefault = true,
+                Gains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            },
+            new()
+            {
+                Name = "Bass Boost",
+                IsDefault = true,
+                Gains = [6, 5, 4, 2, 0, 0, 0, 0, 0, 0]
+            },
+            new()
+            {
+                Name = "Treble Boost",
+                IsDefault = true,
+                Gains = [0, 0, 0, 0, 0, 1, 2, 4, 5, 6]
+            },
+            new()
+            {
+                Name = "Rock",
+                IsDefault = true,
+                Gains = [4, 3, 1, -1, -2, -2, -1, 1, 3, 4]
+            },
+            new()
+            {
+                Name = "Pop",
+                IsDefault = true,
+                Gains = [2, 1, 3, 2, 0, -1, 0, 1, 2, 1]
+            },
+            new()
+            {
+                Name = "Vocal",
+                IsDefault = true,
+                Gains = [-2, -2, -1, 1, 3, 4, 3, 1, 0, -1]
+            },
+            new()
+            {
+                Name = "Jazz",
+                IsDefault = true,
+                Gains = [3, 2, 0, 2, -1, -1, 0, 2, 3, 4]
+            },
+            new()
+            {
+                Name = "Classical",
+                IsDefault = true,
+                Gains = [4, 3, 2, 1, -1, -1, 0, 2, 3, 3]
+            }
         };
 
-        foreach (var def in defaults)
+        foreach (EqPreset def in defaults)
         {
             // Only write if not exists to avoid overwriting if user somehow modified a default file (though they shouldn't)
             // But since they are defaults, we enforce them.
