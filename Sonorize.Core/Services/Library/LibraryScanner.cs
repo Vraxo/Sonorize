@@ -20,7 +20,11 @@ public class LibraryScanner
 
         foreach (string path in _settings.Library.MusicFolderPaths)
         {
-            List<Song> folderSongs = await _musicLibrary.LoadSongsFromFolderAsync(path, _settings.Library.SupportedFileExtensions, CancellationToken.None);
+            List<Song> folderSongs = await _musicLibrary.LoadSongsFromFolderAsync(
+                path,
+                _settings.Library.SupportedFileExtensions,
+                CancellationToken.None);
+
             List<Playlist> folderPlaylists = await _musicLibrary.LoadPlaylistsFromFolderAsync(path, CancellationToken.None);
 
             result.Songs.AddRange(folderSongs);
@@ -34,7 +38,11 @@ public class LibraryScanner
     {
         ScanResult result = new();
 
-        List<Song> folderSongs = await _musicLibrary.LoadSongsFromFolderAsync(path, _settings.Library.SupportedFileExtensions, CancellationToken.None);
+        List<Song> folderSongs = await _musicLibrary.LoadSongsFromFolderAsync(
+            path,
+            _settings.Library.SupportedFileExtensions,
+            CancellationToken.None);
+
         List<Playlist> folderPlaylists = await _musicLibrary.LoadPlaylistsFromFolderAsync(path, CancellationToken.None);
 
         result.Songs.AddRange(folderSongs);

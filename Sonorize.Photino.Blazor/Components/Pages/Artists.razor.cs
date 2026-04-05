@@ -18,16 +18,20 @@ public partial class Artists
 
     private void OnLibraryChanged()
     {
-        _ = InvokeAsync(() => { LoadData(); StateHasChanged(); });
+        _ = InvokeAsync(() =>
+        {
+            LoadData();
+            StateHasChanged();
+        });
     }
 
     private void LoadData()
     {
-        var source = LibService.AllArtists;
+        IReadOnlyList<ArtistGroup> source = LibService.AllArtists;
         _artists = ApplySort(source);
     }
 
-    private bool FilterArtist(ArtistGroup artist, string query)
+    private static bool FilterArtist(ArtistGroup artist, string query)
     {
         return artist.Name.Contains(query, StringComparison.OrdinalIgnoreCase);
     }
@@ -38,7 +42,11 @@ public partial class Artists
         {
             _isAscending = !_isAscending;
         }
-        else { _sortColumn = column; _isAscending = true; }
+        else
+        {
+            _sortColumn = column;
+            _isAscending = true;
+        }
 
         LoadData();
     }
@@ -47,10 +55,19 @@ public partial class Artists
     {
         return _sortColumn switch
         {
-            "Name" => _isAscending ? source.OrderBy(a => a.Name).ToList() : source.OrderByDescending(a => a.Name).ToList(),
-            "Albums" => _isAscending ? source.OrderBy(a => a.AlbumCount).ToList() : source.OrderByDescending(a => a.AlbumCount).ToList(),
-            "Songs" => _isAscending ? source.OrderBy(a => a.SongCount).ToList() : source.OrderByDescending(a => a.SongCount).ToList(),
-            _ => source.ToList()
+            "Name" => _isAscending
+                ? [.. source.OrderBy(a => a.Name)]
+                : [.. source.OrderByDescending(a => a.Name)],
+
+            "Albums" => _isAscending
+                ? [.. source.OrderBy(a => a.AlbumCount)]
+                : [.. source.OrderByDescending(a => a.AlbumCount)],
+
+            "Songs" => _isAscending
+                ? [.. source.OrderBy(a => a.SongCount)]
+                : [.. source.OrderByDescending(a => a.SongCount)],
+
+            _ => [.. source]
         };
     }
 

@@ -9,7 +9,7 @@ public partial class Folders
 
     private void OnLibraryChanged()
     {
-        _ = InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()

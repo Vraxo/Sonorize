@@ -51,9 +51,18 @@ public partial class Playlists
     {
         return _sortColumn switch
         {
-            "Name" => _isAscending ? source.OrderBy(p => p.Name).ToList() : source.OrderByDescending(p => p.Name).ToList(),
-            "Type" => _isAscending ? source.OrderBy(p => p.Type).ThenBy(p => p.Name).ToList() : source.OrderByDescending(p => p.Type).ThenBy(p => p.Name).ToList(),
-            "Count" => _isAscending ? source.OrderBy(p => p.SongFilePaths.Count).ToList() : source.OrderByDescending(p => p.SongFilePaths.Count).ToList(),
+            "Name" => _isAscending
+                ? [.. source.OrderBy(p => p.Name)]
+                : [.. source.OrderByDescending(p => p.Name)],
+
+            "Type" => _isAscending
+                ? [.. source.OrderBy(p => p.Type).ThenBy(p => p.Name)]
+                : [.. source.OrderByDescending(p => p.Type).ThenBy(p => p.Name)],
+
+            "Count" => _isAscending
+                ? [.. source.OrderBy(p => p.SongFilePaths.Count)]
+                : [.. source.OrderByDescending(p => p.SongFilePaths.Count)],
+
             _ => [.. source]
         };
     }

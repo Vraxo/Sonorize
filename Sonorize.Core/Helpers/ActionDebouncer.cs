@@ -3,7 +3,7 @@
 public class ActionDebouncer : IDisposable
 {
     private CancellationTokenSource? _cts;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public void Debounce(Action action, int milliseconds = 500)
     {
@@ -11,9 +11,9 @@ public class ActionDebouncer : IDisposable
         {
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
-            var token = _cts.Token;
+            CancellationToken token = _cts.Token;
 
-            _ = Task.Delay(milliseconds, token).ContinueWith(t =>
+            Task.Delay(milliseconds, token).ContinueWith(t =>
             {
                 if (t.IsCanceled)
                 {

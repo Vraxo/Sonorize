@@ -29,15 +29,21 @@ public class LibraryFileMonitor : IDisposable
 
             try
             {
-                var watcher = new FileSystemWatcher(path)
+                FileSystemWatcher watcher = new(path)
                 {
                     IncludeSubdirectories = true,
-                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.DirectoryName
+
+                    NotifyFilter =
+                        NotifyFilters.FileName |
+                        NotifyFilters.LastWrite |
+                        NotifyFilters.CreationTime |
+                        NotifyFilters.DirectoryName
                 };
 
                 watcher.Created += OnCreated;
                 watcher.Deleted += OnDeleted;
                 watcher.Renamed += OnRenamed;
+
                 watcher.EnableRaisingEvents = true;
 
                 _watchers.Add(watcher);
@@ -51,37 +57,44 @@ public class LibraryFileMonitor : IDisposable
 
     private void StopWatching()
     {
-        foreach (var w in _watchers)
+        foreach (FileSystemWatcher w in _watchers)
         {
             w.EnableRaisingEvents = false;
             w.Dispose();
         }
+
         _watchers.Clear();
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        if (IsSupported(e.FullPath))
+        if (!IsSupported(e.FullPath))
         {
-            // Small delay to ensure file handle is released if it was just copied
-            _ = Task.Delay(500).ContinueWith(_ => FileAdded?.Invoke(e.FullPath));
+            return;
         }
+
+        // Small delay to ensure file handle is released if it was just copied
+        Task.Delay(500).ContinueWith(_ => FileAdded?.Invoke(e.FullPath));
     }
 
     private void OnDeleted(object sender, FileSystemEventArgs e)
     {
-        if (IsSupported(e.FullPath))
+        if (!IsSupported(e.FullPath))
         {
-            FileRemoved?.Invoke(e.FullPath);
+            return;
         }
+
+        FileRemoved?.Invoke(e.FullPath);
     }
 
     private void OnRenamed(object sender, RenamedEventArgs e)
     {
-        if (IsSupported(e.FullPath))
+        if (!IsSupported(e.FullPath))
         {
-            FileRenamed?.Invoke(e.OldFullPath, e.FullPath);
+            return;
         }
+
+        FileRenamed?.Invoke(e.OldFullPath, e.FullPath);
     }
 
     private bool IsSupported(string path)

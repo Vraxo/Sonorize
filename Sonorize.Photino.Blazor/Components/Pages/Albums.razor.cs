@@ -52,10 +52,19 @@ public partial class Albums
     {
         return _sortColumn switch
         {
-            "Title" => _isAscending ? [.. source.OrderBy(a => a.Title)] : source.OrderByDescending(a => a.Title).ToList(),
-            "Artist" => _isAscending ? source.OrderBy(a => a.Artist).ThenBy(a => a.Title).ToList() : [.. source.OrderByDescending(a => a.Artist).ThenBy(a => a.Title)],
-            "Count" => _isAscending ? [.. source.OrderBy(a => a.SongCount)] : source.OrderByDescending(a => a.SongCount).ToList(),
-            _ => source.ToList()
+            "Title" => _isAscending
+                ? [.. source.OrderBy(a => a.Title)]
+                : [.. source.OrderByDescending(a => a.Title)],
+
+            "Artist" => _isAscending
+                ? [.. source.OrderBy(a => a.Artist).ThenBy(a => a.Title)]
+                : [.. source.OrderByDescending(a => a.Artist).ThenBy(a => a.Title)],
+
+            "Count" => _isAscending
+                ? [.. source.OrderBy(a => a.SongCount)]
+                : [.. source.OrderByDescending(a => a.SongCount)],
+
+            _ => [.. source]
         };
     }
 
@@ -65,8 +74,14 @@ public partial class Albums
             ? (builder => { })
             : (builder =>
         {
+
             builder.OpenElement(0, "i");
-            builder.AddAttribute(1, "class", _isAscending ? "fas fa-caret-up sort-icon" : "fas fa-caret-down sort-icon");
+
+            builder.AddAttribute(
+                1,
+                "class",
+                _isAscending ? "fas fa-caret-up sort-icon" : "fas fa-caret-down sort-icon");
+
             builder.CloseElement();
         });
     }

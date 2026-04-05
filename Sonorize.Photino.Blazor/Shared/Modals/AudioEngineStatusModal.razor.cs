@@ -9,6 +9,7 @@ public partial class AudioEngineStatusModal
     private void DismissFxWarning()
     {
         _fxWarningDismissed = true;
+
         StateHasChanged();
     }
 
@@ -21,7 +22,7 @@ public partial class AudioEngineStatusModal
     {
         try
         {
-            _ = Process.Start(new ProcessStartInfo
+            Process.Start(new ProcessStartInfo
             {
                 FileName = url,
                 UseShellExecute = true

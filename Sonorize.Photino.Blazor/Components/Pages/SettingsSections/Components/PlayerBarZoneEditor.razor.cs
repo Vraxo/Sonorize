@@ -26,7 +26,7 @@ public partial class PlayerBarZoneEditor
                 return;
             }
 
-            _ = OnAdd.InvokeAsync(value.Value);
+            OnAdd.InvokeAsync(value.Value);
             field = null;
         }
     }

@@ -19,15 +19,17 @@ public class PlaylistPersistenceService
     {
         _playlistDir = baseDir;
 
-        if (!Directory.Exists(_playlistDir))
+        if (Directory.Exists(_playlistDir))
         {
-            _ = Directory.CreateDirectory(_playlistDir);
+            return;
         }
+
+        _ = Directory.CreateDirectory(_playlistDir);
     }
 
     public List<Playlist> LoadPlaylists()
     {
-        var list = new List<Playlist>();
+        List<Playlist> list = [];
 
         if (!Directory.Exists(_playlistDir))
         {
@@ -39,19 +41,22 @@ public class PlaylistPersistenceService
             try
             {
                 string json = File.ReadAllText(file);
-                var playlist = JsonSerializer.Deserialize<Playlist>(json);
-                if (playlist is not null)
+                Playlist? playlist = JsonSerializer.Deserialize<Playlist>(json);
+
+                if (playlist is null)
                 {
-                    // Ensure the type is forced to Manual for these files
-                    playlist.Type = PlaylistType.Manual;
-                    // Ensure the ID matches the filename if possible, or just trust the file content
-                    list.Add(playlist);
+                    continue;
                 }
+
+                // Ensure the type is forced to Manual for these files
+                playlist.Type = PlaylistType.Manual;
+                // Ensure the ID matches the filename if possible, or just trust the file content
+                list.Add(playlist);
             }
             catch { /* Ignore corrupt files */ }
         }
 
-        return list.OrderBy(p => p.Name).ToList();
+        return [.. list.OrderBy(p => p.Name)];
     }
 
     public void SavePlaylist(Playlist playlist)
@@ -59,15 +64,19 @@ public class PlaylistPersistenceService
         // Use ID as filename to allow renaming without file moves
         string path = Path.Combine(_playlistDir, $"{playlist.Id}.json");
         string json = JsonSerializer.Serialize(playlist, _jsonOptions);
+
         File.WriteAllText(path, json);
     }
 
     public void DeletePlaylist(Playlist playlist)
     {
         string path = Path.Combine(_playlistDir, $"{playlist.Id}.json");
-        if (File.Exists(path))
+
+        if (!File.Exists(path))
         {
-            File.Delete(path);
+            return;
         }
+
+        File.Delete(path);
     }
 }

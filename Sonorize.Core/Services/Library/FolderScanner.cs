@@ -16,8 +16,13 @@ public class FolderScanner
 
     public async Task<(List<Song> Songs, List<Playlist> Playlists)> ScanAsync(string path)
     {
-        var songs = await _musicLibrary.LoadSongsFromFolderAsync(path, _settings.Library.SupportedFileExtensions, CancellationToken.None);
-        var playlists = await _musicLibrary.LoadPlaylistsFromFolderAsync(path, CancellationToken.None);
+        List<Song> songs = await _musicLibrary.LoadSongsFromFolderAsync(
+            path,
+            _settings.Library.SupportedFileExtensions,
+            CancellationToken.None);
+
+        List<Playlist> playlists = await _musicLibrary.LoadPlaylistsFromFolderAsync(path, CancellationToken.None);
+
         return (songs, playlists);
     }
 }

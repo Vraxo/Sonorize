@@ -31,7 +31,7 @@ public class FolderTreeBuilder
             SortNode(root);
         }
 
-        return rootNodes.OrderBy(n => n.Name, StringComparer.OrdinalIgnoreCase).ToList();
+        return [.. rootNodes.OrderBy(n => n.Name, StringComparer.OrdinalIgnoreCase)];
     }
 
     private List<FolderNode> CreateRootNodes()
@@ -50,7 +50,8 @@ public class FolderTreeBuilder
             return;
         }
 
-        FolderNode? rootNode = rootNodes.FirstOrDefault(r => dirPath.StartsWith(r.Path, StringComparison.OrdinalIgnoreCase));
+        FolderNode? rootNode = rootNodes
+            .FirstOrDefault(r => dirPath.StartsWith(r.Path, StringComparison.OrdinalIgnoreCase));
 
         if (rootNode == null)
         {
@@ -72,7 +73,8 @@ public class FolderTreeBuilder
 
     private FolderNode GetOrCreateChildNode(FolderNode parent, string segment)
     {
-        FolderNode? childNode = parent.Children.FirstOrDefault(c => c.Name.Equals(segment, StringComparison.OrdinalIgnoreCase));
+        FolderNode? childNode = parent.Children
+            .FirstOrDefault(c => c.Name.Equals(segment, StringComparison.OrdinalIgnoreCase));
 
         if (childNode != null)
         {
@@ -80,7 +82,13 @@ public class FolderTreeBuilder
         }
 
         string newPath = Path.Combine(parent.Path, segment);
-        childNode = new FolderNode { Name = segment, Path = newPath };
+
+        childNode = new FolderNode
+        {
+            Name = segment,
+            Path = newPath
+        };
+
         parent.Children.Add(childNode);
         return childNode;
     }

@@ -22,7 +22,7 @@ public class LibraryCacheService
 
         if (!Directory.Exists(folder))
         {
-            _ = Directory.CreateDirectory(folder);
+            Directory.CreateDirectory(folder);
         }
 
         _cacheFilePath = Path.Combine(folder, "LibraryCache.json");
@@ -51,7 +51,7 @@ public class LibraryCacheService
         try
         {
             using FileStream openStream = File.OpenRead(_cacheFilePath);
-            var songs = await JsonSerializer.DeserializeAsync<List<Song>>(openStream, _jsonOptions);
+            List<Song>? songs = await JsonSerializer.DeserializeAsync<List<Song>>(openStream, _jsonOptions);
             return songs ?? [];
         }
         catch (Exception ex)

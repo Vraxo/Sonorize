@@ -18,7 +18,7 @@ public class Program
     [STAThread]
     private static void Main(string[] args)
     {
-        using var mutex = new Mutex(true, MutexName, out bool createdNew);
+        using Mutex mutex = new(true, MutexName, out bool createdNew);
 
         if (!createdNew)
         {
@@ -43,7 +43,7 @@ public class Program
         {
             // Fatal Crash Handler
             // Since DI might have failed, we instantiate a temporary logger manually
-            var logger = new LogService();
+            LogService logger = new();
             logger.Error("FATAL APP CRASH", ex);
 
             // Re-throw to ensure the OS knows the process failed
@@ -61,7 +61,7 @@ public class Program
 
     private static void InitializeAppLogic(IServiceProvider services)
     {
-        var logger = services.GetRequiredService<LogService>();
+        LogService logger = services.GetRequiredService<LogService>();
         logger.Info("App starting...");
 
         _ = services.GetRequiredService<PlayerSettingsPersistenceService>();

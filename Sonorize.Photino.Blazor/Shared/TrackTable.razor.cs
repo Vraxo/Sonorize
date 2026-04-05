@@ -36,7 +36,7 @@ public partial class TrackTable
 
     private void OnSettingsChanged()
     {
-        _ = InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
     }
 
     private RenderFragment RenderRow(Song song)
@@ -49,7 +49,11 @@ public partial class TrackTable
         bool isDragging = AllowReorder && song == _draggedSong;
         bool isDragOver = AllowReorder && song == _targetSong;
 
-        string rowClass = $"hover-row {(isActive ? "active-track" : "")} {(isSelected ? "selected-track" : "")} {(isDragging ? "dragging" : "")} {(isDragOver ? "drag-over" : "")}";
+        string rowClass =
+            $"hover-row {(isActive ? "active-track" : "")}" +
+            $"{(isSelected ? "selected-track" : "")}" +
+            $"{(isDragging ? "dragging" : "")}" +
+            $"{(isDragOver ? "drag-over" : "")}";
 
         builder.OpenElement(0, "tr");
         builder.SetKey(song.FilePath); // React-like key for diffing
@@ -67,7 +71,10 @@ public partial class TrackTable
         // Virtualization Height Enforcement
         if (Songs.Count > 500)
         {
-            builder.AddAttribute(7, "style", $"height: {_calculatedRowHeight}px; max-height: {_calculatedRowHeight}px; overflow: hidden;");
+            builder.AddAttribute(
+                7,
+                "style",
+                $"height: {_calculatedRowHeight}px; max-height: {_calculatedRowHeight}px; overflow: hidden;");
         }
 
         // Click Handlers
@@ -203,10 +210,12 @@ public partial class TrackTable
 
     private async Task HandleSort(SortColumn column)
     {
-        if (OnSort.HasDelegate)
+        if (!OnSort.HasDelegate)
         {
-            await OnSort.InvokeAsync(column);
+            return;
         }
+
+        await OnSort.InvokeAsync(column);
     }
 
     private RenderFragment RenderSortIcon(SortColumn column)

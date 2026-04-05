@@ -81,18 +81,17 @@ public static class SchemeHandlers
         return new MemoryStream([]);
     }
 
-    private static Stream GenerateDemoArt(string filePath)
+    private static MemoryStream GenerateDemoArt(string filePath)
     {
-        // Deterministic random based on string hash
         int seed = filePath.GetHashCode();
-        var rng = new Random(seed);
+        Random rng = new(seed);
 
         // Generate random nice colors
-        var c1 = Color.FromRgb((byte)rng.Next(50, 255), (byte)rng.Next(50, 255), (byte)rng.Next(50, 255));
-        var c2 = Color.FromRgb((byte)rng.Next(50, 255), (byte)rng.Next(50, 255), (byte)rng.Next(50, 255));
+        Color c1 = GenerateRandomColor(rng);
+        Color c2 = GenerateRandomColor(rng);
 
         // Create 200x200 image
-        using var image = new Image<Rgba32>(200, 200);
+        using Image<Rgba32> image = new(200, 200);
 
         image.Mutate(x => x.Fill(new LinearGradientBrush(
             new PointF(0, 0),
@@ -102,10 +101,21 @@ public static class SchemeHandlers
             new ColorStop(1, c2)
         )));
 
-        var ms = new MemoryStream();
+        MemoryStream ms = new();
+
         image.SaveAsPng(ms);
+
         ms.Position = 0;
+
         return ms;
+    }
+
+    private static Color GenerateRandomColor(Random rng)
+    {
+        return Color.FromRgb(
+            (byte)rng.Next(50, 255),
+            (byte)rng.Next(50, 255),
+            (byte)rng.Next(50, 255));
     }
 
     private static Stream HandleLocalFile(Uri uri, out string contentType)
@@ -119,6 +129,7 @@ public static class SchemeHandlers
 
         // Security Check: Prevent arbitrary file reads (e.g. sensitive config files)
         string ext = Path.GetExtension(filePath);
+
         if (!AllowedExtensions.Contains(ext))
         {
             return new MemoryStream(Encoding.UTF8.GetBytes("Access Denied: File type not allowed via scheme."));
@@ -140,21 +151,23 @@ public static class SchemeHandlers
         string query = uri.Query.TrimStart('?');
         const string prefix = "path=";
 
-        if (query.StartsWith(prefix))
+        if (!query.StartsWith(prefix))
         {
-            string encoded = query[prefix.Length..];
-            filePath = Uri.UnescapeDataString(encoded);
-            return true;
+            filePath = string.Empty;
+            return false;
         }
 
-        filePath = string.Empty;
-        return false;
+        string encoded = query[prefix.Length..];
+        filePath = Uri.UnescapeDataString(encoded);
+        return true;
     }
 
     private static bool IsArtAvailable(LibraryService library, string filePath)
     {
         Song? song = library.GetSong(filePath);
-        return song is { HasArt: true } && File.Exists(filePath);
+
+        return song is { HasArt: true }
+            && File.Exists(filePath);
     }
 
     private static string GetMimeType(string filePath)

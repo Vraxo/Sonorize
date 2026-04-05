@@ -32,16 +32,20 @@ public class ScrobbleOrchestrator : IDisposable
     private void OnPlaybackStateChanged()
     {
         // Track Changed Logic
-        if (_player.CurrentSong != _currentTrack)
+        if (_player.CurrentSong == _currentTrack)
         {
-            _currentTrack = _player.CurrentSong;
-            _hasScrobbledCurrentTrack = false;
-
-            if (_currentTrack is not null && _settings.Lastfm.ScrobblingEnabled)
-            {
-                _ = _scrobblingService.UpdateNowPlayingAsync(_currentTrack);
-            }
+            return;
         }
+
+        _currentTrack = _player.CurrentSong;
+        _hasScrobbledCurrentTrack = false;
+
+        if (_currentTrack is null || !_settings.Lastfm.ScrobblingEnabled)
+        {
+            return;
+        }
+
+        _ = _scrobblingService.UpdateNowPlayingAsync(_currentTrack);
     }
 
     private void OnPlaybackProgressed()
@@ -52,11 +56,13 @@ public class ScrobbleOrchestrator : IDisposable
         }
 
         // Check eligibility on every progress tick (approx 10Hz)
-        if (_eligibilityService.ShouldScrobble(_currentTrack, _player.CurrentTime, _settings.Lastfm))
+        if (!ScrobbleEligibilityService.ShouldScrobble(_currentTrack, _player.CurrentTime, _settings.Lastfm))
         {
-            _hasScrobbledCurrentTrack = true;
-            _ = _scrobblingService.ScrobbleAsync(_currentTrack, DateTime.UtcNow);
+            return;
         }
+
+        _hasScrobbledCurrentTrack = true;
+        _ = _scrobblingService.ScrobbleAsync(_currentTrack, DateTime.UtcNow);
     }
 
     public void Dispose()

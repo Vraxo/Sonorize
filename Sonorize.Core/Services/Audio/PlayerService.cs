@@ -140,7 +140,8 @@ public class PlayerService : IPlayerService
 
     private void PlayCurrentSong()
     {
-        var song = CurrentSong;
+        Song? song = CurrentSong;
+
         if (song is null)
         {
             return;
@@ -157,7 +158,7 @@ public class PlayerService : IPlayerService
     {
         // BASS callback happens on a mixer thread. We must dispatch to Task pool 
         // to avoid deadlocks when calling BASS functions that might wait for the mixer.
-        _ = Task.Run(() =>
+        Task.Run(() =>
         {
             if (RepeatMode == RepeatMode.One)
             {
@@ -276,45 +277,60 @@ public class PlayerService : IPlayerService
         _audio.SetOutputDevice(deviceName);
     }
 
-    public void StartSeek() { IsSeeking = true; }
-    public void EndSeek() { IsSeeking = false; }
+    public void StartSeek()
+    {
+        IsSeeking = true;
+    }
+
+    public void EndSeek()
+    {
+        IsSeeking = false;
+    }
 
     public void PreviewSeek(double percentage)
     {
-        if (TotalTime > TimeSpan.Zero)
+        if (TotalTime <= TimeSpan.Zero)
         {
-            SeekPreviewTime = TimeSpan.FromSeconds(TotalTime.TotalSeconds * percentage);
-            PlaybackProgressed?.Invoke();
+            return;
         }
+
+        SeekPreviewTime = TimeSpan.FromSeconds(TotalTime.TotalSeconds * percentage);
+        PlaybackProgressed?.Invoke();
     }
 
     public void Seek(double percentage)
     {
-        if (TotalTime > TimeSpan.Zero)
+        if (TotalTime <= TimeSpan.Zero)
         {
-            _audio.CurrentTime = TimeSpan.FromSeconds(TotalTime.TotalSeconds * percentage);
-            PlaybackProgressed?.Invoke();
+            return;
         }
+
+        _audio.CurrentTime = TimeSpan.FromSeconds(TotalTime.TotalSeconds * percentage);
+        PlaybackProgressed?.Invoke();
     }
 
     public void SetVolume(float volume)
     {
         volume = float.Clamp(volume, 0.0f, 1.0f);
         _audio.Volume = volume;
+
         VolumeChanged?.Invoke(volume);
     }
 
     private void UpdatePlaybackProgress()
     {
-        if (IsPlaying && !IsSeeking)
+        if (!IsPlaying || IsSeeking)
         {
-            PlaybackProgressed?.Invoke();
+            return;
         }
+
+        PlaybackProgressed?.Invoke();
     }
 
     public void Dispose()
     {
         _audio.PlaybackFinished -= OnPlaybackFinished;
+
         _playbackTimer.Dispose();
         GC.SuppressFinalize(this);
     }

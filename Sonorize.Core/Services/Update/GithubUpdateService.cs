@@ -26,7 +26,7 @@ public class GitHubUpdateService : IDisposable
     {
         try
         {
-            var releases = await _http.GetFromJsonAsync<List<GitHubRelease>>($"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases");
+            List<GitHubRelease>? releases = await _http.GetFromJsonAsync<List<GitHubRelease>>($"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases");
             GitHubRelease? latest = releases?.FirstOrDefault(r => !r.Prerelease);
 
             if (latest is null)
@@ -55,7 +55,7 @@ public class GitHubUpdateService : IDisposable
                 return;
             }
 
-            var release = new ReleaseInfo
+            ReleaseInfo release = new()
             {
                 Version = latest.TagName,
                 ReleaseNotes = latest.Body,
@@ -71,10 +71,6 @@ public class GitHubUpdateService : IDisposable
         }
     }
 
-    /// <summary>
-    /// Manually injects a release info object to trigger the update flow.
-    /// Used for testing or forced updates.
-    /// </summary>
     public void SimulateUpdate(ReleaseInfo release)
     {
         UpdateDetected?.Invoke(release);
@@ -82,27 +78,46 @@ public class GitHubUpdateService : IDisposable
 
     public async Task DownloadUpdateAsync(string url, string destinationPath, IProgress<double> progress)
     {
-        bool isLocalFile = !url.StartsWith("http", StringComparison.OrdinalIgnoreCase) && File.Exists(url);
+        bool isLocalFile =
+            !url.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            && File.Exists(url);
 
         if (isLocalFile)
         {
-            using var sourceStream = File.OpenRead(url);
-            await ProcessDownloadStreamAsync(sourceStream, destinationPath, sourceStream.Length, progress, isSimulated: true);
+            using FileStream sourceStream = File.OpenRead(url);
+
+            await ProcessDownloadStreamAsync(
+                sourceStream,
+                destinationPath,
+                sourceStream.Length,
+                progress,
+                isSimulated: true);
         }
         else
         {
-            using var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            using HttpResponseMessage response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             _ = response.EnsureSuccessStatusCode();
             long? totalBytes = response.Content.Headers.ContentLength;
 
-            using var stream = await response.Content.ReadAsStreamAsync();
-            await ProcessDownloadStreamAsync(stream, destinationPath, totalBytes, progress, isSimulated: false);
+            using Stream stream = await response.Content.ReadAsStreamAsync();
+
+            await ProcessDownloadStreamAsync(
+                stream,
+                destinationPath,
+                totalBytes,
+                progress,
+                isSimulated: false);
         }
     }
 
-    private static async Task ProcessDownloadStreamAsync(Stream source, string destinationPath, long? totalBytes, IProgress<double> progress, bool isSimulated)
+    private static async Task ProcessDownloadStreamAsync(
+        Stream source,
+        string destinationPath,
+        long? totalBytes,
+        IProgress<double> progress,
+        bool isSimulated)
     {
-        using var destStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        using FileStream destStream = new(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
         byte[] buffer = new byte[8192];
         long totalRead = 0;
@@ -111,6 +126,7 @@ public class GitHubUpdateService : IDisposable
         while ((bytesRead = await source.ReadAsync(buffer)) != 0)
         {
             await destStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+
             totalRead += bytesRead;
 
             if (totalBytes.HasValue && totalBytes.Value > 0)
@@ -118,11 +134,13 @@ public class GitHubUpdateService : IDisposable
                 progress.Report((double)totalRead / totalBytes.Value);
             }
 
-            if (isSimulated)
+            if (!isSimulated)
             {
-                // Artificial delay to visualize progress for local files (too fast otherwise)
-                await Task.Delay(10);
+                continue;
             }
+
+            // Artificial delay to visualize progress for local files (too fast otherwise)
+            await Task.Delay(10);
         }
     }
 

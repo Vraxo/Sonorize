@@ -16,26 +16,33 @@ public partial class SettingsSlider
 
     private async Task HandleInput(ChangeEventArgs e)
     {
-        if (int.TryParse(e.Value?.ToString(), out int val))
+        if (!int.TryParse(e.Value?.ToString(), out int val))
         {
-            await ValueChanged.InvokeAsync(val);
+            return;
         }
+
+        await ValueChanged.InvokeAsync(val);
     }
 
     private async Task HandleNumberChange(ChangeEventArgs e)
     {
-        if (int.TryParse(e.Value?.ToString(), out int val))
+        if (!int.TryParse(e.Value?.ToString(), out int val))
         {
-            val = Math.Clamp(val, Min, Max);
-            await ValueChanged.InvokeAsync(val);
+            return;
         }
+
+        val = int.Clamp(val, Min, Max);
+
+        await ValueChanged.InvokeAsync(val);
     }
 
     private async Task Reset()
     {
-        if (DefaultValue.HasValue)
+        if (!DefaultValue.HasValue)
         {
-            await ValueChanged.InvokeAsync(DefaultValue.Value);
+            return;
         }
+
+        await ValueChanged.InvokeAsync(DefaultValue.Value);
     }
 }

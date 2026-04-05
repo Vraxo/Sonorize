@@ -8,7 +8,10 @@ public static class ScriptUpdateInstaller
     public static void InstallAndRestart(string zipPath)
     {
         string appDir = AppContext.BaseDirectory;
-        string appExe = Process.GetCurrentProcess().MainModule?.FileName ?? "Sonorize.exe";
+
+        string appExe = Process.GetCurrentProcess().MainModule?.FileName
+            ?? "Sonorize.exe";
+
         int currentPid = Environment.ProcessId;
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -29,21 +32,24 @@ public static class ScriptUpdateInstaller
         string scriptPath = Path.Combine(Path.GetTempPath(), "sonorize_update.ps1");
 
         // PowerShell Script: Wait for exit -> Expand ZIP -> Delete ZIP -> Restart
-        string script = $@"
-$ErrorActionPreference = 'Stop'
-Write-Host 'Waiting for Sonorize to close...'
-Wait-Process -Id {pid} -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 1
+        string script = $"""
 
-Write-Host 'Updating files...'
-Expand-Archive -LiteralPath '{zipPath}' -DestinationPath '{appDir}' -Force
+            $ErrorActionPreference = 'Stop'
+            Write-Host 'Waiting for Sonorize to close...'
+            Wait-Process -Id {pid} -ErrorAction SilentlyContinue
+            Start-Sleep -Seconds 1
 
-Write-Host 'Cleaning up...'
-Remove-Item '{zipPath}' -Force
+            Write-Host 'Updating files...'
+            Expand-Archive -LiteralPath '{zipPath}' -DestinationPath '{appDir}' -Force
 
-Write-Host 'Restarting...'
-Start-Process '{appExe}'
-";
+            Write-Host 'Cleaning up...'
+            Remove-Item '{zipPath}' -Force
+
+            Write-Host 'Restarting...'
+            Start-Process '{appExe}'
+
+            """;
+
         File.WriteAllText(scriptPath, script);
 
         ProcessStartInfo startInfo = new()
@@ -62,13 +68,15 @@ Start-Process '{appExe}'
         string scriptPath = Path.Combine(Path.GetTempPath(), "sonorize_update.sh");
 
         // Bash Script
-        string script = $@"
-#!/bin/bash
-while kill -0 {pid} 2>/dev/null; do sleep 1; done
-unzip -o ""{zipPath}"" -d ""{appDir}""
-rm ""{zipPath}""
-""{appExe}"" &
-";
+        string script = $"""
+
+            #!/bin/bash
+            while kill -0 {pid} 2>/dev/null; do sleep 1; done
+            unzip -o "{zipPath}" -d "{appDir}"
+            rm "{zipPath}"
+            "{appExe}" &
+
+            """;
         File.WriteAllText(scriptPath, script);
 
         // Make executable

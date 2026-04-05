@@ -17,7 +17,7 @@ public class EqPresetService
 
     public List<EqPreset> LoadPresets()
     {
-        var presets = new List<EqPreset>();
+        List<EqPreset> presets = [];
 
         if (!Directory.Exists(_presetsDir))
         {
@@ -29,14 +29,16 @@ public class EqPresetService
             try
             {
                 string json = File.ReadAllText(file);
-                var preset = JsonSerializer.Deserialize<EqPreset>(json);
-                if (preset is not null)
+                EqPreset? preset = JsonSerializer.Deserialize<EqPreset>(json);
+
+                if (preset is null)
                 {
-                    // Ensure name matches filename to prevent drift, or trust file content?
-                    // Trusting content is safer for rename operations, but let's ensure consistency.
-                    // For now, we return what's in the file.
-                    presets.Add(preset);
+                    continue;
                 }
+                // Ensure name matches filename to prevent drift, or trust file content?
+                // Trusting content is safer for rename operations, but let's ensure consistency.
+                // For now, we return what's in the file.
+                presets.Add(preset);
             }
             catch { /* Ignore corrupt files */ }
         }
@@ -49,7 +51,7 @@ public class EqPresetService
             return LoadPresets();
         }
 
-        return presets.OrderBy(p => p.Name).ToList();
+        return [.. presets.OrderBy(p => p.Name)];
     }
 
     public void SavePreset(EqPreset preset)
@@ -57,6 +59,7 @@ public class EqPresetService
         string safeName = string.Join("_", preset.Name.Split(Path.GetInvalidFileNameChars()));
         string path = Path.Combine(_presetsDir, $"{safeName}.json");
         string json = JsonSerializer.Serialize(preset, _jsonOptions);
+
         File.WriteAllText(path, json);
     }
 
@@ -70,16 +73,18 @@ public class EqPresetService
         string safeName = string.Join("_", preset.Name.Split(Path.GetInvalidFileNameChars()));
         string path = Path.Combine(_presetsDir, $"{safeName}.json");
 
-        if (File.Exists(path))
+        if (!File.Exists(path))
         {
-            File.Delete(path);
+            return;
         }
+
+        File.Delete(path);
     }
 
     private void EnsureDefaults()
     {
-        var defaults = new List<EqPreset>
-        {
+        List<EqPreset> defaults =
+        [
             new()
             {
                 Name = "Flat",
@@ -128,7 +133,7 @@ public class EqPresetService
                 IsDefault = true,
                 Gains = [4, 3, 2, 1, -1, -1, 0, 2, 3, 3]
             }
-        };
+        ];
 
         foreach (EqPreset def in defaults)
         {

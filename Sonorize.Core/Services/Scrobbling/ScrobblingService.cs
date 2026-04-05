@@ -1,4 +1,5 @@
-﻿using IF.Lastfm.Core.Objects;
+﻿using IF.Lastfm.Core.Api;
+using IF.Lastfm.Core.Objects;
 using Sonorize.Core.Models;
 using Sonorize.Core.Services.System;
 using Sonorize.Core.Settings;
@@ -30,7 +31,8 @@ public class ScrobblingService
             return;
         }
 
-        var client = await _authService.GetAuthenticatedClientAsync();
+        LastfmClient? client = await _authService.GetAuthenticatedClientAsync();
+
         if (client is null)
         {
             return;
@@ -38,12 +40,19 @@ public class ScrobblingService
 
         try
         {
-            var scrobble = new Scrobble(song.Artist, song.Album, song.Title, DateTimeOffset.Now);
-            _ = await client.Track.UpdateNowPlayingAsync(scrobble);
+            Scrobble scrobble = new(
+                song.Artist,
+                song.Album,
+                song.Title,
+                DateTimeOffset.Now);
+
+            await client.Track.UpdateNowPlayingAsync(scrobble);
         }
         catch (Exception ex)
         {
-            _logger.Error($"[LastFM] UpdateNowPlaying failed for {song.Title}", ex);
+            _logger.Error(
+                $"[LastFM] UpdateNowPlaying failed for {song.Title}",
+                ex);
         }
     }
 
@@ -59,7 +68,8 @@ public class ScrobblingService
             return;
         }
 
-        var client = await _authService.GetAuthenticatedClientAsync();
+        LastfmClient? client = await _authService.GetAuthenticatedClientAsync();
+
         if (client is null)
         {
             return;
@@ -67,19 +77,22 @@ public class ScrobblingService
 
         try
         {
-            var scrobble = new Scrobble(song.Artist, song.Album, song.Title, timePlayed);
+            Scrobble scrobble = new(
+                song.Artist,
+                song.Album,
+                song.Title,
+                timePlayed);
 
-#pragma warning disable CS0618 // Type or member is obsolete
             // Inflatable.Lastfm marks single scrobbling as obsolete in favor of batches,
             // but for a desktop player, real-time single scrobbling is the correct pattern.
-            _ = await client.Track.ScrobbleAsync(scrobble);
-#pragma warning restore CS0618
-
+            await client.Track.ScrobbleAsync(scrobble);
             _logger.Info($"[LastFM] Scrobbled: {song.Artist} - {song.Title}");
         }
         catch (Exception ex)
         {
-            _logger.Error($"[LastFM] Scrobble failed for {song.Title}", ex);
+            _logger.Error(
+                $"[LastFM] Scrobble failed for {song.Title}",
+                ex);
         }
     }
 }

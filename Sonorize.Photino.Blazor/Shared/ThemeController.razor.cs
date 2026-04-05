@@ -18,10 +18,12 @@ public partial class ThemeController
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender)
         {
-            await ApplyJsUpdates();
+            return;
         }
+
+        await ApplyJsUpdates();
     }
 
     private void OnSettingsChanged()
@@ -37,7 +39,7 @@ public partial class ThemeController
     private void UpdateState()
     {
         string? bgPath = AppSettings.Theme.BackgroundImagePath;
-        _hasCustomBg = !string.IsNullOrWhiteSpace(bgPath) && System.IO.File.Exists(bgPath);
+        _hasCustomBg = !string.IsNullOrWhiteSpace(bgPath) && File.Exists(bgPath);
         _useTransparency = _hasCustomBg || AppSettings.Theme.EnableAmbientBackground;
 
         string css = ThemeUtils.GenerateRootCss(AppSettings.Theme, _useTransparency);

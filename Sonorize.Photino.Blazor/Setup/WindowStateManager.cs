@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor;
 using Sonorize.Core.Settings;
-using System.Drawing;
 
 namespace Sonorize.Photino.Blazor.Setup;
 
@@ -30,14 +29,14 @@ public class WindowStateManager
         // This is critical for the Taskbar to pick up the runtime window icon correctly.
         string iconPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "img", "icon.ico");
 
-        _ = _app.MainWindow
+        _app.MainWindow
             .SetTitle("Sonorize")
             .SetIconFile(iconPath)
             .SetLogVerbosity(0);
 
         // Enforce the minimum size at the OS level
         // This prevents the user from shrinking the window to a point where the UI breaks
-        _ = _app.MainWindow.SetMinSize(MinWidth, MinHeight);
+        _app.MainWindow.SetMinSize(MinWidth, MinHeight);
 
         RestoreState();
         RestoreZoom();
@@ -52,10 +51,10 @@ public class WindowStateManager
 
         bool isValidPos = _settings.Window.X > -10000 && _settings.Window.Y > -10000;
 
-        _ = _app.MainWindow.SetSize(targetWidth, targetHeight);
+        _app.MainWindow.SetSize(targetWidth, targetHeight);
 
         _ = isValidPos
-            ? _app.MainWindow.SetLocation(new Point(_settings.Window.X, _settings.Window.Y))
+            ? _app.MainWindow.SetLocation(new(_settings.Window.X, _settings.Window.Y))
             : _app.MainWindow.Center();
     }
 
@@ -86,12 +85,14 @@ public class WindowStateManager
         _app.MainWindow.WindowSizeChanged += (sender, size) =>
         {
             // Even though SetMinSize enforces it, we double-check before saving to avoid bad data
-            if (size.Width >= MinWidth && size.Height >= MinHeight)
+            if (size.Width < MinWidth || size.Height < MinHeight)
             {
-                _settings.Window.Width = size.Width;
-                _settings.Window.Height = size.Height;
-                TriggerDebouncedSave();
+                return;
             }
+
+            _settings.Window.Width = size.Width;
+            _settings.Window.Height = size.Height;
+            TriggerDebouncedSave();
         };
 
         _app.MainWindow.WindowClosing += (sender, e) =>
@@ -122,26 +123,42 @@ public class WindowStateManager
                     return;
                 }
 
-                try { _settingsManager.Save(_settings); } catch { }
+                try
+                {
+                    _settingsManager.Save(_settings);
+                }
+                catch { }
             });
         }
     }
 
     private void SaveImmediately()
     {
-        // Final validation before close
-        if (_app.MainWindow.Location.X > -10000 && _app.MainWindow.Location.Y > -10000)
-        {
-            _settings.Window.X = _app.MainWindow.Location.X;
-            _settings.Window.Y = _app.MainWindow.Location.Y;
-        }
-
-        if (_app.MainWindow.Size.Width >= MinWidth && _app.MainWindow.Size.Height >= MinHeight)
-        {
-            _settings.Window.Width = _app.MainWindow.Size.Width;
-            _settings.Window.Height = _app.MainWindow.Size.Height;
-        }
+        EnsureValidPosition();
+        EnsureValidSize();
 
         _settingsManager.Save(_settings);
+    }
+
+    private void EnsureValidSize()
+    {
+        if (_app.MainWindow.Size.Width < MinWidth || _app.MainWindow.Size.Height < MinHeight)
+        {
+            return;
+        }
+
+        _settings.Window.Width = _app.MainWindow.Size.Width;
+        _settings.Window.Height = _app.MainWindow.Size.Height;
+    }
+
+    private void EnsureValidPosition()
+    {
+        if (_app.MainWindow.Location.X <= -10000 || _app.MainWindow.Location.Y <= -10000)
+        {
+            return;
+        }
+
+        _settings.Window.X = _app.MainWindow.Location.X;
+        _settings.Window.Y = _app.MainWindow.Location.Y;
     }
 }

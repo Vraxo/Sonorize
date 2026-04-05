@@ -20,7 +20,12 @@ public class UiEventService : IUiEventService
 
     public void SendEvent(string eventName, object? payload)
     {
-        UiEvent uiEvent = new() { Name = eventName, Payload = payload };
+        UiEvent uiEvent = new()
+        {
+            Name = eventName,
+            Payload = payload
+        };
+
         string json = JsonSerializer.Serialize(uiEvent, _jsonOptions);
         _uiBridge.SendMessage(json);
     }

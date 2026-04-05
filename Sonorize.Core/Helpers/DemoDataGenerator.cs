@@ -40,15 +40,37 @@ public static class DemoDataGenerator
 
     private static readonly string[] SongTitles =
     [
-        "Midnight City", "Sunset Drive", "Neon Lights", "Deep Space", "Lost in Time",
-        "Echoes of Yesterday", "Future Club", "Digital Love", "Harder Better Faster",
-        "Time", "Money", "Us and Them", "DNA", "Humble", "Let It Happen", "The Less I Know",
-        "Dreaming", "Sunrise", "Don't Know Why", "Everlong", "My Hero", "Walk"
+        "Midnight City",
+        "Sunset Drive",
+        "Neon Lights",
+        "Deep Space",
+        "Lost in Time",
+        "Echoes of Yesterday",
+        "Future Club",
+        "Digital Love",
+        "Harder Better Faster",
+        "Time",
+        "Money",
+        "Us and Them",
+        "DNA",
+        "Humble",
+        "Let It Happen",
+        "The Less I Know",
+        "Dreaming",
+        "Sunrise",
+        "Don't Know Why",
+        "Everlong",
+        "My Hero",
+        "Walk"
     ];
 
     private static readonly string[] PlaylistNames =
     [
-        "Late Night Drive", "Coding Focus", "Workout", "Chill Vibes", "Favorites"
+        "Late Night Drive",
+        "Coding Focus",
+        "Workout",
+        "Chill Vibes",
+        "Favorites"
     ];
 
     public static List<Song> Generate(int count = DefaultSongCount)
@@ -87,7 +109,10 @@ public static class DemoDataGenerator
 
     private static string SelectAlbum(string artist, Random rng)
     {
-        return AlbumsByArtist[artist][rng.Next(AlbumsByArtist[artist].Length)];
+        int nameMe = AlbumsByArtist[artist].Length;
+        int nameMeAsap = rng.Next(nameMe);
+
+        return AlbumsByArtist[artist][nameMeAsap];
     }
 
     private static string BuildTitle(int index, Random rng)
@@ -111,13 +136,17 @@ public static class DemoDataGenerator
 
     private static TimeSpan GenerateDuration(Random rng)
     {
-        return TimeSpan.FromSeconds(rng.Next(DurationMinSeconds, DurationMaxSeconds));
+        int randomSeconds = rng.Next(DurationMinSeconds, DurationMaxSeconds);
+        return TimeSpan.FromSeconds(randomSeconds);
     }
 
     private static List<Song> SelectRandomSongs(List<Song> songs, Random rng)
     {
         int size = rng.Next(PlaylistMinSize, PlaylistMaxSize);
-        return songs.OrderBy(_ => rng.Next()).Take(size).ToList();
+
+        return [.. songs
+            .OrderBy(_ => rng.Next())
+            .Take(size)];
     }
 
     private static Playlist CreatePlaylist(string name, List<Song> songs)
@@ -127,7 +156,7 @@ public static class DemoDataGenerator
             Id = Guid.NewGuid(),
             Name = name,
             Type = PlaylistType.Manual,
-            SongFilePaths = songs.Select(s => s.FilePath).ToList()
+            SongFilePaths = [.. songs.Select(s => s.FilePath)]
         };
     }
 }

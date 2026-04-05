@@ -4,6 +4,7 @@ public class PlayerBarConfig
 {
     public List<PlayerBarWidget> Left { get; set; } = [PlayerBarWidget.Info];
     public List<PlayerBarWidget> Center { get; set; } = [PlayerBarWidget.StackedTransport];
+
     public List<PlayerBarWidget> Right { get; set; } =
     [
         PlayerBarWidget.Focus,

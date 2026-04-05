@@ -18,15 +18,17 @@ public partial class LibraryGrid
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender)
         {
-            _objRef = DotNetObjectReference.Create(this);
-            try
-            {
-                await JS.InvokeVoidAsync("observeResize", _container, _objRef);
-            }
-            catch { /* Ignore JS errors during init/disposal race */ }
+            return;
         }
+
+        _objRef = DotNetObjectReference.Create(this);
+        try
+        {
+            await JS.InvokeVoidAsync("observeResize", _container, _objRef);
+        }
+        catch { /* Ignore JS errors during init/disposal race */ }
     }
 
     protected override void OnParametersSet()
@@ -46,6 +48,7 @@ public partial class LibraryGrid
         {
             // Fallback initial calculation
             double width = AppSettings.Window.Width;
+
             if (AppSettings.Window.IsSidebarOpen)
             {
                 width -= AppSettings.Window.SidebarWidth;
@@ -80,11 +83,11 @@ public partial class LibraryGrid
 
         // Calculate columns based on actual container width
         // We use Math.Floor to ensure they fit
-        _columns = Math.Max(1, (int)Math.Floor((containerWidth + gap) / (itemWidth + gap)));
+        _columns = int.Max(1, (int)double.Floor((containerWidth + gap) / (itemWidth + gap)));
 
         float verticalPadding = AppSettings.Library.GridItemPadding * 2;
         float textAreaHeight = 65; // Fixed allowance for 2 lines of text
-        _estimatedRowHeight = (float)Math.Ceiling(itemWidth + verticalPadding + textAreaHeight + gap);
+        _estimatedRowHeight = float.Ceiling(itemWidth + verticalPadding + textAreaHeight + gap);
 
         ChunkData();
     }
@@ -94,10 +97,11 @@ public partial class LibraryGrid
         _chunkedSongs = [.. Songs
             .Select((x, i) => new { Index = i, Value = x })
             .GroupBy(x => x.Index / _columns)
-            .Select(x => x.Select(v => v.Value).ToList())];
+            .Select(x => x.Select(v => v.Value)
+            .ToList())];
     }
 
-    private string GetArtUrl(Song song)
+    private static string GetArtUrl(Song song)
     {
         return $"sonorize://albumart/?path={Uri.EscapeDataString(song.FilePath)}";
     }

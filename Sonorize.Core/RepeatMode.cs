@@ -1,3 +1,8 @@
 ﻿namespace Sonorize.Core;
 
-public enum RepeatMode { None, All, One }
+public enum RepeatMode
+{
+    None,
+    All,
+    One
+}

@@ -50,14 +50,15 @@ public class LibraryDataManager : IDisposable
 
     public Song? GetSong(string path)
     {
-        var songs = AllSongs;
+        IReadOnlyList<Song> songs = AllSongs;
         return songs.FirstOrDefault(s => s.FilePath.Equals(path, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task LoadCacheIntoMemoryAsync()
     {
-        var cachedSongs = await _cacheService.LoadCacheAsync();
+        List<Song> cachedSongs = await _cacheService.LoadCacheAsync();
         AllSongs = cachedSongs;
+
         DataUpdated?.Invoke();
     }
 
@@ -65,23 +66,28 @@ public class LibraryDataManager : IDisposable
     {
         AllSongs = demoSongs;
         _filePlaylists = demoPlaylists;
+
         DataUpdated?.Invoke();
     }
 
     public void UpdateFilePlaylists(List<Playlist> found, bool incremental = false)
     {
-        var mode = incremental ? PlaylistSyncOrchestrator.SyncMode.Incremental : PlaylistSyncOrchestrator.SyncMode.Full;
-        _filePlaylists = _playlistSync.Sync(_filePlaylists.ToList(), found, mode);
+        PlaylistSyncOrchestrator.SyncMode mode = incremental
+            ? PlaylistSyncOrchestrator.SyncMode.Incremental
+            : PlaylistSyncOrchestrator.SyncMode.Full;
+
+        _filePlaylists = PlaylistSyncOrchestrator.Sync([.. _filePlaylists], found, mode);
+
         DataUpdated?.Invoke();
     }
 
     private async Task RebuildAggregatesAsync()
     {
-        var songs = AllSongs.ToList();
-        var (albums, artists) = _aggregator.Aggregate(songs);
-        var folderTree = _treeBuilder.Build(songs);
+        List<Song> songs = AllSongs.ToList();
+        (List<AlbumGroup>? albums, List<ArtistGroup>? artists) = _aggregator.Aggregate(songs);
+        List<FolderNode> folderTree = _treeBuilder.Build(songs);
 
-        AllSongs = songs.OrderBy(s => s.Title, StringComparer.OrdinalIgnoreCase).ToList();
+        AllSongs = [.. songs.OrderBy(s => s.Title, StringComparer.OrdinalIgnoreCase)];
         AllAlbums = albums;
         AllArtists = artists;
         FolderRootNodes = folderTree;

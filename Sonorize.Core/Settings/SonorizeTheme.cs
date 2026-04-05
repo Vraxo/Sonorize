@@ -51,7 +51,7 @@ public class SonorizeTheme
 
     public SonorizeTheme Clone()
     {
-        var clone = (SonorizeTheme)MemberwiseClone();
+        SonorizeTheme clone = (SonorizeTheme)MemberwiseClone();
         clone.PlayerBarLayout = PlayerBarLayout.Clone();
         return clone;
     }

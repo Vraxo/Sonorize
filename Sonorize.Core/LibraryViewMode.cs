@@ -1,3 +1,7 @@
 ﻿namespace Sonorize.Core;
 
-public enum LibraryViewMode { List, Grid }
+public enum LibraryViewMode
+{
+    List,
+    Grid
+}

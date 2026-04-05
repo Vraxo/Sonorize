@@ -30,19 +30,21 @@ public class LibraryScanCoordinator
 
     public async Task ScanSingleFolderAsync(string path)
     {
-        var (songs, playlists) = await _scanner.ScanAsync(path);
+        (List<Song>? songs, List<Playlist>? playlists) = await _scanner.ScanAsync(path);
+
         ProcessScanResults(songs, playlists, cleanup: false);
     }
 
     private async Task ScanFolderWithCleanupAsync(string path)
     {
-        var (songs, playlists) = await _scanner.ScanAsync(path);
+        (List<Song>? songs, List<Playlist>? playlists) = await _scanner.ScanAsync(path);
+
         ProcessScanResults(songs, playlists, cleanup: true);
     }
 
     private void ProcessScanResults(List<Song> songs, List<Playlist> playlists, bool cleanup)
     {
-        foreach (var song in songs)
+        foreach (Song song in songs)
         {
             _dataManager.AddOrUpdateSong(song);
         }
@@ -57,15 +59,18 @@ public class LibraryScanCoordinator
 
     private void RemoveMissingSongs(List<Song> foundSongs)
     {
-        var foundPaths = new HashSet<string>(foundSongs.Select(s => s.FilePath), StringComparer.OrdinalIgnoreCase);
+        HashSet<string> foundPaths = new(foundSongs.Select(s => s.FilePath), StringComparer.OrdinalIgnoreCase);
 
-        foreach (var song in _dataManager.AllSongs)
+        foreach (Song song in _dataManager.AllSongs)
         {
             bool isDemo = song.FilePath.StartsWith(DemoDataGenerator.DemoScheme, StringComparison.OrdinalIgnoreCase);
-            if (!isDemo && !foundPaths.Contains(song.FilePath))
+
+            if (isDemo || foundPaths.Contains(song.FilePath))
             {
-                _dataManager.RemoveSong(song.FilePath);
+                continue;
             }
+
+            _dataManager.RemoveSong(song.FilePath);
         }
     }
 }

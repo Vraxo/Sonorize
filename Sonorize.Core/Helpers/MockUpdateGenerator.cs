@@ -8,14 +8,14 @@ public static class MockUpdateGenerator
     public static ReleaseInfo Generate()
     {
         string tempDir = Path.Combine(Path.GetTempPath(), "SonorizeMock_" + Guid.NewGuid());
-        _ = Directory.CreateDirectory(tempDir);
+        Directory.CreateDirectory(tempDir);
 
         try
         {
-            // Create a dummy file that proves the update worked
             File.WriteAllText(Path.Combine(tempDir, "UPDATE_SUCCESSFUL.txt"), $"Update test completed at {DateTime.Now}");
 
             string zipPath = Path.Combine(Path.GetTempPath(), "mock-release.zip");
+
             if (File.Exists(zipPath))
             {
                 File.Delete(zipPath);

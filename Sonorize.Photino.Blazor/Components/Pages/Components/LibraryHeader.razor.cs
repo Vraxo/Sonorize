@@ -21,19 +21,24 @@ public partial class LibraryHeader
     private async Task OnSearchInput(ChangeEventArgs e)
     {
         SearchQuery = e.Value?.ToString() ?? "";
+
         await SearchQueryChanged.InvokeAsync(SearchQuery);
     }
 
     private async Task ClearSearch()
     {
         SearchQuery = "";
+
         await SearchQueryChanged.InvokeAsync(SearchQuery);
         await OnSearchKeyUp.InvokeAsync();
     }
 
     private async Task ToggleViewMode()
     {
-        var newMode = ViewMode == LibraryViewMode.List ? LibraryViewMode.Grid : LibraryViewMode.List;
+        LibraryViewMode newMode = ViewMode == LibraryViewMode.List
+            ? LibraryViewMode.Grid
+            : LibraryViewMode.List;
+
         await ViewModeChanged.InvokeAsync(newMode);
     }
 }

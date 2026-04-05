@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp.PixelFormats;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
 namespace Sonorize.Core.Services.System;
@@ -12,8 +13,9 @@ public class ImageAnalysisService
             try
             {
                 // 1. Extract image data using TagLib (same logic as SchemeHandler)
-                using var file = TagLib.File.Create(audioFilePath);
-                var pic = file.Tag.Pictures.FirstOrDefault();
+                using TagLib.File file = TagLib.File.Create(audioFilePath);
+
+                TagLib.IPicture? pic = file.Tag.Pictures.FirstOrDefault();
 
                 if (pic is null || pic.Data.Data.Length == 0)
                 {
@@ -23,7 +25,7 @@ public class ImageAnalysisService
                 // 2. Load into ImageSharp
                 // ImageSharp is fully managed and cross-platform (no System.Drawing/GDI+)
                 // Fix: Resolve ambiguity with System.Net.Mime.MediaTypeNames.Image
-                using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(pic.Data.Data);
+                using Image<Rgba32> image = Image.Load<Rgba32>(pic.Data.Data);
 
                 // 3. Downsample to 1x1 pixel to get the average color efficiently
                 image.Mutate(x => x.Resize(1, 1));

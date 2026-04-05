@@ -1,5 +1,5 @@
 ﻿using IF.Lastfm.Core.Api;
-using IF.Lastfm.Core.Objects;
+using IF.Lastfm.Core.Api.Helpers;
 using Sonorize.Core.Configuration;
 using Sonorize.Core.Services.System;
 using Sonorize.Core.Settings;
@@ -47,14 +47,15 @@ public class LastfmAuthService
             return null;
         }
 
-        if (!string.IsNullOrEmpty(_settings.Lastfm.SessionKey))
+        if (string.IsNullOrEmpty(_settings.Lastfm.SessionKey))
         {
-            var auth = new LastAuth(_apiKey, _apiSecret);
-            _ = auth.LoadSession(new LastUserSession { Token = _settings.Lastfm.SessionKey });
-            return new LastfmClient(auth);
+            return null;
         }
 
-        return null;
+        LastAuth auth = new(_apiKey, _apiSecret);
+        auth.LoadSession(new() { Token = _settings.Lastfm.SessionKey });
+
+        return new(auth);
     }
 
     public async Task<LastfmClient?> AuthenticateWithCredentialsAsync(string password)
@@ -65,10 +66,11 @@ public class LastfmAuthService
             return null;
         }
 
-        var auth = new LastAuth(_apiKey, _apiSecret);
+        LastAuth auth = new(_apiKey, _apiSecret);
+
         try
         {
-            var response = await auth.GetSessionTokenAsync(_settings.Lastfm.Username!, password);
+            LastResponse response = await auth.GetSessionTokenAsync(_settings.Lastfm.Username!, password);
 
             if (response.Success && auth.Authenticated && auth.UserSession is not null)
             {
@@ -90,6 +92,7 @@ public class LastfmAuthService
 
     public bool IsConfigured()
     {
-        return IsAppIdConfigured && !string.IsNullOrEmpty(_settings.Lastfm.SessionKey);
+        return IsAppIdConfigured
+            && !string.IsNullOrEmpty(_settings.Lastfm.SessionKey);
     }
 }

@@ -24,6 +24,7 @@ public class DemoDataLoader
         }
 
         List<Playlist> playlists = DemoDataGenerator.GeneratePlaylists(songs);
+
         _dataManager.UpdateFilePlaylists(playlists, incremental: false);
     }
 }

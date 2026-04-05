@@ -109,11 +109,12 @@ public partial class Sidebar
         string currentUri = Nav.Uri;
         string targetUri = Nav.ToAbsoluteUri(href).ToString();
 
-        bool isActive = (href == "albums" && currentUri.Contains("/albums")) ||
-                        (href == "artists" && currentUri.Contains("/artists")) ||
-                        (href == "folders" && currentUri.Contains("/folders")) ||
-                        (href == "playlists" && currentUri.EndsWith("/playlists")) ||
-                        currentUri.Equals(targetUri, StringComparison.OrdinalIgnoreCase);
+        bool isActive =
+            (href == "albums" && currentUri.Contains("/albums")) ||
+            (href == "artists" && currentUri.Contains("/artists")) ||
+            (href == "folders" && currentUri.Contains("/folders")) ||
+            (href == "playlists" && currentUri.EndsWith("/playlists")) ||
+            currentUri.Equals(targetUri, StringComparison.OrdinalIgnoreCase);
 
         return isActive ? "active" : "";
     }

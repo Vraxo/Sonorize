@@ -10,7 +10,12 @@ public class LibrarySettings
 
     public List<string> SupportedFileExtensions { get; set; } =
     [
-        ".mp3", ".flac", ".m4a", ".aac", ".wav", ".ogg"
+        ".mp3",
+        ".flac",
+        ".m4a",
+        ".aac",
+        ".wav",
+        ".ogg"
     ];
 
     // Individual View Modes

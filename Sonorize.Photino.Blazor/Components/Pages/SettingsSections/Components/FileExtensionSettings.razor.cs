@@ -7,7 +7,15 @@ public partial class FileExtensionSettings
 {
     private readonly List<string> _knownExtensions =
     [
-        ".mp3", ".flac", ".wav", ".m4a", ".aac", ".ogg", ".wma", ".opus", ".aiff"
+        ".mp3",
+        ".flac",
+        ".wav",
+        ".m4a",
+        ".aac",
+        ".ogg",
+        ".wma",
+        ".opus",
+        ".aiff"
     ];
 
     private string _newExtension = "";
@@ -40,10 +48,12 @@ public partial class FileExtensionSettings
 
     private void HandleExtensionKeyUp(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter")
+        if (e.Key != "Enter")
         {
-            AddExtension();
+            return;
         }
+
+        AddExtension();
     }
 
     private void AddExtension()
@@ -54,6 +64,7 @@ public partial class FileExtensionSettings
         }
 
         string formatted = _newExtension.Trim().ToLowerInvariant();
+
         if (!formatted.StartsWith("."))
         {
             formatted = "." + formatted;
@@ -64,6 +75,7 @@ public partial class FileExtensionSettings
             AppSettings.Library.SupportedFileExtensions.Add(formatted);
             SaveAndRefresh();
         }
+
         _newExtension = "";
     }
 

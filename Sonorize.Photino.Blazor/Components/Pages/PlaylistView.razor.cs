@@ -58,8 +58,12 @@ public partial class PlaylistView
 
     private void ToggleViewMode()
     {
-        _viewMode = _viewMode == LibraryViewMode.List ? LibraryViewMode.Grid : LibraryViewMode.List;
+        _viewMode = _viewMode == LibraryViewMode.List
+            ? LibraryViewMode.Grid
+            : LibraryViewMode.List;
+
         AppSettings.Library.PlaylistDetailViewMode = _viewMode;
+
         SettingsManager.Save(AppSettings);
     }
 
@@ -75,12 +79,15 @@ public partial class PlaylistView
         }
 
         Dictionary<string, Song> songLookup = LibService.AllSongs.ToDictionary(s => s.FilePath);
-        foreach (var path in _currentPlaylist.SongFilePaths)
+
+        foreach (string path in _currentPlaylist.SongFilePaths)
         {
-            if (songLookup.TryGetValue(path, out var song))
+            if (!songLookup.TryGetValue(path, out Song? song))
             {
-                _masterPlaylistSongs.Add(song);
+                continue;
             }
+
+            _masterPlaylistSongs.Add(song);
         }
 
         FilterPlaylist();
@@ -110,9 +117,10 @@ public partial class PlaylistView
 
         if (!string.IsNullOrWhiteSpace(_searchQuery))
         {
-            query = query.Where(s => s.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                                     s.Artist.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
-                                     s.Album.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
+            query =
+                query.Where(s => s.Title.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)
+                || s.Artist.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase)
+                || s.Album.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase));
         }
 
         if (_sortColumn != SortColumn.None)
@@ -120,8 +128,11 @@ public partial class PlaylistView
             switch (_sortColumn)
             {
                 case SortColumn.Title:
-                    query = _isAscending ? query.OrderBy(s => s.Title) : query.OrderByDescending(s => s.Title);
+                    query = _isAscending
+                        ? query.OrderBy(s => s.Title)
+                        : query.OrderByDescending(s => s.Title);
                     break;
+
                 case SortColumn.Artist:
                     query = _isAscending
                        ? query.OrderBy(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title)
@@ -133,12 +144,14 @@ public partial class PlaylistView
                         : query.OrderByDescending(s => s.Album).ThenBy(s => s.Title);
                     break;
                 case SortColumn.Duration:
-                    query = _isAscending ? query.OrderBy(s => s.Duration) : query.OrderByDescending(s => s.Duration);
+                    query = _isAscending
+                        ? query.OrderBy(s => s.Duration)
+                        : query.OrderByDescending(s => s.Duration);
                     break;
             }
         }
 
-        _filteredSongs = query.ToList();
+        _filteredSongs = [.. query];
     }
 
     private void GoToSettings()

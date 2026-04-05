@@ -1,3 +1,7 @@
 ﻿namespace Sonorize.Core;
 
-public enum TextOverflowMode { Wrap, Truncate }
+public enum TextOverflowMode
+{
+    Wrap,
+    Truncate
+}

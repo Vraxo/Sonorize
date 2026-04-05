@@ -75,7 +75,14 @@ public class QueueController
 
     public bool TryRegress()
     {
-        return Queue.Count != 0 && (IsShuffle ? AdvanceShuffle(forward: false, autoAdvance: false) : AdvanceLinear(forward: false, autoAdvance: false));
+        return Queue.Count != 0 && NameMe();
+    }
+
+    private bool NameMe()
+    {
+        return IsShuffle
+            ? AdvanceShuffle(forward: false, autoAdvance: false)
+            : AdvanceLinear(forward: false, autoAdvance: false);
     }
 
     // --- Mode Management ---
@@ -83,11 +90,13 @@ public class QueueController
     public void ToggleShuffle()
     {
         IsShuffle = !IsShuffle;
+
         if (IsShuffle)
         {
             RebuildShuffleDeck();
             SyncShufflePointer();
         }
+
         ModesChanged?.Invoke(IsShuffle, RepeatMode);
     }
 
@@ -99,6 +108,7 @@ public class QueueController
             RepeatMode.All => RepeatMode.One,
             _ => RepeatMode.None
         };
+
         ModesChanged?.Invoke(IsShuffle, RepeatMode);
     }
 
@@ -106,11 +116,14 @@ public class QueueController
     {
         IsShuffle = isShuffle;
         RepeatMode = repeatMode;
-        if (IsShuffle)
+
+        if (!IsShuffle)
         {
-            RebuildShuffleDeck();
-            SyncShufflePointer();
+            return;
         }
+
+        RebuildShuffleDeck();
+        SyncShufflePointer();
     }
 
     // --- Mutation ---
@@ -189,7 +202,9 @@ public class QueueController
 
     private bool AdvanceLinear(bool forward, bool autoAdvance)
     {
-        int next = forward ? CurrentIndex + 1 : CurrentIndex - 1;
+        int next = forward
+            ? CurrentIndex + 1
+            : CurrentIndex - 1;
 
         if (next >= Queue.Count)
         {
@@ -198,6 +213,7 @@ public class QueueController
                 CurrentIndex = 0;
                 return true;
             }
+
             return false;
         }
 
@@ -238,13 +254,15 @@ public class QueueController
 
         _shufflePointer = nextPtr;
         CurrentIndex = _shuffleDeck[_shufflePointer];
+
         return true;
     }
 
     private void RebuildShuffleDeck()
     {
-        _shuffleDeck = Enumerable.Range(0, Queue.Count).ToList();
+        _shuffleDeck = [.. Enumerable.Range(0, Queue.Count)];
         int n = _shuffleDeck.Count;
+
         while (n > 1)
         {
             n--;
@@ -261,10 +279,11 @@ public class QueueController
         }
 
         // Find where the current index lives in the deck
-        int ptr = _shuffleDeck.IndexOf(CurrentIndex);
-        if (ptr != -1)
+        int pointer = _shuffleDeck.IndexOf(CurrentIndex);
+
+        if (pointer != -1)
         {
-            _shufflePointer = ptr;
+            _shufflePointer = pointer;
         }
         else if (_shuffleDeck.Count > 0)
         {

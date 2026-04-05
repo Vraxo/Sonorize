@@ -16,10 +16,12 @@ public class FileImportService
         _settings = settings;
         _cacheDir = Path.Combine(Path.GetTempPath(), "Sonorize", "DropCache");
 
-        if (!Directory.Exists(_cacheDir))
+        if (Directory.Exists(_cacheDir))
         {
-            _ = Directory.CreateDirectory(_cacheDir);
+            return;
         }
+
+        _ = Directory.CreateDirectory(_cacheDir);
     }
 
     public async Task<List<Song>> ImportStreamsAsync(IEnumerable<(Stream stream, string fileName)> files)
@@ -27,41 +29,44 @@ public class FileImportService
         // Cleanup old cache on new drop to prevent infinite bloat
         CleanupCache();
 
-        var songs = new List<Song>();
+        List<Song> songs = [];
 
-        foreach (var (stream, fileName) in files)
+        foreach ((Stream? stream, string? fileName) in files)
         {
-            var ext = Path.GetExtension(fileName).ToLowerInvariant();
+            string ext = Path.GetExtension(fileName).ToLowerInvariant();
+
             if (!_settings.Library.SupportedFileExtensions.Contains(ext))
             {
                 continue;
             }
 
-            var tempPath = Path.Combine(_cacheDir, fileName);
+            string tempPath = Path.Combine(_cacheDir, fileName);
 
             try
             {
-                using (var fs = new FileStream(tempPath, FileMode.Create))
+                using (FileStream fs = new(tempPath, FileMode.Create))
                 {
                     await stream.CopyToAsync(fs);
                 }
 
-                var song = await _libraryService.CreateSongFromFileAsync(tempPath);
-                if (song is not null)
+                Song? song = await _libraryService.CreateSongFromFileAsync(tempPath);
+
+                if (song is null)
                 {
-                    // Fallback metadata for loose files
-                    if (song.Artist == "Unknown Artist")
-                    {
-                        song.Artist = "Dropped File";
-                    }
-
-                    if (song.Album == "Unknown Album")
-                    {
-                        song.Album = "Queue";
-                    }
-
-                    songs.Add(song);
+                    continue;
                 }
+
+                if (song.Artist == "Unknown Artist")
+                {
+                    song.Artist = "Dropped File";
+                }
+
+                if (song.Album == "Unknown Album")
+                {
+                    song.Album = "Queue";
+                }
+
+                songs.Add(song);
             }
             catch (Exception ex)
             {
@@ -76,8 +81,9 @@ public class FileImportService
     {
         try
         {
-            var dir = new DirectoryInfo(_cacheDir);
-            foreach (var file in dir.GetFiles())
+            DirectoryInfo dir = new(_cacheDir);
+
+            foreach (FileInfo file in dir.GetFiles())
             {
                 file.Delete();
             }

@@ -18,25 +18,45 @@ public class AudioService : IAudioService
     private readonly int[] _eqHandles = new int[10];
     private readonly float[] _eqGains = new float[10];
     private bool _eqEnabled = false;
-    private readonly float[] _eqCenters = [31, 63, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+
+    private readonly float[] _eqCenters =
+    [
+        31,
+        63,
+        125,
+        250,
+        500,
+        1000,
+        2000,
+        4000,
+        8000,
+        16000
+    ];
 
     // FX State
     private float _currentTempo = 0;
     private float _currentPitch = 0;
+
+    private string? _currentFilePath;
 
     public bool IsAudioEngineAvailable { get; private set; } = false;
     public bool IsFxAvailable { get; private set; } = false;
 
     public event Action? PlaybackFinished;
 
-    public Models.PlaybackState PlaybackState => !IsAudioEngineAvailable || _streamHandle == 0
-                ? Models.PlaybackState.Stopped
-                : Bass.ChannelIsActive(_streamHandle) switch
-                {
-                    ManagedBass.PlaybackState.Playing => Sonorize.Core.Models.PlaybackState.Playing,
-                    ManagedBass.PlaybackState.Paused => Sonorize.Core.Models.PlaybackState.Paused,
-                    _ => Sonorize.Core.Models.PlaybackState.Stopped
-                };
+    public Models.PlaybackState PlaybackState => IsAudioEngineAvailable && _streamHandle != 0
+                ? GetPlaybackState()
+                : Models.PlaybackState.Stopped;
+
+    private Models.PlaybackState GetPlaybackState()
+    {
+        return Bass.ChannelIsActive(_streamHandle) switch
+        {
+            ManagedBass.PlaybackState.Playing => Models.PlaybackState.Playing,
+            ManagedBass.PlaybackState.Paused => Models.PlaybackState.Paused,
+            _ => Models.PlaybackState.Stopped
+        };
+    }
 
     public TimeSpan CurrentTime
     {
@@ -53,11 +73,13 @@ public class AudioService : IAudioService
         }
         set
         {
-            if (IsAudioEngineAvailable && _streamHandle != 0)
+            if (!IsAudioEngineAvailable || _streamHandle == 0)
             {
-                long pos = Bass.ChannelSeconds2Bytes(_streamHandle, value.TotalSeconds);
-                _ = Bass.ChannelSetPosition(_streamHandle, pos);
+                return;
             }
+
+            long pos = Bass.ChannelSeconds2Bytes(_streamHandle, value.TotalSeconds);
+            _ = Bass.ChannelSetPosition(_streamHandle, pos);
         }
     }
 
@@ -80,19 +102,24 @@ public class AudioService : IAudioService
     public float Volume
     {
         get;
+
         set
         {
             field = Math.Clamp(value, 0.0f, 1.0f);
-            if (IsAudioEngineAvailable && _streamHandle != 0)
+
+            if (!IsAudioEngineAvailable || _streamHandle == 0)
             {
-                _ = Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Volume, field);
+                return;
             }
+
+            Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Volume, field);
         }
     } = 1.0f;
 
     public AudioService(LogService logger)
     {
         _logger = logger;
+
         InitializeBass();
     }
 
@@ -146,18 +173,26 @@ public class AudioService : IAudioService
         try
         {
             int count = Bass.DeviceCount;
+
             for (int i = 0; i < count; i++)
             {
-                if (Bass.GetDeviceInfo(i, out DeviceInfo info))
+                if (!Bass.GetDeviceInfo(i, out DeviceInfo info)
+                    || !info.IsEnabled
+                    || info.Type == DeviceType.Microphone)
                 {
-                    if (info.IsEnabled && info.Type != DeviceType.Microphone)
-                    {
-                        devices.Add(new AudioDeviceInfo { Index = i, Name = info.Name, IsDefault = info.IsDefault });
-                    }
+                    continue;
                 }
+
+                devices.Add(new()
+                {
+                    Index = i,
+                    Name = info.Name,
+                    IsDefault = info.IsDefault
+                });
             }
         }
         catch { }
+
         return devices;
     }
 
@@ -175,35 +210,41 @@ public class AudioService : IAudioService
 
         _preferredDeviceIndexString = deviceIndexString;
 
-        if (int.TryParse(deviceIndexString, out int deviceIndex))
+        if (!int.TryParse(deviceIndexString, out int deviceIndex))
         {
-            string? currentFile = GetCurrentFile();
-            TimeSpan currentPos = CurrentTime;
-            bool wasPlaying = PlaybackState == Sonorize.Core.Models.PlaybackState.Playing;
-
-            Stop();
-            _ = Bass.Free();
-
-            if (Bass.Init(deviceIndex, 44100, DeviceInitFlags.Default, IntPtr.Zero))
-            {
-                if (currentFile is not null)
-                {
-                    Load(currentFile);
-                    CurrentTime = currentPos;
-                    if (wasPlaying)
-                    {
-                        Play();
-                    }
-                }
-            }
-            else
-            {
-                _logger.Error($"Failed to switch audio device: {Bass.LastError}");
-            }
+            return;
         }
+
+        string? currentFile = GetCurrentFile();
+        TimeSpan currentPos = CurrentTime;
+        bool wasPlaying = PlaybackState == Models.PlaybackState.Playing;
+
+        Stop();
+        _ = Bass.Free();
+
+        if (!Bass.Init(deviceIndex, 44100, DeviceInitFlags.Default, IntPtr.Zero))
+        {
+            _logger.Error($"Failed to switch audio device: {Bass.LastError}");
+            return;
+        }
+
+        if (currentFile is null)
+        {
+            return;
+        }
+
+        Load(currentFile);
+        CurrentTime = currentPos;
+
+        if (!wasPlaying)
+        {
+            return;
+        }
+
+        Play();
     }
 
-    private string? _currentFilePath;
+
     private string? GetCurrentFile()
     {
         return _currentFilePath;
@@ -301,21 +342,22 @@ public class AudioService : IAudioService
 
     public void Play()
     {
-        if (IsAudioEngineAvailable && _streamHandle != 0)
+        if (!IsAudioEngineAvailable || _streamHandle == 0 || Bass.ChannelPlay(_streamHandle))
         {
-            if (!Bass.ChannelPlay(_streamHandle))
-            {
-                _logger.Error($"Play failed: {Bass.LastError}");
-            }
+            return;
         }
+
+        _logger.Error($"Play failed: {Bass.LastError}");
     }
 
     public void Pause()
     {
-        if (IsAudioEngineAvailable && _streamHandle != 0)
+        if (!IsAudioEngineAvailable || _streamHandle == 0)
         {
-            _ = Bass.ChannelPause(_streamHandle);
+            return;
         }
+
+        _ = Bass.ChannelPause(_streamHandle);
     }
 
     public void Stop()
@@ -323,8 +365,8 @@ public class AudioService : IAudioService
         if (IsAudioEngineAvailable && _streamHandle != 0)
         {
             _isManuallyStopping = true;
-            _ = Bass.ChannelStop(_streamHandle);
-            _ = Bass.StreamFree(_streamHandle);
+            Bass.ChannelStop(_streamHandle);
+            Bass.StreamFree(_streamHandle);
             // _sourceHandle is freed automatically due to FxFreeSource flag
             _streamHandle = 0;
             _sourceHandle = 0;
@@ -338,19 +380,25 @@ public class AudioService : IAudioService
     public void SetTempo(float percentage)
     {
         _currentTempo = percentage;
-        if (IsFxAvailable && _streamHandle != 0)
+
+        if (!IsFxAvailable || _streamHandle == 0)
         {
-            _ = Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Tempo, _currentTempo);
+            return;
         }
+
+        Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Tempo, _currentTempo);
     }
 
     public void SetPitch(float semitones)
     {
         _currentPitch = semitones;
-        if (IsFxAvailable && _streamHandle != 0)
+
+        if (!IsFxAvailable || _streamHandle == 0)
         {
-            _ = Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Pitch, _currentPitch);
+            return;
         }
+
+        Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Pitch, _currentPitch);
     }
 
     private void ApplyTempoPitch()
@@ -360,8 +408,8 @@ public class AudioService : IAudioService
             return;
         }
 
-        _ = Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Tempo, _currentTempo);
-        _ = Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Pitch, _currentPitch);
+        Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Tempo, _currentTempo);
+        Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Pitch, _currentPitch);
     }
 
     // --- EQ Logic ---
@@ -369,28 +417,30 @@ public class AudioService : IAudioService
     public void SetEq(bool enabled, float[] gains)
     {
         _eqEnabled = enabled;
+
         if (gains.Length == 10)
         {
             Array.Copy(gains, _eqGains, 10);
         }
 
-        if (_streamHandle != 0)
+        if (_streamHandle == 0)
         {
-            if (_eqEnabled)
-            {
-                if (_eqHandles[0] == 0)
-                {
-                    ApplyEqToStream();
-                }
-                else
-                {
-                    UpdateAllBands();
-                }
-            }
-            else
-            {
-                RemoveEq();
-            }
+            return;
+        }
+
+        if (!_eqEnabled)
+        {
+            RemoveEq();
+            return;
+        }
+
+        if (_eqHandles[0] == 0)
+        {
+            ApplyEqToStream();
+        }
+        else
+        {
+            UpdateAllBands();
         }
     }
 
@@ -403,10 +453,12 @@ public class AudioService : IAudioService
 
         _eqGains[bandIndex] = gain;
 
-        if (_streamHandle != 0 && _eqEnabled && _eqHandles[bandIndex] != 0)
+        if (_streamHandle == 0 || !_eqEnabled || _eqHandles[bandIndex] == 0)
         {
-            UpdateBandParam(bandIndex);
+            return;
         }
+
+        UpdateBandParam(bandIndex);
     }
 
     private void ApplyEqToStream()
@@ -420,6 +472,7 @@ public class AudioService : IAudioService
         {
             int fx = Bass.ChannelSetFX(_streamHandle, EffectType.DXParamEQ, 0);
             _eqHandles[i] = fx;
+
             UpdateBandParam(i);
         }
     }
@@ -433,11 +486,13 @@ public class AudioService : IAudioService
 
         for (int i = 0; i < 10; i++)
         {
-            if (_eqHandles[i] != 0)
+            if (_eqHandles[i] == 0)
             {
-                _ = Bass.ChannelRemoveFX(_streamHandle, _eqHandles[i]);
-                _eqHandles[i] = 0;
+                continue;
             }
+
+            Bass.ChannelRemoveFX(_streamHandle, _eqHandles[i]);
+            _eqHandles[i] = 0;
         }
     }
 
@@ -456,7 +511,7 @@ public class AudioService : IAudioService
             return;
         }
 
-        var param = new DXParamEQParams
+        DXParamEQParams param = new()
         {
             fCenter = _eqCenters[index],
             fBandwidth = 12f,
@@ -473,6 +528,7 @@ public class AudioService : IAudioService
     public void Dispose()
     {
         Stop();
+
         if (IsAudioEngineAvailable)
         {
             try
@@ -483,6 +539,7 @@ public class AudioService : IAudioService
             }
             catch { /* Swallowing shutdown errors is safer than crashing the app closing */ }
         }
+
         GC.SuppressFinalize(this);
     }
 }

@@ -46,6 +46,7 @@ public partial class SettingsColorControl
         }
 
         Value = val;
+
         await ValueChanged.InvokeAsync(val);
     }
 }

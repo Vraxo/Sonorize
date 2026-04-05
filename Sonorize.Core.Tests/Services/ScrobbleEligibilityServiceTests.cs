@@ -28,7 +28,7 @@ public class ScrobbleEligibilityServiceTests
         var played = TimeSpan.FromSeconds(29);
 
         // Act
-        bool result = _service.ShouldScrobble(song, played, _settings);
+        bool result = ScrobbleEligibilityService.ShouldScrobble(song, played, _settings);
 
         // Assert
         Assert.False(result, "Songs under 30 seconds should never scrobble (Last.fm rule).");
@@ -43,7 +43,7 @@ public class ScrobbleEligibilityServiceTests
         var played = TimeSpan.FromSeconds(101); // Just over 50%
 
         // Act
-        bool result = _service.ShouldScrobble(song, played, _settings);
+        bool result = ScrobbleEligibilityService.ShouldScrobble(song, played, _settings);
 
         // Assert
         Assert.True(result);
@@ -58,7 +58,7 @@ public class ScrobbleEligibilityServiceTests
         var played = TimeSpan.FromSeconds(90);
 
         // Act
-        bool result = _service.ShouldScrobble(song, played, _settings);
+        bool result = ScrobbleEligibilityService.ShouldScrobble(song, played, _settings);
 
         // Assert
         Assert.False(result);
@@ -76,7 +76,7 @@ public class ScrobbleEligibilityServiceTests
         var played = TimeSpan.FromSeconds(250);
 
         // Act
-        bool result = _service.ShouldScrobble(song, played, _settings);
+        bool result = ScrobbleEligibilityService.ShouldScrobble(song, played, _settings);
 
         // Assert
         Assert.True(result, "Should scrobble because 4-minute absolute cap was met, even if 50% wasn't.");
@@ -91,7 +91,7 @@ public class ScrobbleEligibilityServiceTests
         var played = TimeSpan.FromSeconds(200); // Less than 240s
 
         // Act
-        bool result = _service.ShouldScrobble(song, played, _settings);
+        bool result = ScrobbleEligibilityService.ShouldScrobble(song, played, _settings);
 
         // Assert
         Assert.False(result);
@@ -106,7 +106,7 @@ public class ScrobbleEligibilityServiceTests
         var played = TimeSpan.FromSeconds(85); // 85%, not enough for 90%
 
         // Act
-        bool result = _service.ShouldScrobble(song, played, _settings);
+        bool result = ScrobbleEligibilityService.ShouldScrobble(song, played, _settings);
 
         // Assert
         Assert.False(result);

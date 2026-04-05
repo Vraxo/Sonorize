@@ -16,7 +16,7 @@ public class DataRebuildScheduler : IDisposable
     {
         if (immediate)
         {
-            _ = _rebuildAction();
+            _rebuildAction();
             return;
         }
 

@@ -22,11 +22,16 @@ public partial class Library
     private bool _showMetadataEditor = false;
     private Song? _selectedSongForModal;
     private Song? _focusedSong;
-    private readonly Timer _debounceTimer = new(300) { AutoReset = false };
+
+    private readonly Timer _debounceTimer = new(300)
+    {
+        AutoReset = false
+    };
 
     protected override void OnInitialized()
     {
         _viewMode = AppSettings.Library.SongsViewMode;
+
         _debounceTimer.Elapsed += (s, e) => InvokeAsync(ApplyFilterAndSort);
         LibService.LibraryChanged += OnLibraryChanged;
         PlayerService.PlaybackStateChanged += OnPlaybackStateChanged;
@@ -34,25 +39,45 @@ public partial class Library
 
     protected override void OnParametersSet()
     {
-        AlbumName = AlbumName is not null ? Uri.UnescapeDataString(AlbumName) : null;
-        ArtistName = ArtistName is not null ? Uri.UnescapeDataString(ArtistName) : null;
+        AlbumName = AlbumName is not null
+            ? Uri.UnescapeDataString(AlbumName)
+            : null;
+
+        ArtistName = ArtistName is not null
+            ? Uri.UnescapeDataString(ArtistName)
+            : null;
+
         _ = ApplyFilterAndSort();
     }
 
     private void OnLibraryChanged()
     {
-        _ = InvokeAsync(() => { _ = ApplyFilterAndSort(); StateHasChanged(); });
+        InvokeAsync(() =>
+        {
+            _ = ApplyFilterAndSort();
+            StateHasChanged();
+        });
     }
 
     private void OnPlaybackStateChanged()
     {
         // Need to re-render so TrackTable updates the active speaker icon
-        _ = InvokeAsync(StateHasChanged);
+        InvokeAsync(StateHasChanged);
     }
 
     private string GetPageTitle()
     {
-        return !string.IsNullOrEmpty(AlbumName) ? AlbumName : !string.IsNullOrEmpty(ArtistName) ? ArtistName : "Your Library";
+        if (!string.IsNullOrEmpty(AlbumName))
+        {
+            return AlbumName;
+        }
+
+        if (!string.IsNullOrEmpty(ArtistName))
+        {
+            return ArtistName;
+        }
+
+        return "Your Library";
     }
 
     private void ClearFilters()
@@ -84,7 +109,7 @@ public partial class Library
         _isFiltering = true;
         StateHasChanged();
 
-        var baseList = await LibService.SearchAsync(_searchQuery);
+        IReadOnlyList<Song> baseList = await LibService.SearchAsync(_searchQuery);
 
         _filteredSongs = await Task.Run(() =>
         {
@@ -110,14 +135,47 @@ public partial class Library
     {
         return _sortColumn == SortColumn.None
             ? [.. query]
-            : _sortColumn switch
-            {
-                SortColumn.Title => _isAscending ? query.OrderBy(s => s.Title).ToList() : query.OrderByDescending(s => s.Title).ToList(),
-                SortColumn.Artist => _isAscending ? query.OrderBy(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title).ToList() : query.OrderByDescending(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title).ToList(),
-                SortColumn.Album => _isAscending ? query.OrderBy(s => s.Album).ThenBy(s => s.Title).ToList() : query.OrderByDescending(s => s.Album).ThenBy(s => s.Title).ToList(),
-                SortColumn.Duration => _isAscending ? query.OrderBy(s => s.Duration).ToList() : query.OrderByDescending(s => s.Duration).ToList(),
-                _ => query.ToList()
-            };
+            : SortByQuery(query);
+    }
+
+    private List<Song> SortByQuery(IEnumerable<Song> query)
+    {
+        return _sortColumn switch
+        {
+            SortColumn.Title => SortByTitle(query),
+            SortColumn.Artist => SortByArtist(query),
+            SortColumn.Album => SortByAlbum(query),
+            SortColumn.Duration => SortByDuration(query),
+            _ => [.. query]
+        };
+    }
+
+    private List<Song> SortByTitle(IEnumerable<Song> query)
+    {
+        return _isAscending
+            ? [.. query.OrderBy(s => s.Title)]
+            : [.. query.OrderByDescending(s => s.Title)];
+    }
+
+    private List<Song> SortByArtist(IEnumerable<Song> query)
+    {
+        return _isAscending
+            ? [.. query.OrderBy(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title)]
+            : [.. query.OrderByDescending(s => s.Artist).ThenBy(s => s.Album).ThenBy(s => s.Title)];
+    }
+
+    private List<Song> SortByAlbum(IEnumerable<Song> query)
+    {
+        return _isAscending
+            ? [.. query.OrderBy(s => s.Album).ThenBy(s => s.Title)]
+            : [.. query.OrderByDescending(s => s.Album).ThenBy(s => s.Title)];
+    }
+
+    private List<Song> SortByDuration(IEnumerable<Song> query)
+    {
+        return _isAscending
+            ? [.. query.OrderBy(s => s.Duration)]
+            : [.. query.OrderByDescending(s => s.Duration)];
     }
 
     private void Sort(SortColumn column)
@@ -126,15 +184,37 @@ public partial class Library
         {
             _isAscending = !_isAscending;
         }
-        else { _sortColumn = column; _isAscending = true; }
+        else
+        {
+            _sortColumn = column;
+            _isAscending = true;
+        }
+
         _ = ApplyFilterAndSort();
     }
 
-    private void OpenOptions(Song song) { _selectedSongForModal = song; _showActionsModal = true; }
-    private void CloseOptions() { _showActionsModal = false; }
+    private void OpenOptions(Song song)
+    {
+        _selectedSongForModal = song;
+        _showActionsModal = true;
+    }
 
-    private void OpenMetadataEditor(Song song) { _selectedSongForModal = song; _showMetadataEditor = true; }
-    private void CloseMetadataEditor() { _showMetadataEditor = false; _selectedSongForModal = null; }
+    private void CloseOptions()
+    {
+        _showActionsModal = false;
+    }
+
+    private void OpenMetadataEditor(Song song)
+    {
+        _selectedSongForModal = song;
+        _showMetadataEditor = true;
+    }
+
+    private void CloseMetadataEditor()
+    {
+        _showMetadataEditor = false;
+        _selectedSongForModal = null;
+    }
 
     private void GoToSettings()
     {
@@ -144,15 +224,19 @@ public partial class Library
     private async Task OnRowClick(Song song)
     {
         _focusedSong = song;
-        if (AppSettings.Playback.PlayOnSingleClick || _viewMode == LibraryViewMode.Grid)
+
+        if (!AppSettings.Playback.PlayOnSingleClick && _viewMode != LibraryViewMode.Grid)
         {
-            await PlayerService.PlaySong(song, _filteredSongs);
+            return;
         }
+
+        await PlayerService.PlaySong(song, _filteredSongs);
     }
 
     private async Task OnRowDoubleClick(Song song)
     {
         _focusedSong = song;
+
         await PlayerService.PlaySong(song, _filteredSongs);
     }
 

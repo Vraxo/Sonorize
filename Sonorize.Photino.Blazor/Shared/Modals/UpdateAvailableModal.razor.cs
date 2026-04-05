@@ -48,7 +48,7 @@ public partial class UpdateAvailableModal
         try
         {
             string tempPath = Path.Combine(Path.GetTempPath(), $"sonorize_update_{Guid.NewGuid()}.zip");
-            var progress = new Progress<double>(p =>
+            Progress<double> progress = new(p =>
             {
                 _downloadProgress = p;
                 StateHasChanged();
@@ -71,16 +71,18 @@ public partial class UpdateAvailableModal
         _isDismissed = true;
     }
 
-    private string FormatBytes(long bytes)
+    private static string FormatBytes(long bytes)
     {
-        string[] sizes = { "B", "KB", "MB", "GB" };
+        string[] sizes = ["B", "KB", "MB", "GB"];
         double len = bytes;
         int order = 0;
+
         while (len >= 1024 && order < sizes.Length - 1)
         {
             order++;
             len /= 1024;
         }
+
         return $"{len:0.##} {sizes[order]}";
     }
 

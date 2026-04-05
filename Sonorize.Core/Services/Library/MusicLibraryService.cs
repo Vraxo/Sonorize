@@ -8,7 +8,8 @@ public class MusicLibraryService : IMusicLibraryService
 {
     private static readonly HashSet<string> PlaylistExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".m3u", ".m3u8"
+        ".m3u",
+        ".m3u8"
     };
 
     public Task<List<Song>> LoadSongsFromFolderAsync(string folderPath, IEnumerable<string> extensions, CancellationToken cancellationToken)
@@ -26,7 +27,13 @@ public class MusicLibraryService : IMusicLibraryService
 
             try
             {
-                _ = Parallel.ForEach(musicFiles, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount, CancellationToken = cancellationToken }, (file) =>
+                ParallelOptions parallelOptions = new()
+                {
+                    MaxDegreeOfParallelism = Environment.ProcessorCount,
+                    CancellationToken = cancellationToken
+                };
+
+                _ = Parallel.ForEach(musicFiles, parallelOptions, (file) =>
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
@@ -34,10 +41,12 @@ public class MusicLibraryService : IMusicLibraryService
                     }
 
                     // Pre-check for validity before heavy parsing
-                    if (IsFileValid(file))
+                    if (!IsFileValid(file))
                     {
-                        songs.Add(ProcessMusicFile(file));
+                        return;
                     }
+
+                    songs.Add(ProcessMusicFile(file));
                 });
             }
             catch (OperationCanceledException)
@@ -64,14 +73,19 @@ public class MusicLibraryService : IMusicLibraryService
                     break;
                 }
 
-                if (IsFileValid(file))
+                if (!IsFileValid(file))
                 {
-                    Playlist? playlist = ProcessPlaylistFile(file);
-                    if (playlist is not null)
-                    {
-                        playlists.Add(playlist);
-                    }
+                    continue;
                 }
+
+                Playlist? playlist = ProcessPlaylistFile(file);
+
+                if (playlist is null)
+                {
+                    continue;
+                }
+
+                playlists.Add(playlist);
             }
 
             return playlists;
@@ -82,7 +96,9 @@ public class MusicLibraryService : IMusicLibraryService
     {
         return Task.Run(() =>
         {
-            return !IsFileValid(filePath) ? null : ProcessMusicFile(filePath);
+            return !IsFileValid(filePath)
+                ? null
+                : ProcessMusicFile(filePath);
         });
     }
 
@@ -97,10 +113,10 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
-            using var file = TagLib.File.Create(filePath);
-            var tag = file.Tag;
+            using TagLib.File file = TagLib.File.Create(filePath);
+            TagLib.Tag tag = file.Tag;
 
-            return new SongMetadata
+            return new()
             {
                 Title = tag.Title ?? "",
                 Artist = tag.FirstPerformer ?? "",
@@ -128,14 +144,25 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
-            using var file = TagLib.File.Create(filePath);
-            var tag = file.Tag;
+            using TagLib.File file = TagLib.File.Create(filePath);
+            TagLib.Tag tag = file.Tag;
 
             tag.Title = metadata.Title;
-            tag.Performers = string.IsNullOrWhiteSpace(metadata.Artist) ? [] : [metadata.Artist];
+
+            tag.Performers = string.IsNullOrWhiteSpace(metadata.Artist)
+                ? []
+                : [metadata.Artist];
+
             tag.Album = metadata.Album;
-            tag.AlbumArtists = string.IsNullOrWhiteSpace(metadata.AlbumArtists) ? [] : [metadata.AlbumArtists];
-            tag.Genres = string.IsNullOrWhiteSpace(metadata.Genre) ? [] : [metadata.Genre];
+
+            tag.AlbumArtists = string.IsNullOrWhiteSpace(metadata.AlbumArtists)
+                ? []
+                : [metadata.AlbumArtists];
+
+            tag.Genres = string.IsNullOrWhiteSpace(metadata.Genre)
+                ? []
+                : [metadata.Genre];
+
             tag.Year = metadata.Year;
             tag.Track = metadata.Track;
             tag.Disc = metadata.Disc;
@@ -215,7 +242,7 @@ public class MusicLibraryService : IMusicLibraryService
 
             return songPaths.Count == 0
                 ? null
-                : new Playlist
+                : new()
                 {
                     Name = Path.GetFileNameWithoutExtension(filePath),
                     FilePath = filePath,
@@ -231,7 +258,9 @@ public class MusicLibraryService : IMusicLibraryService
 
     private static Song CreateSongFromTags(TagLib.File tagFile, string filePath)
     {
-        bool hasArt = tagFile.Tag.Pictures is not null && tagFile.Tag.Pictures.Length > 0;
+        bool hasArt =
+            tagFile.Tag.Pictures is not null
+            && tagFile.Tag.Pictures.Length > 0;
 
         return new()
         {

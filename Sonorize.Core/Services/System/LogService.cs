@@ -10,10 +10,12 @@ public class LogService
     public LogService()
     {
         string dir = AppDataHelper.GetBaseDirectory();
+
         if (!Directory.Exists(dir))
         {
             _ = Directory.CreateDirectory(dir);
         }
+
         _logPath = Path.Combine(dir, "app.log");
     }
 
@@ -29,7 +31,10 @@ public class LogService
 
     public void Error(string message, Exception? ex = null)
     {
-        string msg = ex is null ? message : $"{message}\n{ex}";
+        string msg = ex is null
+            ? message
+            : $"{message}\n{ex}";
+
         Write("ERROR", msg);
     }
 
@@ -40,12 +45,10 @@ public class LogService
             lock (_lock)
             {
                 // Simple rolling log: if > 5MB, delete and start over
-                if (File.Exists(_logPath) && new FileInfo(_logPath).Length > 5 * 1024 * 1024)
-                {
-                    File.Delete(_logPath);
-                }
+                NameMe();
 
                 string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{level}] {message}{Environment.NewLine}";
+
                 File.AppendAllText(_logPath, line);
             }
         }
@@ -54,5 +57,17 @@ public class LogService
             // Fallback to console if file access fails (better than crashing the crash logger)
             Console.WriteLine($"[LOG FAILURE] {message}");
         }
+    }
+
+    private void NameMe()
+    {
+        const int Mb5 = 5 * 1024 * 1024;
+
+        if (!File.Exists(_logPath) || new FileInfo(_logPath).Length <= Mb5)
+        {
+            return;
+        }
+
+        File.Delete(_logPath);
     }
 }

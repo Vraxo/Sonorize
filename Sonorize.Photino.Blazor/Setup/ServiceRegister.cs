@@ -24,65 +24,65 @@ public static class ServiceRegistrar
 
     private static void RegisterCoreInfrastructure(IServiceCollection services)
     {
-        _ = services.AddSingleton<LogService>();
+        services.AddSingleton<LogService>();
     }
 
     private static void RegisterSettings(IServiceCollection services)
     {
-        _ = services.AddSingleton<ISettingsManager<SonorizeSettings>>(_ => new SettingsManager<SonorizeSettings>("Settings.json"));
-        _ = services.AddSingleton(sp => sp.GetRequiredService<ISettingsManager<SonorizeSettings>>().Load());
+        services.AddSingleton<ISettingsManager<SonorizeSettings>>(_ => new SettingsManager<SonorizeSettings>("Settings.json"));
+        services.AddSingleton(sp => sp.GetRequiredService<ISettingsManager<SonorizeSettings>>().Load());
     }
 
     private static void RegisterLibrary(IServiceCollection services)
     {
         // Maximum decomposition pattern
-        _ = services.AddSingleton<LibraryDataManager>();
-        _ = services.AddSingleton<LibraryScanCoordinator>();
-        _ = services.AddSingleton<LibraryEventCoordinator>();
-        _ = services.AddSingleton<FolderTreeBuilder>();
-        _ = services.AddSingleton<PlaylistSyncOrchestrator>();
-        _ = services.AddSingleton<FolderScanner>();
-        _ = services.AddSingleton<DemoDataLoader>();
+        services.AddSingleton<LibraryDataManager>();
+        services.AddSingleton<LibraryScanCoordinator>();
+        services.AddSingleton<LibraryEventCoordinator>();
+        services.AddSingleton<FolderTreeBuilder>();
+        services.AddSingleton<PlaylistSyncOrchestrator>();
+        services.AddSingleton<FolderScanner>();
+        services.AddSingleton<DemoDataLoader>();
 
         // Facade service
-        _ = services.AddSingleton<LibraryService>();
+        services.AddSingleton<LibraryService>();
 
         // Supporting services
-        _ = services.AddSingleton<IMusicLibraryService, MusicLibraryService>();
-        _ = services.AddSingleton<PlaylistPersistenceService>();
-        _ = services.AddSingleton<PlaylistManager>();
-        _ = services.AddSingleton<SearchService>();
-        _ = services.AddSingleton<LibraryCacheService>();
-        _ = services.AddSingleton<LibraryAggregator>();
-        _ = services.AddSingleton<LibraryFileMonitor>();
-        _ = services.AddSingleton<LibraryScanner>();
+        services.AddSingleton<IMusicLibraryService, MusicLibraryService>();
+        services.AddSingleton<PlaylistPersistenceService>();
+        services.AddSingleton<PlaylistManager>();
+        services.AddSingleton<SearchService>();
+        services.AddSingleton<LibraryCacheService>();
+        services.AddSingleton<LibraryAggregator>();
+        services.AddSingleton<LibraryFileMonitor>();
+        services.AddSingleton<LibraryScanner>();
     }
 
     private static void RegisterAudio(IServiceCollection services)
     {
-        _ = services.AddSingleton<IAudioService, AudioService>();
-        _ = services.AddSingleton<EqPresetService>();
-        _ = services.AddSingleton<QueueController>();
-        _ = services.AddSingleton<PlayerServiceFactory>();
-        _ = services.AddSingleton<IPlayerService>(sp => sp.GetRequiredService<PlayerServiceFactory>().Create());
-        _ = services.AddSingleton<PlayerSettingsPersistenceService>();
+        services.AddSingleton<IAudioService, AudioService>();
+        services.AddSingleton<EqPresetService>();
+        services.AddSingleton<QueueController>();
+        services.AddSingleton<PlayerServiceFactory>();
+        services.AddSingleton(sp => sp.GetRequiredService<PlayerServiceFactory>().Create());
+        services.AddSingleton<PlayerSettingsPersistenceService>();
     }
 
     private static void RegisterUI(IServiceCollection services)
     {
-        _ = services.AddSingleton<ThemeService>();
-        _ = services.AddSingleton<LayoutStateService>();
-        _ = services.AddSingleton<FileImportService>();
-        _ = services.AddSingleton<ImageAnalysisService>();
-        _ = services.AddSingleton<GitHubUpdateService>();
+        services.AddSingleton<ThemeService>();
+        services.AddSingleton<LayoutStateService>();
+        services.AddSingleton<FileImportService>();
+        services.AddSingleton<ImageAnalysisService>();
+        services.AddSingleton<GitHubUpdateService>();
     }
 
     private static void RegisterIntegrations(IServiceCollection services)
     {
-        _ = services.AddSingleton<FileExplorerService>();
-        _ = services.AddSingleton<LastfmAuthService>();
-        _ = services.AddSingleton<ScrobblingService>();
-        _ = services.AddSingleton<ScrobbleEligibilityService>();
-        _ = services.AddSingleton<ScrobbleOrchestrator>();
+        services.AddSingleton<FileExplorerService>();
+        services.AddSingleton<LastfmAuthService>();
+        services.AddSingleton<ScrobblingService>();
+        services.AddSingleton<ScrobbleEligibilityService>();
+        services.AddSingleton<ScrobbleOrchestrator>();
     }
 }

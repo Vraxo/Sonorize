@@ -15,9 +15,9 @@ public class PlayerServiceFactory
 
     public IPlayerService Create()
     {
-        var settings = _services.GetRequiredService<SonorizeSettings>();
-        var audioService = _services.GetRequiredService<IAudioService>();
-        var queueController = _services.GetRequiredService<QueueController>();
+        SonorizeSettings settings = _services.GetRequiredService<SonorizeSettings>();
+        IAudioService audioService = _services.GetRequiredService<IAudioService>();
+        QueueController queueController = _services.GetRequiredService<QueueController>();
 
         // Apply initial EQ settings before creating PlayerService
         audioService.SetEq(settings.Playback.EqEnabled, settings.Playback.EqGains);

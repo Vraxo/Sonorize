@@ -2,10 +2,6 @@
 
 public static class FileSystemHelper
 {
-    /// <summary>
-    /// Recursively enumerates files in a directory, skipping inaccessible folders (System Volume Info, etc.)
-    /// to prevent UnauthorizedAccessException from aborting the entire scan.
-    /// </summary>
     public static IEnumerable<string> GetFilesSafe(string root, HashSet<string> validExtensions)
     {
         if (!Directory.Exists(root))
@@ -13,7 +9,7 @@ public static class FileSystemHelper
             yield break;
         }
 
-        var stack = new Stack<string>();
+        Stack<string> stack = new();
         stack.Push(root);
 
         while (stack.Count > 0)
@@ -32,10 +28,12 @@ public static class FileSystemHelper
             {
                 foreach (string file in files)
                 {
-                    if (validExtensions.Contains(Path.GetExtension(file)))
+                    if (!validExtensions.Contains(Path.GetExtension(file)))
                     {
-                        yield return file;
+                        continue;
                     }
+
+                    yield return file;
                 }
             }
 

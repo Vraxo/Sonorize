@@ -41,6 +41,7 @@ public partial class LibraryTab
     private int GridPadding
     {
         get => AppSettings.Library.GridItemPadding;
+
         set
         {
             AppSettings.Library.GridItemPadding = value;

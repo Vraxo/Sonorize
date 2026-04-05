@@ -9,7 +9,6 @@ public class PlaylistManager
 
     public IReadOnlyList<Playlist> ManualPlaylists => _manualPlaylists;
 
-    // Event to notify parent/coordinator (LibraryService) of changes
     public event Action? PlaylistsChanged;
 
     public PlaylistManager(PlaylistPersistenceService persistence)
@@ -20,7 +19,7 @@ public class PlaylistManager
 
     public Playlist CreatePlaylist(string name)
     {
-        var playlist = new Playlist
+        Playlist playlist = new()
         {
             Name = name,
             Type = PlaylistType.Manual,
@@ -36,31 +35,34 @@ public class PlaylistManager
 
     public void SavePlaylist(Playlist playlist)
     {
-        if (playlist.Type == PlaylistType.Manual)
+        if (playlist.Type != PlaylistType.Manual)
         {
-            _persistence.SavePlaylist(playlist);
-            PlaylistsChanged?.Invoke();
+            return;
         }
+
+        _persistence.SavePlaylist(playlist);
+        PlaylistsChanged?.Invoke();
     }
 
     public void DeletePlaylist(Playlist playlist)
     {
-        if (playlist.Type == PlaylistType.Manual)
+        if (playlist.Type != PlaylistType.Manual || !_manualPlaylists.Remove(playlist))
         {
-            if (_manualPlaylists.Remove(playlist))
-            {
-                _persistence.DeletePlaylist(playlist);
-                PlaylistsChanged?.Invoke();
-            }
+            return;
         }
+
+        _persistence.DeletePlaylist(playlist);
+        PlaylistsChanged?.Invoke();
     }
 
     public void AddSongToPlaylist(Playlist playlist, Song song)
     {
-        if (playlist.Type == PlaylistType.Manual && !playlist.SongFilePaths.Contains(song.FilePath))
+        if (playlist.Type != PlaylistType.Manual || playlist.SongFilePaths.Contains(song.FilePath))
         {
-            playlist.SongFilePaths.Add(song.FilePath);
-            SavePlaylist(playlist);
+            return;
         }
+
+        playlist.SongFilePaths.Add(song.FilePath);
+        SavePlaylist(playlist);
     }
 }

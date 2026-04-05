@@ -116,7 +116,7 @@ public class LibraryService : IDisposable
 
     public Task<IReadOnlyList<Song>> SearchAsync(string query)
     {
-        return Task.Run(() => _searchService.Search(_dataManager.AllSongs, query));
+        return Task.Run(() => SearchService.Search(_dataManager.AllSongs, query));
     }
 
     public void Dispose()

@@ -7,7 +7,7 @@ public class ScrobbleEligibilityService
 {
     private const int MinTrackLengthForScrobbleSeconds = 30;
 
-    public bool ShouldScrobble(Song song, TimeSpan playedDuration, LastfmSettings settings)
+    public static bool ShouldScrobble(Song song, TimeSpan playedDuration, LastfmSettings settings)
     {
         if (song is null || song.Duration.TotalSeconds <= MinTrackLengthForScrobbleSeconds)
         {
@@ -19,7 +19,7 @@ public class ScrobbleEligibilityService
         double requiredPlaybackAbsolute = settings.ScrobbleThresholdAbsoluteSeconds;
 
         // Logic: The track must be played for at least half its duration, or for 4 minutes (whichever is shorter).
-        double effectiveRequiredSeconds = Math.Min(requiredPlaybackFromPercentage, requiredPlaybackAbsolute);
+        double effectiveRequiredSeconds = double.Min(requiredPlaybackFromPercentage, requiredPlaybackAbsolute);
 
         return playedDuration.TotalSeconds >= effectiveRequiredSeconds;
     }

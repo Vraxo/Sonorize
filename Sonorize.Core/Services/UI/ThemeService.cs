@@ -17,6 +17,7 @@ public class ThemeService
     public ThemeService()
     {
         _themesDir = AppDataHelper.GetSubDirectory("Themes");
+
         EnsureBuiltInThemes();
     }
 
@@ -41,10 +42,12 @@ public class ThemeService
                 // or if they deleted it intentionally? 
                 // Decision: We treat these as "starter templates". If missing, we restore them.
                 // This allows users to "reset" a theme by deleting it from AppData.
-                if (!File.Exists(dest))
+                if (File.Exists(dest))
                 {
-                    File.Copy(file, dest);
+                    continue;
                 }
+
+                File.Copy(file, dest);
             }
         }
         catch (Exception ex)
@@ -69,6 +72,7 @@ public class ThemeService
         string safeName = string.Join("_", name.Split(Path.GetInvalidFileNameChars()));
         string path = Path.Combine(_themesDir, $"{safeName}.json");
         string json = JsonSerializer.Serialize(theme, _jsonOptions);
+
         File.WriteAllText(path, json);
     }
 

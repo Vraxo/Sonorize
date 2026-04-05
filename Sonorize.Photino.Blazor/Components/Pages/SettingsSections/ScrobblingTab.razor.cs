@@ -40,14 +40,11 @@ public partial class ScrobblingTab
         _isAuthenticating = false;
         _password = ""; // Clear password from memory immediately
 
-        if (client is not null)
-        {
-            // Success
-        }
-        else
+        if (client is null)
         {
             _authError = "Authentication failed. Check credentials.";
         }
+
         StateHasChanged();
     }
 

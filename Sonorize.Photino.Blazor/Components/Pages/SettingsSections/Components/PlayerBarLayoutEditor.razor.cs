@@ -25,7 +25,7 @@ public partial class PlayerBarLayoutEditor
             return;
         }
 
-        var item = _sourceList[_sourceIndex];
+        PlayerBarWidget item = _sourceList[_sourceIndex];
         _sourceList.RemoveAt(_sourceIndex);
 
         // Adjust index if dropping into same list after the removed item
@@ -46,7 +46,7 @@ public partial class PlayerBarLayoutEditor
         }
 
         // Clamp to safe bounds
-        targetIndex = Math.Clamp(targetIndex, 0, targetList.Count);
+        targetIndex = int.Clamp(targetIndex, 0, targetList.Count);
 
         targetList.Insert(targetIndex, item);
         ResetDragState();

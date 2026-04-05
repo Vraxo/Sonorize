@@ -11,7 +11,12 @@ public partial class ThemeLayoutCard
     private int PlayerBarHeightInt { get => AppSettings.Theme.PlayerBarHeight; set { AppSettings.Theme.PlayerBarHeight = value; Save(); } }
     private int BaseFontSizeInt { get => AppSettings.Theme.BaseFontSize; set { AppSettings.Theme.BaseFontSize = value; Save(); } }
 
-    private void UpdateBool(Action<bool> updateAction, ChangeEventArgs e) { updateAction((bool)(e.Value ?? false)); Save(); }
+    private void UpdateBool(Action<bool> updateAction, ChangeEventArgs e)
+    {
+        updateAction((bool)(e.Value ?? false));
+        Save();
+    }
+
     private void Save()
     {
         SettingsManager.Save(AppSettings);
