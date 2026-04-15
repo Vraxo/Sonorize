@@ -62,6 +62,7 @@ public partial class ScrobblingTab
     {
         AppSettings.Lastfm.SessionKey = null;
         _showLogoutConfirmation = false;
+
         SettingsManager.Save(AppSettings);
     }
 }

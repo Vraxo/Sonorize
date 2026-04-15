@@ -18,3 +18,16 @@ public class WindowSettings
     public int Y { get; set; } = -1;
     public bool IsMaximized { get; set; } = false;
 }
+
+public class LayoutState
+{
+    public bool IsSidebarOpen { get; set; } = true;
+    public int SidebarWidth { get; set; } = 260;
+}
+
+public class Visuals
+{
+    public bool ShowSliderThumbs { get; set; } = true;
+    public bool EnableSidebarAnimation { get; set; } = true;
+    public double ZoomLevel { get; set; } = 1.0;
+}

@@ -46,8 +46,8 @@ public class WindowStateManager
     private void RestoreState()
     {
         // Ensure stored size is at least the minimum
-        int targetWidth = Math.Max(_settings.Window.Width, MinWidth);
-        int targetHeight = Math.Max(_settings.Window.Height, MinHeight);
+        int targetWidth = int.Max(_settings.Window.Width, MinWidth);
+        int targetHeight = int.Max(_settings.Window.Height, MinHeight);
 
         bool isValidPos = _settings.Window.X > -10000 && _settings.Window.Y > -10000;
 

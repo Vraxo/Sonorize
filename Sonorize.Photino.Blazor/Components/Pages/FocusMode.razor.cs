@@ -15,7 +15,8 @@ public partial class FocusMode
         PlayerService.PlaybackStateChanged += OnStateChanged;
         PlayerService.QueueChanged += OnStateChanged;
         SettingsManager.SettingsSaved += OnStateChanged;
-        _ = UpdateState();
+
+        UpdateState();
     }
 
     private async void OnStateChanged()

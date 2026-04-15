@@ -56,3 +56,39 @@ public class SonorizeTheme
         return clone;
     }
 }
+
+public class ThemeColors
+{
+    public string AccentColor { get; set; } = "#D9BBFB";
+    public string BgPrimary { get; set; } = "#000000";
+    public string BgSecondary { get; set; } = "#121212";
+    public string BgTertiary { get; set; } = "#242424";
+    public string PlayerBarBg { get; set; } = "#181818";
+    public string BorderColor { get; set; } = "#282828";
+    public string TextPrimary { get; set; } = "#FFFFFF";
+    public string TextSecondary { get; set; } = "#B3B3B3";
+}
+
+public class ThemeStyling
+{
+    public int BorderRadius { get; set; } = 4;
+    public bool UsePillButtons { get; set; } = true;
+    public bool EnableAmbientBackground { get; set; } = false;
+    public bool EnableCustomScrollbars { get; set; } = true;
+}
+
+public class LayoutPreferences
+{
+    public PlayerBarPosition PlayerBarPosition { get; set; } = PlayerBarPosition.Bottom;
+    public SidebarPosition SidebarPosition { get; set; } = SidebarPosition.Left;
+    public int PlayerBarHeight { get; set; } = 90; // NEW: Customizable height
+
+    public PlayerBarConfig PlayerBarLayout { get; set; } = new();
+}
+
+public class ThemeTypography
+{
+    public string CustomFontFamily { get; set; } = "";
+    public int BaseFontSize { get; set; } = 14;
+    public string CustomCss { get; set; } = "";
+}

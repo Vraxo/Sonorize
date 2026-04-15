@@ -17,6 +17,7 @@ public partial class PlayerBarZoneEditor
     private PlayerBarWidget? AddSelection
     {
         get;
+
         set
         {
             field = value;
@@ -27,6 +28,7 @@ public partial class PlayerBarZoneEditor
             }
 
             OnAdd.InvokeAsync(value.Value);
+
             field = null;
         }
     }
@@ -34,7 +36,7 @@ public partial class PlayerBarZoneEditor
     private void HandleDragStart(int index)
     {
         LayoutState.SetInternalDrag(true);
-        _ = OnDragStart.InvokeAsync(index);
+        OnDragStart.InvokeAsync(index);
     }
 
     private void HandleDragEnd()

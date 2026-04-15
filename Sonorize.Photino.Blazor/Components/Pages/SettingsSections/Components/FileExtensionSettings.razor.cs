@@ -29,7 +29,7 @@ public partial class FileExtensionSettings
     {
         if (IsActive(ext))
         {
-            _ = AppSettings.Library.SupportedFileExtensions.Remove(ext);
+            AppSettings.Library.SupportedFileExtensions.Remove(ext);
         }
         else
         {
@@ -81,7 +81,7 @@ public partial class FileExtensionSettings
 
     private void RemoveExtension(string ext)
     {
-        _ = AppSettings.Library.SupportedFileExtensions.Remove(ext);
+        AppSettings.Library.SupportedFileExtensions.Remove(ext);
         SaveAndRefresh();
     }
 

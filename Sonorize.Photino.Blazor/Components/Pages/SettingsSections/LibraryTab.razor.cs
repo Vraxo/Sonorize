@@ -53,23 +53,28 @@ public partial class LibraryTab
     {
         NfdStatus result = Nfd.PickFolder(out string? path, null);
 
-        if (result != NfdStatus.Ok || string.IsNullOrEmpty(path) || AppSettings.Library.MusicFolderPaths.Contains(path))
+        if (CanAddFolder(result, path))
         {
             return;
         }
 
         AppSettings.Library.MusicFolderPaths.Add(path);
         Save();
-        // Just scan this new folder
-        _ = LibraryService.ScanFolder(path);
+        LibraryService.ScanFolder(path);
+    }
+
+    private bool CanAddFolder(NfdStatus result, string? path)
+    {
+        return result != NfdStatus.Ok
+            || string.IsNullOrEmpty(path)
+            || AppSettings.Library.MusicFolderPaths.Contains(path);
     }
 
     private void RemoveFolder(string path)
     {
-        _ = AppSettings.Library.MusicFolderPaths.Remove(path);
+        AppSettings.Library.MusicFolderPaths.Remove(path);
         Save();
-        // Trigger full reconciliation to remove zombie tracks
-        _ = LibraryService.RefreshLibraryAsync();
+        LibraryService.RefreshLibraryAsync();
     }
 
     private void Save()

@@ -13,6 +13,7 @@ public partial class SettingsColorControl
     private async Task HandleColorChange(ChangeEventArgs e)
     {
         string val = e.Value?.ToString() ?? "#000000";
+
         await UpdateValue(val);
     }
 

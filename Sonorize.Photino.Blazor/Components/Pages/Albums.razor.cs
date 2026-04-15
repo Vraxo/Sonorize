@@ -18,7 +18,11 @@ public partial class Albums
 
     private void OnLibraryChanged()
     {
-        _ = InvokeAsync(() => { LoadData(); StateHasChanged(); });
+        InvokeAsync(() =>
+        {
+            LoadData();
+            StateHasChanged();
+        });
     }
 
     private void LoadData()
@@ -29,8 +33,8 @@ public partial class Albums
 
     private static bool FilterAlbum(AlbumGroup album, string query)
     {
-        return album.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-               album.Artist.Contains(query, StringComparison.OrdinalIgnoreCase);
+        return album.Title.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || album.Artist.Contains(query, StringComparison.OrdinalIgnoreCase);
     }
 
     private void Sort(string column)
@@ -89,6 +93,7 @@ public partial class Albums
     private void OnViewModeChanged(LibraryViewMode mode)
     {
         AppSettings.Library.AlbumsViewMode = mode;
+
         SettingsManager.Save(AppSettings);
         StateHasChanged();
     }
@@ -98,7 +103,7 @@ public partial class Albums
         Nav.NavigateTo($"/library/album/{Uri.EscapeDataString(album.Title)}");
     }
 
-    private string GetArtUrl(string path)
+    private static string GetArtUrl(string path)
     {
         return $"sonorize://albumart/?path={Uri.EscapeDataString(path)}";
     }

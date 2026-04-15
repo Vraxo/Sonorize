@@ -14,6 +14,8 @@
     <Authors>Sonorize Contributors</Authors>
     <Company>Sonorize Contributors</Company>
     <Copyright>Copyright © 2025 Sonorize Contributors</Copyright>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
