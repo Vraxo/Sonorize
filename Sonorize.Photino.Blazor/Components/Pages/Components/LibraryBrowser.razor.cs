@@ -22,7 +22,11 @@ public partial class LibraryBrowser<TItem>
 
     private string _searchQuery = "";
     private List<TItem> _filteredItems = [];
-    private readonly Timer _debounceTimer = new(300) { AutoReset = false };
+
+    private readonly Timer _debounceTimer = new(300)
+    {
+        AutoReset = false
+    };
 
     protected override void OnInitialized()
     {

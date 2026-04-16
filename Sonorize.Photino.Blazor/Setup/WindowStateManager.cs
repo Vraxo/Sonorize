@@ -74,12 +74,14 @@ public class WindowStateManager
 
         _app.MainWindow.WindowLocationChanged += (sender, location) =>
         {
-            if (location.X > -10000 && location.Y > -10000)
+            if (location.X <= -10000 || location.Y <= -10000)
             {
-                _settings.Window.X = location.X;
-                _settings.Window.Y = location.Y;
-                TriggerDebouncedSave();
+                return;
             }
+
+            _settings.Window.X = location.X;
+            _settings.Window.Y = location.Y;
+            TriggerDebouncedSave();
         };
 
         _app.MainWindow.WindowSizeChanged += (sender, size) =>
