@@ -1,0 +1,18 @@
+/* --- Custom Scrollbar Styling (Scoped) --- */
+.custom-scrollbars ::-webkit-scrollbar {
+    width: 12px;
+}
+
+.custom-scrollbars ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.custom-scrollbars ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 6px;
+    border: 2px solid var(--bg-secondary);
+}
+
+.custom-scrollbars ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+}

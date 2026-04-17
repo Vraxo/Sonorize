@@ -1,0 +1,57 @@
+/* --- Range Slider --- */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #535353;
+    height: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: transparent;
+    height: 4px;
+    border-radius: 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -6px;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background-color: var(--text-primary);
+    border: none;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+    background-color: var(--accent-primary);
+}
+
+input[type="range"].hide-thumb::-webkit-slider-thumb {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    box-shadow: none;
+}
+
+/* --- Form Controls --- */
+.form-control {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius);
+    font-size: inherit;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-secondary);
+}

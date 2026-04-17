@@ -1,4 +1,12 @@
-@import url('base.css');
+/* Base - Variables (must be first) */
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/buttons.css');
+@import url('base/forms.css');
+@import url('base/scrollbars.css');
+@import url('base/modals.css');
+
+/* Layout */
 @import url('layout.css');
 @import url('sidebar.css');
 @import url('player-bar/index.css');
@@ -12,7 +20,7 @@
 @import url('folder-tree.css');
 
 /* Settings Modules */
-@import url('settings/common.css'); /* NEW: Shared patterns */
+@import url('settings/common.css');
 @import url('settings/layout.css');
 @import url('settings/controls.css');
 @import url('settings/library.css');

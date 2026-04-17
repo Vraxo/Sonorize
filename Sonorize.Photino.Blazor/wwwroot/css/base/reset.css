@@ -1,0 +1,41 @@
+html {
+    /* CRITICAL: Enforce instant scrolling. Smooth scrolling causes lag when dragging scrollbars. */
+    scroll-behavior: auto !important;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--base-font-size); /* Responsive base size */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--text-primary);
+}
+
+/* --- Global Form Element Overrides --- */
+textarea {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+input[type="checkbox"] {
+    accent-color: var(--accent-primary) !important;
+}
