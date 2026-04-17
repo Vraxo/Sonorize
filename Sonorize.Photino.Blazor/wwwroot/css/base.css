@@ -49,6 +49,13 @@ a {
         color: var(--text-primary);
     }
 
+/* --- Global Textarea Reset --- */
+textarea {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
 /* --- General UI Elements --- */
 .btn {
     padding: 5px 15px; /* Aggressively reduced for compact desktop feel */

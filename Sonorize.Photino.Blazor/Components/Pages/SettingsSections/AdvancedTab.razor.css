@@ -39,19 +39,21 @@
         padding: 20px;
     }
 
-    .code-editor {
+    textarea.code-editor {
         width: 100%;
         min-height: 300px;
-        background-color: rgba(0, 0, 0, 0.2);
-        color: var(--text-primary);
+        background-color: var(--bg-secondary, #121212) !important; /* Force override browser default */
+        color: var(--text-primary, #FFFFFF) !important;
         font-family: 'Consolas', 'Monaco', monospace;
         font-size: 13px;
         padding: 15px;
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--border-color, #282828);
         border-radius: 6px;
         outline: none;
         resize: vertical;
         line-height: 1.5;
+        appearance: none;
+        -webkit-appearance: none;
     }
 
         .code-editor:focus {
