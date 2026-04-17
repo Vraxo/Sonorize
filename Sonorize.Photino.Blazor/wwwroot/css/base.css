@@ -56,6 +56,11 @@ textarea {
     border-color: var(--border-color) !important;
 }
 
+/* --- Global Checkbox Reset --- */
+input[type="checkbox"] {
+    accent-color: var(--accent-primary) !important;
+}
+
 /* --- General UI Elements --- */
 .btn {
     padding: 5px 15px; /* Aggressively reduced for compact desktop feel */
