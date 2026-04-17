@@ -63,6 +63,59 @@
         pointer-events: none;
     }
 
+/* Action Button with Text (e.g., "Save As...") */
+.header-action-text-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.95em;
+    padding: 6px 12px;
+    border-radius: 6px; /* Fallback if --btn-radius not defined */
+    border-radius: var(--btn-radius, 6px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+    .header-action-text-btn:hover {
+        background-color: var(--hover-bg);
+        color: var(--text-primary);
+    }
+
+    .header-action-text-btn i {
+        font-size: 1.1em;
+        pointer-events: none;
+    }
+
+/* Action Button with Text (e.g., "Save As...") */
+.header-action-text-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.95em;
+    padding: 6px 12px;
+    border-radius: var(--btn-radius);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+    .header-action-text-btn:hover {
+        background-color: var(--hover-bg);
+        color: var(--text-primary);
+    }
+
+    .header-action-text-btn i {
+        font-size: 1.1em;
+        pointer-events: none;
+    }
+
 /* --- Search Bar --- */
 .search-container {
     position: relative;
