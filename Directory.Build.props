@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!-- Move all bin outputs to solutionRoot/artifacts/bin/ProjectName/ -->
+    <BaseOutputPath>$(MSBuildThisFileDirectory)artifacts\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <!-- Move all obj intermediate outputs to solutionRoot/artifacts/obj/ProjectName/ -->
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)artifacts\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <!-- Optional: keep the same OutputPath behaviour for legacy targets -->
+    <OutputPath>$(BaseOutputPath)</OutputPath>
+  </PropertyGroup>
+</Project>

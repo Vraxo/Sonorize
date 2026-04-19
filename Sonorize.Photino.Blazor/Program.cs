@@ -64,16 +64,16 @@ public class Program
         LogService logger = services.GetRequiredService<LogService>();
         logger.Info("App starting...");
 
-        _ = services.GetRequiredService<PlayerSettingsPersistenceService>();
+        services.GetRequiredService<PlayerSettingsPersistenceService>();
 
         // Initialize Scrobble Orchestrator so it starts listening to Player events
-        _ = services.GetRequiredService<ScrobbleOrchestrator>();
+        services.GetRequiredService<ScrobbleOrchestrator>();
 
         LibraryService library = services.GetRequiredService<LibraryService>();
-        _ = services.GetRequiredService<SonorizeSettings>();
+        services.GetRequiredService<SonorizeSettings>();
 
         // InitializeAsync handles both Cache loading and Background scanning internally
-        _ = library.InitializeAsync();
+        library.InitializeAsync();
     }
 
     private static void SetupWindowAndPersistence(PhotinoBlazorApp app)
@@ -86,10 +86,10 @@ public class Program
     {
         LibraryService library = app.Services.GetRequiredService<LibraryService>();
 
-        _ = app.MainWindow.RegisterCustomSchemeHandler("sonorize",
-            (object sender, string scheme, string url, out string contentType) =>
-            {
-                return SchemeHandlers.ProcessRequest(url, library, out contentType);
-            });
+        app.MainWindow.RegisterCustomSchemeHandler("sonorize",
+           (object sender, string scheme, string url, out string contentType) =>
+           {
+               return SchemeHandlers.ProcessRequest(url, library, out contentType);
+           });
     }
 }

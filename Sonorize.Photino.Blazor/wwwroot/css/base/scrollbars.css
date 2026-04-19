@@ -1,4 +1,3 @@
-/* --- Custom Scrollbar Styling (Scoped) --- */
 .custom-scrollbars ::-webkit-scrollbar {
     width: 12px;
 }
