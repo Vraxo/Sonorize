@@ -11,16 +11,46 @@
 
 <div class="settings-view-container">
 
-    <!-- Saved Themes -->
-    <SettingsCard Title="Saved Themes" Description="Switch between presets or saved styles">
+    <!-- Saved Themes (full combo) -->
+    <SettingsCard Title="Saved Themes" Description="Switch between presets that include both colors and layout">
         <HeaderAction>
-            <button class="header-action-text-btn" @onclick="OpenSaveModal" title="Save Current">
+            <button class="header-action-text-btn" @onclick="OpenSaveModal" title="Save Current as Full Theme">
                 <i class="fas fa-save"></i> Save As...
             </button>
         </HeaderAction>
         <ChildContent>
             <ThemeListSection @ref="_themeList" OnLoadTheme="ApplyLoadedTheme" />
         </ChildContent>
+    </SettingsCard>
+
+    <!-- Color Schemes (independent) -->
+    <SettingsCard Title="Color Scheme" Description="Change only the colors of the interface">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <select @bind:get="_selectedColorTheme" @bind:set="OnColorThemeSelected" style="flex: 1; min-width: 150px;">
+                @foreach (var colorTheme in _colorThemes)
+                {
+                    <option value="@colorTheme">@colorTheme</option>
+                }
+            </select>
+            <button class="action-btn" @onclick="OpenSaveColorModal" title="Save current colors as new scheme">
+                <i class="fas fa-save"></i> Save Colors...
+            </button>
+        </div>
+    </SettingsCard>
+
+    <!-- Layout Presets (independent) -->
+    <SettingsCard Title="Layout Preset" Description="Change only the layout and behavior">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <select @bind:get="_selectedLayoutTheme" @bind:set="OnLayoutThemeSelected" style="flex: 1; min-width: 150px;">
+                @foreach (var layoutTheme in _layoutThemes)
+                {
+                    <option value="@layoutTheme">@layoutTheme</option>
+                }
+            </select>
+            <button class="action-btn" @onclick="OpenSaveLayoutModal" title="Save current layout as new preset">
+                <i class="fas fa-save"></i> Save Layout...
+            </button>
+        </div>
     </SettingsCard>
 
     <!-- Player Bar Layout -->
@@ -38,4 +68,7 @@
 
 </div>
 
+<!-- Modals -->
 <SaveThemeModal IsVisible="_showSaveModal" OnClose="CloseSaveModal" OnConfirm="ConfirmSaveTheme" />
+<SaveThemeModal IsVisible="_showSaveColorModal" OnClose="CloseSaveColorModal" OnConfirm="ConfirmSaveColorScheme" Title="Save Color Scheme" />
+<SaveThemeModal IsVisible="_showSaveLayoutModal" OnClose="CloseSaveLayoutModal" OnConfirm="ConfirmSaveLayoutPreset" Title="Save Layout Preset" />
