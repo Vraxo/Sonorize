@@ -5,7 +5,7 @@ namespace Sonorize.Photino.Blazor.Components.Pages;
 public partial class FocusMode
 {
     private string? _artSrc;
-    private Sonorize.Core.Models.Song? _currentSong;
+    private Song? _currentSong;
     private bool _isBackgroundBright = false;
 
     private string ContainerClass => $"focus-container {(_isBackgroundBright ? "adaptive-dark-text" : "")}";

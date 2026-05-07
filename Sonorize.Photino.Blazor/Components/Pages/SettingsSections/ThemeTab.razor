@@ -27,6 +27,7 @@
     <SettingsCard Title="Color Scheme" Description="Change only the colors of the interface">
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <select @bind:get="_selectedColorTheme" @bind:set="OnColorThemeSelected" style="flex: 1; min-width: 150px;">
+                <option disabled selected hidden value="">-- Select a color scheme --</option>
                 @foreach (var colorTheme in _colorThemes)
                 {
                     <option value="@colorTheme">@colorTheme</option>
@@ -42,6 +43,7 @@
     <SettingsCard Title="Layout Preset" Description="Change only the layout and behavior">
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <select @bind:get="_selectedLayoutTheme" @bind:set="OnLayoutThemeSelected" style="flex: 1; min-width: 150px;">
+                <option disabled selected hidden value="">-- Select a layout preset --</option>
                 @foreach (var layoutTheme in _layoutThemes)
                 {
                     <option value="@layoutTheme">@layoutTheme</option>

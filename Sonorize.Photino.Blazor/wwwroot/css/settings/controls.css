@@ -234,3 +234,24 @@
         opacity: 1;
         color: var(--accent-primary);
     }
+
+/* --- Select Dropdowns --- */
+.settings-view-container select {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    font-size: 0.9em;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.settings-view-container select:hover {
+    border-color: var(--accent-primary);
+}
+
+.settings-view-container select:focus {
+    border-color: var(--accent-primary);
+}

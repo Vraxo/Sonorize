@@ -14,14 +14,15 @@ public partial class ThemeTab
 
     private List<string> _colorThemes = new();
     private List<string> _layoutThemes = new();
-    private string _selectedColorTheme = "";
-    private string _selectedLayoutTheme = "";
+    private string? _selectedColorTheme = null;
+    private string? _selectedLayoutTheme = null;
 
     protected override void OnInitialized()
     {
         RefreshThemeLists();
-        _selectedColorTheme = _colorThemes.FirstOrDefault() ?? "";
-        _selectedLayoutTheme = _layoutThemes.FirstOrDefault() ?? "";
+        // Do NOT auto-select any theme; keep null so placeholder is shown.
+        _selectedColorTheme = null;
+        _selectedLayoutTheme = null;
     }
 
     private void RefreshThemeLists()
