@@ -1,5 +1,6 @@
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
+using TagLib;
 
 namespace Sonorize.Core.Tests.Library;
 
@@ -44,7 +45,7 @@ public class MusicLibraryServiceTests : IDisposable
         CreateDummyFile("audio.wav");
 
         // Act
-        List<Models.Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(_tempTestDirectory, _defaultExtensions, CancellationToken.None);
+        List<Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(_tempTestDirectory, _defaultExtensions, CancellationToken.None);
 
         // Assert
         Assert.Equal(3, songs.Count);
@@ -63,7 +64,7 @@ public class MusicLibraryServiceTests : IDisposable
         CreateDummyFile("data.txt");
 
         // Act
-        List<Models.Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(_tempTestDirectory, _defaultExtensions, CancellationToken.None);
+        List<Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(_tempTestDirectory, _defaultExtensions, CancellationToken.None);
 
         // Assert
         Assert.Equal(2, songs.Count);
@@ -78,7 +79,7 @@ public class MusicLibraryServiceTests : IDisposable
         string nonExistentPath = Path.Combine(_tempTestDirectory, "non_existent_folder");
 
         // Act
-        List<Models.Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(nonExistentPath, _defaultExtensions, CancellationToken.None);
+        List<Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(nonExistentPath, _defaultExtensions, CancellationToken.None);
 
         // Assert
         Assert.NotNull(songs);
@@ -94,14 +95,14 @@ public class MusicLibraryServiceTests : IDisposable
         File.WriteAllText(corruptFilePath, "INVALID_BINARY_DATA_TO_TRIGGER_PARSER_ERROR");
 
         // Act
-        List<Models.Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(
+        List<Song> songs = await _musicLibraryService.LoadSongsFromFolderAsync(
             _tempTestDirectory,
             _defaultExtensions,
             CancellationToken.None);
 
         // Assert
         _ = Assert.Single(songs);
-        Models.Song song = songs[0];
+        Song song = songs[0];
         Assert.Equal("corrupt", song.Title);
         Assert.Equal("Unknown Artist", song.Artist);
         Assert.Equal(TimeSpan.Zero, song.Duration);

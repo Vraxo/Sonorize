@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Settings;
+namespace Sonorize.Core.Settings;
 
 public class WindowSettings
 {

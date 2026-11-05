@@ -1,7 +1,6 @@
+using ManagedBass;
+using ManagedBass.Fx;
 using Sonorize.Core.Core;
-
-﻿using ManagedBass;
-using ManagedBass.Fx; // Required for Tempo/Pitch
 
 namespace Sonorize.Core.Playback;
 
@@ -43,17 +42,17 @@ public class AudioService : IAudioService
 
     public event Action? PlaybackFinished;
 
-    public Models.PlaybackState PlaybackState => IsAudioEngineAvailable && _streamHandle != 0
+    public PlaybackState PlaybackState => IsAudioEngineAvailable && _streamHandle != 0
                 ? GetPlaybackState()
-                : Models.PlaybackState.Stopped;
+                : PlaybackState.Stopped;
 
-    private Models.PlaybackState GetPlaybackState()
+    private PlaybackState GetPlaybackState()
     {
         return Bass.ChannelIsActive(_streamHandle) switch
         {
-            ManagedBass.PlaybackState.Playing => Models.PlaybackState.Playing,
-            ManagedBass.PlaybackState.Paused => Models.PlaybackState.Paused,
-            _ => Models.PlaybackState.Stopped
+            ManagedBass.PlaybackState.Playing => PlaybackState.Playing,
+            ManagedBass.PlaybackState.Paused => PlaybackState.Paused,
+            _ => PlaybackState.Stopped
         };
     }
 
@@ -216,7 +215,7 @@ public class AudioService : IAudioService
 
         string? currentFile = GetCurrentFile();
         TimeSpan currentPos = CurrentTime;
-        bool wasPlaying = PlaybackState == Models.PlaybackState.Playing;
+        bool wasPlaying = PlaybackState == PlaybackState.Playing;
 
         Stop();
         _ = Bass.Free();

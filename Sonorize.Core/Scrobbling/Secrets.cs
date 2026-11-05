@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Scrobbling;
+namespace Sonorize.Core.Scrobbling;
 
 /// <summary>
 /// Manages application secrets using a partial method strategy.

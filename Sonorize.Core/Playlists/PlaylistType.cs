@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Playlists;
+namespace Sonorize.Core.Playlists;
 
 public enum PlaylistType
 {

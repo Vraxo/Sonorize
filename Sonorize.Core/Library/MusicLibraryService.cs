@@ -2,8 +2,6 @@ using System.Collections.Concurrent;
 using Sonorize.Core.Core;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;
-using TagLib.File file = TagLib.File.Create(filePath);
-using TagLib.File tagFile = TagLib.File.Create(filePath);
 
 namespace Sonorize.Core.Library;
 
@@ -116,6 +114,7 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
+            using TagLib.File file = TagLib.File.Create(filePath);
             TagLib.Tag tag = file.Tag;
 
             return new()
@@ -146,6 +145,7 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
+            using TagLib.File file = TagLib.File.Create(filePath);
             TagLib.Tag tag = file.Tag;
 
             tag.Title = metadata.Title;
@@ -204,6 +204,7 @@ public class MusicLibraryService : IMusicLibraryService
     {
         try
         {
+            using TagLib.File tagFile = TagLib.File.Create(filePath);
             return CreateSongFromTags(tagFile, filePath);
         }
         catch (Exception)

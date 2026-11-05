@@ -1,7 +1,6 @@
+using NSubstitute;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
-
-﻿using NSubstitute;
 
 namespace Sonorize.Core.Tests.Core;
 

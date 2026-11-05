@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Mutex mutex = new(true, MutexName, out bool createdNew);
 using Photino.Blazor;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
@@ -18,6 +17,7 @@ public class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        using Mutex mutex = new(true, MutexName, out bool createdNew);
 
         if (!createdNew)
         {

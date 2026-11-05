@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Metadata;
+namespace Sonorize.Core.Metadata;
 
 public class SongMetadata
 {

@@ -1,13 +1,10 @@
 using System.Text;
-using Image<Rgba32> image = new(200, 200);
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
-using TagLib.File tfile = TagLib.File.Create(filePath);
-
-﻿using SixLabors.ImageSharp;
 
 namespace Sonorize.Photino.Blazor.Shell;
 
@@ -67,6 +64,7 @@ public static class SchemeHandlers
 
         try
         {
+            using TagLib.File tfile = TagLib.File.Create(filePath);
             TagLib.IPicture? pic = tfile.Tag.Pictures.FirstOrDefault();
 
             if (pic is not null)
@@ -93,6 +91,7 @@ public static class SchemeHandlers
         Color c2 = GenerateRandomColor(rng);
 
         // Create 200x200 image
+        using Image<Rgba32> image = new(200, 200);
 
         image.Mutate(x => x.Fill(new LinearGradientBrush(
             new PointF(0, 0),

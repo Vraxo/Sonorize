@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Library;
+namespace Sonorize.Core.Library;
 
 public class AlbumGroup
 {

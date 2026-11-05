@@ -1,7 +1,5 @@
 using Sonorize.Core.Scrobbling;
 
-﻿using Sonorize.Core.Settings;
-
 namespace Sonorize.Core.Tests.Scrobbling;
 
 public class LastfmSettingsTests

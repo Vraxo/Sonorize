@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Sonorize.Core.Settings;
 
 namespace Sonorize.Core.Playback;

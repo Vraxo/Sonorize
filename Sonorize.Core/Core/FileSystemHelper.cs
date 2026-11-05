@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Core;
+namespace Sonorize.Core.Core;
 
 public static class FileSystemHelper
 {
