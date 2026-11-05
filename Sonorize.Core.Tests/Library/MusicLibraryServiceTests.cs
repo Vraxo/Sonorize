@@ -1,5 +1,6 @@
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
+using TagLib;
 
 namespace Sonorize.Core.Tests.Library;
 

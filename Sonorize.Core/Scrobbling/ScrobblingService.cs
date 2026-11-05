@@ -1,8 +1,7 @@
+using IF.Lastfm.Core.Api;
 using IF.Lastfm.Core.Objects;
 using Sonorize.Core.Core;
 using Sonorize.Core.Settings;
-
-﻿using IF.Lastfm.Core.Api;
 
 namespace Sonorize.Core.Scrobbling;
 

@@ -1,8 +1,7 @@
-using Image<Rgba32> image = Image.Load<Rgba32>(pic.Data.Data);
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp;
-using TagLib.File file = TagLib.File.Create(audioFilePath);
+using TagLib;
 
 namespace Sonorize.Core.Core;
 

@@ -2,8 +2,6 @@ using System.Collections.Concurrent;
 using Sonorize.Core.Core;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;
-using TagLib.File file = TagLib.File.Create(filePath);
-using TagLib.File tagFile = TagLib.File.Create(filePath);
 
 namespace Sonorize.Core.Library;
 

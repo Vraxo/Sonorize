@@ -1,10 +1,6 @@
 using System.Net.Http.Json;
 using System.Reflection;
-using FileStream destStream = new(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
-using FileStream sourceStream = File.OpenRead(url);
-using HttpResponseMessage response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
 using Sonorize.Core.Core;
-using Stream stream = await response.Content.ReadAsStreamAsync();
 
 namespace Sonorize.Core.Updates;
 

@@ -1,13 +1,11 @@
 using System.Text;
-using Image<Rgba32> image = new(200, 200);
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
-using TagLib.File tfile = TagLib.File.Create(filePath);
-
-﻿using SixLabors.ImageSharp;
+using TagLib;
 
 namespace Sonorize.Photino.Blazor.Shell;
 

@@ -1,7 +1,5 @@
+using ManagedBass;
 using Sonorize.Core.Core;
-
-﻿using ManagedBass;
-using ManagedBass.Fx; // Required for Tempo/Pitch
 
 namespace Sonorize.Core.Playback;
 

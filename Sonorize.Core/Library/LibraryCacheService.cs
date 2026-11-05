@@ -1,6 +1,4 @@
 using System.Text.Json;
-using FileStream createStream = File.Create(_cacheFilePath);
-using FileStream openStream = File.OpenRead(_cacheFilePath);
 using Sonorize.Core.Core;
 
 namespace Sonorize.Core.Library;

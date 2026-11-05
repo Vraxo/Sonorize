@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Updates;
+namespace Sonorize.Core.Updates;
 
 public class UpdateSettings
 {

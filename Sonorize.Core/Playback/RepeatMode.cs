@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Playback;
+namespace Sonorize.Core.Playback;
 
 public enum RepeatMode
 {

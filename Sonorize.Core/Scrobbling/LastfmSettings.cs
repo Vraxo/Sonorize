@@ -1,4 +1,4 @@
-﻿namespace Sonorize.Core.Scrobbling;
+namespace Sonorize.Core.Scrobbling;
 
 public class LastfmSettings
 {

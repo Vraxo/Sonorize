@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Mutex mutex = new(true, MutexName, out bool createdNew);
 using Photino.Blazor;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;

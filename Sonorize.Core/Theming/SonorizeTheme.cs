@@ -1,7 +1,7 @@
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
 
-﻿namespace Sonorize.Core.Theming;
+namespace Sonorize.Core.Theming;
 
 public class SonorizeTheme
 {

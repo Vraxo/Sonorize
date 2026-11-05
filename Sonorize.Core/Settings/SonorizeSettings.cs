@@ -4,7 +4,7 @@ using Sonorize.Core.Scrobbling;
 using Sonorize.Core.Theming;
 using Sonorize.Core.Updates;
 
-﻿namespace Sonorize.Core.Settings;
+namespace Sonorize.Core.Settings;
 
 public class SonorizeSettings
 {

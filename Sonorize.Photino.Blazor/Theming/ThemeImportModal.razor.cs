@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-using var doc = JsonDocument.Parse(_themeJson);
 
 namespace Sonorize.Photino.Blazor.Theming;
 
