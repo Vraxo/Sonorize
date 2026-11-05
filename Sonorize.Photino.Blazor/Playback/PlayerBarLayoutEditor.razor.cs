@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
 
-namespace Sonorize.Photino.Blazor.Settings;
+namespace Sonorize.Photino.Blazor.Playback;
 
 public partial class PlayerBarLayoutEditor
 {
