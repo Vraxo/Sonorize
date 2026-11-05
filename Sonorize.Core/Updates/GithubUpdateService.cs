@@ -83,6 +83,7 @@ public class GitHubUpdateService : IDisposable
 
         if (isLocalFile)
         {
+            using FileStream sourceStream = File.OpenRead(url);
 
             await ProcessDownloadStreamAsync(
                 sourceStream,
@@ -93,9 +94,11 @@ public class GitHubUpdateService : IDisposable
         }
         else
         {
+            using HttpResponseMessage response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             _ = response.EnsureSuccessStatusCode();
             long? totalBytes = response.Content.Headers.ContentLength;
 
+            using Stream stream = await response.Content.ReadAsStreamAsync();
 
             await ProcessDownloadStreamAsync(
                 stream,
@@ -113,6 +116,7 @@ public class GitHubUpdateService : IDisposable
         IProgress<double> progress,
         bool isSimulated)
     {
+        using FileStream destStream = new(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
         byte[] buffer = new byte[8192];
         long totalRead = 0;

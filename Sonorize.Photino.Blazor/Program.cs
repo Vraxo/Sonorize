@@ -17,6 +17,7 @@ public class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        using Mutex mutex = new(true, MutexName, out bool createdNew);
 
         if (!createdNew)
         {

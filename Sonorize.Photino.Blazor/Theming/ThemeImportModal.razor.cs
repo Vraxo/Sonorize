@@ -34,6 +34,7 @@ public partial class ThemeImportModal
         try
         {
             // Basic validation that it is valid JSON
+            using var doc = JsonDocument.Parse(_themeJson);
             _hasError = false;
             await OnImport.InvokeAsync(_themeJson);
         }

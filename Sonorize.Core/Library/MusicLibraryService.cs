@@ -114,6 +114,7 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
+            using TagLib.File file = TagLib.File.Create(filePath);
             TagLib.Tag tag = file.Tag;
 
             return new()
@@ -144,6 +145,7 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
+            using TagLib.File file = TagLib.File.Create(filePath);
             TagLib.Tag tag = file.Tag;
 
             tag.Title = metadata.Title;
@@ -202,6 +204,7 @@ public class MusicLibraryService : IMusicLibraryService
     {
         try
         {
+            using TagLib.File tagFile = TagLib.File.Create(filePath);
             return CreateSongFromTags(tagFile, filePath);
         }
         catch (Exception)
