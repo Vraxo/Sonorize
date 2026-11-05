@@ -1,4 +1,5 @@
 using ManagedBass;
+using ManagedBass.Fx;
 using Sonorize.Core.Core;
 
 namespace Sonorize.Core.Playback;
@@ -214,7 +215,7 @@ public class AudioService : IAudioService
 
         string? currentFile = GetCurrentFile();
         TimeSpan currentPos = CurrentTime;
-        bool wasPlaying = PlaybackState == Models.PlaybackState.Playing;
+        bool wasPlaying = PlaybackState == PlaybackState.Playing;
 
         Stop();
         _ = Bass.Free();
