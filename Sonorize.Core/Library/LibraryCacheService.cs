@@ -1,0 +1,62 @@
+using System.Text.Json;
+using FileStream createStream = File.Create(_cacheFilePath);
+using FileStream openStream = File.OpenRead(_cacheFilePath);
+using Sonorize.Core.Core;
+
+namespace Sonorize.Core.Library;
+
+public class LibraryCacheService
+{
+    private readonly string _cacheFilePath;
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        WriteIndented = false // Compact for speed
+    };
+
+    // Parameterless for DI
+    public LibraryCacheService() : this(null) { }
+
+    // Overload for testing to isolate the cache file
+    public LibraryCacheService(string? basePath)
+    {
+        string folder = basePath ?? AppDataHelper.GetBaseDirectory();
+
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        _cacheFilePath = Path.Combine(folder, "LibraryCache.json");
+    }
+
+    public async Task SaveCacheAsync(IEnumerable<Song> songs)
+    {
+        try
+        {
+            await JsonSerializer.SerializeAsync(createStream, songs, _jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Cache] Failed to save library cache: {ex.Message}");
+        }
+    }
+
+    public async Task<List<Song>> LoadCacheAsync()
+    {
+        if (!File.Exists(_cacheFilePath))
+        {
+            return [];
+        }
+
+        try
+        {
+            List<Song>? songs = await JsonSerializer.DeserializeAsync<List<Song>>(openStream, _jsonOptions);
+            return songs ?? [];
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Cache] Failed to load library cache: {ex.Message}");
+            return [];
+        }
+    }
+}

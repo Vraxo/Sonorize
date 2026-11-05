@@ -1,0 +1,76 @@
+@inject LibraryService LibService
+
+<Modal IsVisible="IsVisible"
+       Title="Edit Metadata"
+       ConfirmText="@(_isSaving ? "Saving..." : "Save Changes")"
+       ShowCancelButton="true"
+       OnCancel="Cancel"
+       OnConfirm="Save">
+
+    @if (_isLoading)
+    {
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading tags...</p>
+        </div>
+    }
+    else if (_loadError)
+    {
+        <div class="error-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Failed to load metadata. File may be corrupt or inaccessible.</p>
+        </div>
+    }
+    else if (_meta is not null)
+    {
+        <div class="meta-form">
+            <div class="form-group full-width">
+                <label>Title</label>
+                <input type="text" class="form-control" @bind="_meta.Title" placeholder="Track Title" />
+            </div>
+
+            <div class="form-group half">
+                <label>Artist</label>
+                <input type="text" class="form-control" @bind="_meta.Artist" placeholder="Artist Name" />
+            </div>
+
+            <div class="form-group half">
+                <label>Album Artist</label>
+                <input type="text" class="form-control" @bind="_meta.AlbumArtists" placeholder="Album Artist" />
+            </div>
+
+            <div class="form-group full-width">
+                <label>Album</label>
+                <input type="text" class="form-control" @bind="_meta.Album" placeholder="Album Name" />
+            </div>
+
+            <div class="form-group half">
+                <label>Genre</label>
+                <input type="text" class="form-control" @bind="_meta.Genre" placeholder="Genre" />
+            </div>
+
+            <div class="form-group half">
+                <label>Year</label>
+                <input type="number" class="form-control" @bind="_meta.Year" />
+            </div>
+
+            <div class="form-group quarter">
+                <label>Track #</label>
+                <input type="number" class="form-control" @bind="_meta.Track" />
+            </div>
+
+            <div class="form-group quarter">
+                <label>Disc #</label>
+                <input type="number" class="form-control" @bind="_meta.Disc" />
+            </div>
+        </div>
+
+        @if (_saveError is not null)
+        {
+            <div class="save-error">
+                <i class="fas fa-times-circle"></i> @_saveError
+            </div>
+        }
+    }
+
+</Modal>

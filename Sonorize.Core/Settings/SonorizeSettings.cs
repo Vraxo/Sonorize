@@ -1,3 +1,9 @@
+using Sonorize.Core.Library;
+using Sonorize.Core.Playback;
+using Sonorize.Core.Scrobbling;
+using Sonorize.Core.Theming;
+using Sonorize.Core.Updates;
+
 ﻿namespace Sonorize.Core.Settings;
 
 public class SonorizeSettings

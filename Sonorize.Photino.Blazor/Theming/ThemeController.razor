@@ -1,0 +1,30 @@
+@using Microsoft.JSInterop
+@using Sonorize.Core
+@using Sonorize.Core.Settings
+@using System.Globalization
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject IJSRuntime JS
+
+<style id="dynamic-css">
+    @_dynamicCss
+</style>
+
+<!-- Removed CSS zoom block to allow Native WebView zoom to handle scaling without artifacts -->
+@if (_useTransparency)
+{
+    <style id="layout-transparency">
+        .sidebar {
+            backdrop-filter: blur(var(--bg-blur));
+            -webkit-backdrop-filter: blur(var(--bg-blur));
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .player-bar {
+            backdrop-filter: blur(var(--bg-blur));
+            -webkit-backdrop-filter: blur(var(--bg-blur));
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+}

@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Mutex mutex = new(true, MutexName, out bool createdNew);
 using Photino.Blazor;
-using Sonorize.Core.Services.Audio;
-using Sonorize.Core.Services.Library;
-using Sonorize.Core.Services.Scrobbling;
-using Sonorize.Core.Services.System;
+using Sonorize.Core.Core;
+using Sonorize.Core.Library;
+using Sonorize.Core.Playback;
+using Sonorize.Core.Scrobbling;
 using Sonorize.Core.Settings;
-using Sonorize.Photino.Blazor.Components;
-using Sonorize.Photino.Blazor.Setup;
+using Sonorize.Photino.Blazor.Shell;
 
 namespace Sonorize.Photino.Blazor;
 
@@ -18,7 +18,6 @@ public class Program
     [STAThread]
     private static void Main(string[] args)
     {
-        using Mutex mutex = new(true, MutexName, out bool createdNew);
 
         if (!createdNew)
         {

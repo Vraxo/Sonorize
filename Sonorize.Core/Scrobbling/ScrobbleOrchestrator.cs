@@ -1,0 +1,73 @@
+using Sonorize.Core.Core;
+using Sonorize.Core.Playback;
+using Sonorize.Core.Settings;
+
+namespace Sonorize.Core.Scrobbling;
+
+public class ScrobbleOrchestrator : IDisposable
+{
+    private readonly IPlayerService _player;
+    private readonly ScrobblingService _scrobblingService;
+    private readonly ScrobbleEligibilityService _eligibilityService;
+    private readonly SonorizeSettings _settings;
+
+    private Song? _currentTrack;
+    private bool _hasScrobbledCurrentTrack;
+
+    public ScrobbleOrchestrator(
+        IPlayerService player,
+        ScrobblingService scrobblingService,
+        ScrobbleEligibilityService eligibilityService,
+        SonorizeSettings settings)
+    {
+        _player = player;
+        _scrobblingService = scrobblingService;
+        _eligibilityService = eligibilityService;
+        _settings = settings;
+
+        _player.PlaybackStateChanged += OnPlaybackStateChanged;
+        _player.PlaybackProgressed += OnPlaybackProgressed;
+    }
+
+    private void OnPlaybackStateChanged()
+    {
+        // Track Changed Logic
+        if (_player.CurrentSong == _currentTrack)
+        {
+            return;
+        }
+
+        _currentTrack = _player.CurrentSong;
+        _hasScrobbledCurrentTrack = false;
+
+        if (_currentTrack is null || !_settings.Lastfm.ScrobblingEnabled)
+        {
+            return;
+        }
+
+        _ = _scrobblingService.UpdateNowPlayingAsync(_currentTrack);
+    }
+
+    private void OnPlaybackProgressed()
+    {
+        if (_currentTrack is null || _hasScrobbledCurrentTrack || !_player.IsPlaying)
+        {
+            return;
+        }
+
+        // Check eligibility on every progress tick (approx 10Hz)
+        if (!ScrobbleEligibilityService.ShouldScrobble(_currentTrack, _player.CurrentTime, _settings.Lastfm))
+        {
+            return;
+        }
+
+        _hasScrobbledCurrentTrack = true;
+        _ = _scrobblingService.ScrobbleAsync(_currentTrack, DateTime.UtcNow);
+    }
+
+    public void Dispose()
+    {
+        _player.PlaybackStateChanged -= OnPlaybackStateChanged;
+        _player.PlaybackProgressed -= OnPlaybackProgressed;
+    }
+}

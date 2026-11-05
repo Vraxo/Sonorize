@@ -1,0 +1,36 @@
+@using Sonorize.Core.Settings
+
+<div class="editor-wrapper">
+    <div class="editor-toolbar">
+        <span class="editor-label">Drag and drop widgets to rearrange zones</span>
+        <button class="reset-layout-btn" @onclick="ResetDefaults" title="Reset all zones to default">
+            <i class="fas fa-undo"></i> Reset to Default
+        </button>
+    </div>
+
+    <div class="layout-editor">
+        <PlayerBarZoneEditor Title="Left Zone"
+                             Widgets="Config.Left"
+                             OnDragStart="@(i => HandleDragStart(Config.Left, i))"
+                             OnDropOnItem="@(i => HandleItemDrop(Config.Left, i))"
+                             OnDropOnZone="@(() => HandleZoneDrop(Config.Left))"
+                             OnRemove="@(i => Remove(Config.Left, i))"
+                             OnAdd="@(w => Add(Config.Left, w))" />
+
+        <PlayerBarZoneEditor Title="Center Zone"
+                             Widgets="Config.Center"
+                             OnDragStart="@(i => HandleDragStart(Config.Center, i))"
+                             OnDropOnItem="@(i => HandleItemDrop(Config.Center, i))"
+                             OnDropOnZone="@(() => HandleZoneDrop(Config.Center))"
+                             OnRemove="@(i => Remove(Config.Center, i))"
+                             OnAdd="@(w => Add(Config.Center, w))" />
+
+        <PlayerBarZoneEditor Title="Right Zone"
+                             Widgets="Config.Right"
+                             OnDragStart="@(i => HandleDragStart(Config.Right, i))"
+                             OnDropOnItem="@(i => HandleItemDrop(Config.Right, i))"
+                             OnDropOnZone="@(() => HandleZoneDrop(Config.Right))"
+                             OnRemove="@(i => Remove(Config.Right, i))"
+                             OnAdd="@(w => Add(Config.Right, w))" />
+    </div>
+</div>
