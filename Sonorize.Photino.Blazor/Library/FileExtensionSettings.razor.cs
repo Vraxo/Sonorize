@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Sonorize.Core.Library;
 using Sonorize.Core.Settings;
 
-namespace Sonorize.Photino.Blazor.Settings;
+namespace Sonorize.Photino.Blazor.Library;
 
 public partial class FileExtensionSettings
 {
