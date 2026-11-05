@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using Sonorize.Photino.Blazor.Shell;
 
 namespace Sonorize.Core.Updates;
 
