@@ -1,0 +1,125 @@
+@using Sonorize.Core
+@using Sonorize.Core.Settings
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject IPlayerService PlayerService
+
+<div class="settings-view-container">
+
+    <!-- Audio Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Audio Output</span>
+            <span class="card-desc">Manage playback devices</span>
+        </div>
+        <div class="card-content">
+            <div class="control-row">
+                <label>Output Device</label>
+                <select class="form-control dropdown" @onchange="OnDeviceChanged">
+                    @foreach (var device in _audioDevices)
+                    {
+                        <option value="@device.Index" selected="@IsSelected(device)">
+                            @device.Name @(device.IsDefault ? "(Default)" : "")
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Behavior Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Behavior</span>
+            <span class="card-desc">Interaction and animation preferences</span>
+        </div>
+        <div class="card-content">
+            <label class="toggle-row">
+                <span class="toggle-label">Play song on single click</span>
+                <input type="checkbox" @bind="PlayOnSingleClick" class="toggle-input" />
+            </label>
+
+            <div class="divider"></div>
+
+            <label class="toggle-row">
+                <span class="toggle-label">Animate Sidebar Toggle</span>
+                <input type="checkbox" @bind="EnableSidebarAnimation" class="toggle-input" />
+            </label>
+        </div>
+    </div>
+
+    <!-- Display Section -->
+    <div class="settings-card">
+        <div class="card-header">
+            <span class="card-title">Display</span>
+            <span class="card-desc">Customize lists and scaling</span>
+        </div>
+        <div class="card-content">
+            <!-- UI Zoom -->
+            <div class="control-group">
+                <div class="slider-header">
+                    <span class="group-label">UI Scale (Zoom)</span>
+                    <span class="value-badge">@ZoomInt%</span>
+                </div>
+                <input type="range" min="50" max="150" step="5" @bind="ZoomInt" class="styled-slider" />
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Columns -->
+            <div class="control-group">
+                <span class="group-label">Track List Columns</span>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" @bind="ShowIndex" /> Index (#)</label>
+                    <label><input type="checkbox" @bind="ShowArt" /> Album Art</label>
+                    <label><input type="checkbox" @bind="ShowArtist" /> Artist</label>
+                    <label><input type="checkbox" @bind="ShowAlbum" /> Album</label>
+                    <label><input type="checkbox" @bind="ShowDuration" /> Duration</label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Overflow Mode -->
+            <div class="control-group">
+                <span class="group-label">Text Overflow</span>
+                <div class="radio-row">
+                    <label class="radio-btn @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Wrap ? "active" : "")">
+                        <input type="radio" name="overflow" checked="@(AppSettings.Library.TrackListOverflow == TextOverflowMode.Wrap)"
+                               @onchange="@(() => UpdateOverflow(TextOverflowMode.Wrap))" />
+                        Wrap
+                    </label>
+                    <label class="radio-btn @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Truncate ? "active" : "")">
+                        <input type="radio" name="overflow" checked="@(AppSettings.Library.TrackListOverflow == TextOverflowMode.Truncate)"
+                               @onchange="@(() => UpdateOverflow(TextOverflowMode.Truncate))" />
+                        Truncate
+                    </label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Styling Toggles -->
+            <div class="control-group">
+                <span class="group-label">List Styling</span>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" @bind="EnableZebra" /> Zebra Striping</label>
+                    <label><input type="checkbox" @bind="ShowGridLines" /> Grid Lines</label>
+                    <label><input type="checkbox" @bind="ShowThumbs" /> Slider Thumbs</label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Density Sliders -->
+            <div class="control-group">
+                <span class="group-label">Compactness</span>
+                <div class="slider-stack">
+                    <SettingsSlider Label="Row Padding" @bind-Value="RowPadding" Min="0" Max="40" Step="1" Unit="px" />
+                    <SettingsSlider Label="Art Size" @bind-Value="ListArtSize" Min="20" Max="120" Step="4" Unit="px" />
+                    <SettingsSlider Label="Sidebar Padding" @bind-Value="SidebarItemPadding" Min="2" Max="30" Step="1" Unit="px" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

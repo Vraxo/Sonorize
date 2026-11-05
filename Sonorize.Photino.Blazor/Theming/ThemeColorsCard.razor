@@ -1,0 +1,54 @@
+@using NativeFileDialogs.Net
+@using Sonorize.Core.Settings
+@implements IDisposable
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+
+<SettingsCard Title="Colors & Background" Description="Fine-tune the palette">
+
+    <div class="control-group">
+        <span class="group-label">Custom Background Image</span>
+        <div class="file-input-row">
+            <input type="text" class="form-control readonly-input" value="@AppSettings.Theme.BackgroundImagePath" readonly placeholder="No image selected" />
+            <button class="btn-icon-action" @onclick="PickBackgroundImage" title="Browse">
+                <i class="fas fa-folder-open"></i>
+            </button>
+            @if (!string.IsNullOrEmpty(AppSettings.Theme.BackgroundImagePath))
+            {
+                <button class="btn-icon-action danger" @onclick="ClearBackgroundImage" title="Clear">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="control-group">
+        <span class="group-label">Transparency & Effects</span>
+        <div class="slider-stack">
+            <SettingsSlider Label="Bg Blur" @bind-Value="BackgroundBlur" Min="0" Max="100" Step="5" Unit="px" />
+            <SettingsSlider Label="Bg Brightness" @bind-Value="BgBrightnessInt" Min="0" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Sidebar Opacity" @bind-Value="SidebarOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Content Opacity" @bind-Value="MainContentOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Bar Opacity" @bind-Value="PlayerBarOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
+            <SettingsSlider Label="Gradient H" @bind-Value="GradientHeightInt" Min="0" Max="800" Step="50" Unit="px" />
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="control-group">
+        <span class="group-label">Palette</span>
+        <div class="color-grid-container">
+            <SettingsColorControl Label="Accent" @bind-Value="AccentColor" OnReset="@(() => Reset(s => s.Theme.AccentColor = _defaults.AccentColor))" />
+            <SettingsColorControl Label="Primary Bg" @bind-Value="BgPrimary" OnReset="@(() => Reset(s => s.Theme.BgPrimary = _defaults.BgPrimary))" />
+            <SettingsColorControl Label="Secondary Bg" @bind-Value="BgSecondary" OnReset="@(() => Reset(s => s.Theme.BgSecondary = _defaults.BgSecondary))" />
+            <SettingsColorControl Label="Tertiary Bg" @bind-Value="BgTertiary" OnReset="@(() => Reset(s => s.Theme.BgTertiary = _defaults.BgTertiary))" />
+            <SettingsColorControl Label="Player Bar" @bind-Value="PlayerBarBg" OnReset="@(() => Reset(s => s.Theme.PlayerBarBg = _defaults.PlayerBarBg))" />
+            <SettingsColorControl Label="Border" @bind-Value="BorderColor" OnReset="@(() => Reset(s => s.Theme.BorderColor = _defaults.BorderColor))" />
+            <SettingsColorControl Label="Text Primary" @bind-Value="TextPrimary" OnReset="@(() => Reset(s => s.Theme.TextPrimary = _defaults.TextPrimary))" />
+            <SettingsColorControl Label="Text Secondary" @bind-Value="TextSecondary" OnReset="@(() => Reset(s => s.Theme.TextSecondary = _defaults.TextSecondary))" />
+        </div>
+    </div>
+</SettingsCard>

@@ -1,0 +1,63 @@
+﻿@page "/"
+@page "/library/album/{AlbumName}"
+@page "/library/artist/{ArtistName}"
+
+@using Timer = System.Timers.Timer
+@using Sonorize.Core.Settings
+@inject LibraryService LibService
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject NavigationManager Nav
+@implements IDisposable
+
+<LibraryHeader @bind-SearchQuery="_searchQuery"
+               OnSearchKeyUp="OnSearchKeyUp"
+               ViewMode="_viewMode"
+               ViewModeChanged="OnViewModeChanged"
+               OnSettingsClick="GoToSettings"
+               Title="@GetPageTitle()"
+               ShowBackButton="@(AlbumName is not null || ArtistName is not null)"
+               OnBackClick="ClearFilters" />
+
+<div id="library-container" class="library-container @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Truncate ? "truncate-track-text" : "")">
+    @if (_isFiltering)
+    {
+        <div class="empty-library-message">
+            <p>Filtering...</p>
+        </div>
+    }
+    else if (_filteredSongs.Count == 0)
+    {
+        <div class="empty-library-message">
+            <p>No songs found for this view.</p>
+        </div>
+    }
+    else if (_viewMode == LibraryViewMode.List)
+    {
+        <TrackTable Songs="_filteredSongs"
+                    ActiveSong="PlayerService.CurrentSong"
+                    SelectedSong="_focusedSong"
+                    CurrentSortColumn="_sortColumn"
+                    IsAscending="_isAscending"
+                    OnSort="Sort"
+                    OnRowClick="OnRowClick"
+                    OnRowDoubleClick="OnRowDoubleClick"
+                    OnOptionsClick="OpenOptions" />
+    }
+    else
+    {
+        <LibraryGrid Songs="_filteredSongs"
+                     OnSongClick="OnRowClick" />
+    }
+</div>
+
+<TrackActionsModal IsVisible="_showActionsModal"
+                   Song="_selectedSongForModal"
+                   OnClose="CloseOptions"
+                   OnEditMetadata="OpenMetadataEditor" />
+
+<MetadataEditorModal IsVisible="_showMetadataEditor"
+                     Song="_selectedSongForModal"
+                     OnClose="CloseMetadataEditor" />
+

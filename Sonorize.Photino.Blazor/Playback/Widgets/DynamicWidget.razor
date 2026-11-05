@@ -1,0 +1,39 @@
+﻿@using Sonorize.Core.Settings
+
+@switch (Type)
+{
+    case PlayerBarWidget.Info:
+        <InfoWidget />
+        break;
+    case PlayerBarWidget.Transport:
+        <TransportWidget />
+        break;
+    case PlayerBarWidget.Seek:
+        <SeekWidget />
+        break;
+    case PlayerBarWidget.StackedTransport:
+        <StackedTransportWidget />
+        break;
+    case PlayerBarWidget.Volume:
+        <VolumeWidget />
+        break;
+    case PlayerBarWidget.Focus:
+        <FocusWidget />
+        break;
+    case PlayerBarWidget.SpeedPitch:
+        <SpeedPitchWidget />
+        break;
+    case PlayerBarWidget.Equalizer:
+        <EqWidget />
+        break;
+    case PlayerBarWidget.Queue:
+        <QueueWidget />
+        break;
+    case PlayerBarWidget.Spacer:
+        <div style="flex-grow:1;"></div>
+        break;
+}
+
+@code {
+    [Parameter] public PlayerBarWidget Type { get; set; }
+}

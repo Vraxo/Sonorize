@@ -1,0 +1,30 @@
+using Sonorize.Core.Core;
+
+namespace Sonorize.Core.Library;
+
+public class DataRebuildScheduler : IDisposable
+{
+    private readonly ActionDebouncer _debouncer = new();
+    private readonly Func<Task> _rebuildAction;
+
+    public DataRebuildScheduler(Func<Task> rebuildAction)
+    {
+        _rebuildAction = rebuildAction;
+    }
+
+    public void ScheduleRebuild(bool immediate = false)
+    {
+        if (immediate)
+        {
+            _rebuildAction();
+            return;
+        }
+
+        _debouncer.Debounce(async () => await _rebuildAction(), 1000);
+    }
+
+    public void Dispose()
+    {
+        _debouncer.Dispose();
+    }
+}

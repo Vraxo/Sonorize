@@ -1,0 +1,28 @@
+﻿@using Sonorize.Core
+@using Sonorize.Core.Settings
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject EqPresetService PresetService
+
+<Modal IsVisible="IsVisible"
+       Title="Equalizer"
+       ConfirmText="Close"
+       ShowCancelButton="false"
+       OnCancel="Close"
+       OnConfirm="Close">
+
+    <EqPresetBar IsEnabled="@AppSettings.Playback.EqEnabled"
+                 IsEnabledChanged="OnEnabledChanged"
+                 CurrentPresetName="@_currentPresetName"
+                 UserPresets="@UserPresets"
+                 DefaultPresets="@DefaultPresets"
+                 CanDelete="@CanDelete"
+                 OnPresetSelected="OnPresetSelected"
+                 OnSave="OnSavePreset"
+                 OnDelete="OnDeletePreset" />
+
+    <EqFaders Gains="@AppSettings.Playback.EqGains"
+              OnGainChanged="OnGainChanged" />
+
+</Modal>

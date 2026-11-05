@@ -1,0 +1,54 @@
+﻿@page "/queue"
+@using Sonorize.Core.Settings
+@inject IPlayerService PlayerService
+@inject SonorizeSettings AppSettings
+@inject ISettingsManager<SonorizeSettings> SettingsManager
+@inject NavigationManager Nav
+@implements IDisposable
+
+<div class="header">
+    <div id="header-context-controls">
+        <button class="header-action-btn" title="Back" @onclick="GoBack">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+    <h1 id="header-title">Play Queue</h1>
+    <div class="header-controls header-right">
+        <span style="color: var(--text-secondary); font-size: 0.9em;">
+            @PlayerService.PlaybackQueue.Count tracks
+        </span>
+    </div>
+</div>
+
+<div class="queue-container">
+    @if (!PlayerService.PlaybackQueue.Any())
+    {
+        <div class="empty-message">
+            <i class="fas fa-music"></i>
+            <p>Queue is empty. Go play some music!</p>
+        </div>
+    }
+    else
+    {
+        <div class="queue-list">
+            <TrackTable Songs="PlayerService.PlaybackQueue"
+                        ActiveSong="PlayerService.CurrentSong"
+                        AllowReorder="true"
+                        ShowRemoveButton="true"
+                        EmptyMessage="Queue is empty."
+                        OnPlay="PlayFromQueue"
+                        OnReorder="HandleReorder"
+                        OnRemove="HandleRemove"
+                        OnOptionsClick="OpenOptions" />
+        </div>
+    }
+</div>
+
+<TrackActionsModal IsVisible="_showActionsModal"
+                   Song="_selectedSongForModal"
+                   OnClose="CloseOptions"
+                   OnEditMetadata="OpenMetadataEditor" />
+
+<MetadataEditorModal IsVisible="_showMetadataEditor"
+                     Song="_selectedSongForModal"
+                     OnClose="CloseMetadataEditor" />

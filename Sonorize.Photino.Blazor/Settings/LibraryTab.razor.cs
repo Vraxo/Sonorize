@@ -1,0 +1,85 @@
+using NativeFileDialogs.Net;
+using Sonorize.Core.Library;
+using Sonorize.Core.Settings;
+
+namespace Sonorize.Photino.Blazor.Settings;
+
+public partial class LibraryTab
+{
+    private bool ScanOnStartup
+    {
+        get => AppSettings.Library.ScanOnStartup;
+
+        set
+        {
+            AppSettings.Library.ScanOnStartup = value;
+            Save();
+        }
+    }
+
+    private int GridWidth
+    {
+        get => AppSettings.Library.GridItemWidth;
+
+        set
+        {
+            AppSettings.Library.GridItemWidth = value;
+            Save();
+        }
+    }
+
+    private int GridGap
+    {
+        get => AppSettings.Library.GridGap;
+
+        set
+        {
+            AppSettings.Library.GridGap = value;
+            Save();
+        }
+    }
+
+    private int GridPadding
+    {
+        get => AppSettings.Library.GridItemPadding;
+
+        set
+        {
+            AppSettings.Library.GridItemPadding = value;
+            Save();
+        }
+    }
+
+    private void AddFolder()
+    {
+        NfdStatus result = Nfd.PickFolder(out string? path, null);
+
+        if (CanAddFolder(result, path))
+        {
+            return;
+        }
+
+        AppSettings.Library.MusicFolderPaths.Add(path);
+        Save();
+        LibraryService.ScanFolder(path);
+    }
+
+    private bool CanAddFolder(NfdStatus result, string? path)
+    {
+        return result != NfdStatus.Ok
+            || string.IsNullOrEmpty(path)
+            || AppSettings.Library.MusicFolderPaths.Contains(path);
+    }
+
+    private void RemoveFolder(string path)
+    {
+        AppSettings.Library.MusicFolderPaths.Remove(path);
+        Save();
+        LibraryService.RefreshLibraryAsync();
+    }
+
+    private void Save()
+    {
+        SettingsManager.Save(AppSettings);
+    }
+}

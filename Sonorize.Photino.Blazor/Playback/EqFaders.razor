@@ -1,0 +1,17 @@
+﻿<div class="eq-bands-container">
+    @for (int i = 0; i < 10; i++)
+    {
+        var index = i;
+        <div class="eq-band">
+            <div class="eq-slider-wrapper">
+                <input type="range"
+                       min="-15" max="15"
+                       step="1"
+                       value="@Gains[index]"
+                       @oninput="@(e => HandleInput(index, e))"
+                       class="vertical-slider" />
+            </div>
+            <span class="eq-freq" title="@_tooltips[index]">@_labels[index]</span>
+        </div>
+    }
+</div>
