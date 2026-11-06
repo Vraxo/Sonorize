@@ -2,7 +2,7 @@
 
 **Sonorize** is a modern, customizable desktop music player built with .NET 10 and Blazor Hybrid (Photino). It is designed to provide a clean, web-based interface for your local music library while offering native desktop performance and advanced audio controls.
 
-![Sonorize Screenshot](Assets/Screenshot.png)
+![Sonorize Screenshot](assets/Screenshot.png)
 
 > ⚠️ **Status: Experimental**
 > 
