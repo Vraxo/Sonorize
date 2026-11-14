@@ -1,10 +1,10 @@
-using Sonorize.Core.Core;
+﻿using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;
 using Sonorize.Core.Settings;
 
-﻿using NSubstitute;
+using NSubstitute;
 
 namespace Sonorize.Core.Tests.Library;
 
@@ -60,7 +60,6 @@ public class LibraryServiceTests
         string tempDir = Path.Combine(Path.GetTempPath(), "SonorizeTest_" + Guid.NewGuid());
         _ = Directory.CreateDirectory(tempDir);
 
-        var settingsManager = new SettingsManager<SonorizeSettings>("test_lib_settings.json", tempDir);
         var playlistPersistence = new PlaylistPersistenceService(Path.Combine(tempDir, "Playlists"));
         var cacheService = new LibraryCacheService(tempDir);
         var aggregator = new LibraryAggregator();
@@ -70,17 +69,24 @@ public class LibraryServiceTests
         _playlistManager = new PlaylistManager(playlistPersistence);
         _searchService = new SearchService();
 
-        var scanner = new LibraryScanner(_mockMusicLibrary, _settings);
-
-        _libraryService = new LibraryService(
-            scanner,
-            _mockMusicLibrary,
-            _settings,
-            settingsManager,
+        var dataManager = new LibraryDataManager(
             cacheService,
             aggregator,
-            _fileMonitor,
+            new FolderTreeBuilder(_settings),
+            new PlaylistSyncOrchestrator());
+
+        var scanCoordinator = new LibraryScanCoordinator(
+            new FolderScanner(_mockMusicLibrary, _settings),
+            dataManager,
+            _settings);
+
+        _libraryService = new LibraryService(
+            dataManager,
+            scanCoordinator,
+            new LibraryEventCoordinator(_settings, dataManager, _fileMonitor),
+            new DemoDataLoader(dataManager),
             _playlistManager,
+            _mockMusicLibrary,
             _searchService);
 
         // Safe platform-agnostic path construction
@@ -105,6 +111,7 @@ public class LibraryServiceTests
 
         // Use RescanLibraryFullAsync to explicitly wait for the scan in tests
         await _libraryService.RescanLibraryFullAsync();
+        await WaitUntilAsync(() => _libraryService.AllSongs.Count == _sampleSongs.Count);
 
         Assert.Equal(4, _libraryService.AllSongs.Count);
     }
@@ -119,6 +126,7 @@ public class LibraryServiceTests
         _settings.Library.MusicFolderPaths.Add(_mockMusicPath);
         _mockMusicLibrary.SongsToReturn = _sampleSongs;
         await _libraryService.RescanLibraryFullAsync();
+        await WaitUntilAsync(() => _libraryService.AllSongs.Count == _sampleSongs.Count);
 
         // Act
         IReadOnlyList<Song> results = await _libraryService.SearchAsync(query!);
@@ -133,11 +141,21 @@ public class LibraryServiceTests
         _settings.Library.MusicFolderPaths.Add(_mockMusicPath);
         _mockMusicLibrary.SongsToReturn = _sampleSongs;
         await _libraryService.RescanLibraryFullAsync();
+        await WaitUntilAsync(() => _libraryService.AllSongs.Count == _sampleSongs.Count);
 
         IReadOnlyList<Song> results = await _libraryService.SearchAsync("Alpha");
 
         Assert.Equal(2, results.Count);
         Assert.Contains(results, s => s.Title == "Alpha Track");
         Assert.Contains(results, s => s.Title == "Another Alpha");
+    }
+
+    // Scan results reach the public lists through a debounced rebuild, so wait for it.
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (int attempt = 0; attempt < 100 && !condition(); attempt++)
+        {
+            await Task.Delay(50);
+        }
     }
 }

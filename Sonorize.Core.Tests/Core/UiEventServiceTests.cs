@@ -1,9 +1,8 @@
-using System.Text.Json;
-using JsonDocument jsonDoc = JsonDocument.Parse(capturedJson);
+﻿using System.Text.Json;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
 
-﻿using NSubstitute;
+using NSubstitute;
 
 namespace Sonorize.Core.Tests.Core;
 
@@ -31,7 +30,7 @@ public class UiEventServiceTests
         // Assert
         _uiBridge.Received(1).SendMessage(Arg.Any<string>());
         Assert.NotNull(capturedJson);
-
+        using JsonDocument jsonDoc = JsonDocument.Parse(capturedJson);
         JsonElement root = jsonDoc.RootElement;
 
         Assert.Equal("event", root.GetProperty("type").GetString());
@@ -52,7 +51,7 @@ public class UiEventServiceTests
 
         // Assert
         Assert.NotNull(capturedJson);
-
+        using JsonDocument jsonDoc = JsonDocument.Parse(capturedJson);
         JsonElement root = jsonDoc.RootElement;
         JsonElement payloadElement = root.GetProperty("payload");
 
@@ -73,7 +72,7 @@ public class UiEventServiceTests
 
         // Assert
         Assert.NotNull(capturedJson);
-
+        using JsonDocument jsonDoc = JsonDocument.Parse(capturedJson);
         JsonElement root = jsonDoc.RootElement;
 
         Assert.Equal(JsonValueKind.Null, root.GetProperty("payload").ValueKind);
@@ -92,7 +91,7 @@ public class UiEventServiceTests
 
         // Assert
         Assert.NotNull(capturedJson);
-
+        using JsonDocument jsonDoc = JsonDocument.Parse(capturedJson);
         JsonElement root = jsonDoc.RootElement;
         JsonElement payloadElement = root.GetProperty("payload");
 

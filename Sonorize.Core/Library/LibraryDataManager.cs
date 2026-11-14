@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playlists;
 
@@ -10,6 +11,10 @@ public class LibraryDataManager : IDisposable
     private readonly FolderTreeBuilder _treeBuilder;
     private readonly PlaylistSyncOrchestrator _playlistSync;
     private readonly DataRebuildScheduler _rebuildScheduler;
+
+    // Source of truth for the library, keyed by file path. AllSongs, AllAlbums,
+    // AllArtists and FolderRootNodes are snapshots rebuilt from it.
+    private readonly ConcurrentDictionary<string, Song> _songs = new(StringComparer.OrdinalIgnoreCase);
 
     private List<Playlist> _filePlaylists = [];
 
@@ -36,39 +41,54 @@ public class LibraryDataManager : IDisposable
 
     public void AddOrUpdateSong(Song song)
     {
+        _songs[song.FilePath] = song;
         _rebuildScheduler.ScheduleRebuild();
     }
 
     public void RemoveSong(string path)
     {
-        _rebuildScheduler.ScheduleRebuild();
+        if (_songs.TryRemove(path, out _))
+        {
+            _rebuildScheduler.ScheduleRebuild();
+        }
     }
 
     public void ClearData()
     {
+        _songs.Clear();
+        _filePlaylists = [];
         _rebuildScheduler.ScheduleRebuild(immediate: true);
     }
 
     public Song? GetSong(string path)
     {
-        IReadOnlyList<Song> songs = AllSongs;
-        return songs.FirstOrDefault(s => s.FilePath.Equals(path, StringComparison.OrdinalIgnoreCase));
+        return _songs.GetValueOrDefault(path);
     }
 
     public async Task LoadCacheIntoMemoryAsync()
     {
         List<Song> cachedSongs = await _cacheService.LoadCacheAsync();
-        AllSongs = cachedSongs;
 
-        DataUpdated?.Invoke();
+        foreach (Song song in cachedSongs)
+        {
+            _songs[song.FilePath] = song;
+        }
+
+        RebuildSnapshots();
     }
 
     public void LoadDemoDataIntoMemory(List<Song> demoSongs, List<Playlist> demoPlaylists)
     {
-        AllSongs = demoSongs;
+        _songs.Clear();
+
+        foreach (Song song in demoSongs)
+        {
+            _songs[song.FilePath] = song;
+        }
+
         _filePlaylists = demoPlaylists;
 
-        DataUpdated?.Invoke();
+        RebuildSnapshots();
     }
 
     public void UpdateFilePlaylists(List<Playlist> found, bool incremental = false)
@@ -84,7 +104,13 @@ public class LibraryDataManager : IDisposable
 
     private async Task RebuildAggregatesAsync()
     {
-        List<Song> songs = AllSongs.ToList();
+        RebuildSnapshots();
+        await _cacheService.SaveCacheAsync(AllSongs);
+    }
+
+    private void RebuildSnapshots()
+    {
+        List<Song> songs = [.. _songs.Values];
         (List<AlbumGroup>? albums, List<ArtistGroup>? artists) = _aggregator.Aggregate(songs);
         List<FolderNode> folderTree = _treeBuilder.Build(songs);
 
@@ -94,7 +120,6 @@ public class LibraryDataManager : IDisposable
         FolderRootNodes = folderTree;
 
         DataUpdated?.Invoke();
-        await _cacheService.SaveCacheAsync(AllSongs);
     }
 
     public void Dispose()

@@ -1,5 +1,3 @@
-using Sonorize.Core.Settings;
-
 ﻿using Sonorize.Core.Settings;
 
 namespace Sonorize.Core.Library;
