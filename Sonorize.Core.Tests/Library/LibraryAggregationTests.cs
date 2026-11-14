@@ -48,7 +48,6 @@ public class LibraryAggregationTests
     {
         _mockMusicLibrary = new MockMusicLibraryService();
         var settings = new SonorizeSettings();
-        var settingsManager = new SettingsManager<SonorizeSettings>("test_agg_settings.json", Path.GetTempPath());
 
         string tempDir = Path.Combine(Path.GetTempPath(), "SonorizeTest_" + Guid.NewGuid());
         _ = Directory.CreateDirectory(tempDir);
@@ -61,17 +60,24 @@ public class LibraryAggregationTests
         var fileMonitor = Substitute.For<LibraryFileMonitor>(settings);
         var playlistManager = new PlaylistManager(playlistPersistence);
         var searchService = new SearchService();
-        var scanner = new LibraryScanner(_mockMusicLibrary, settings);
-
-        _libraryService = new LibraryService(
-            scanner,
-            _mockMusicLibrary,
-            settings,
-            settingsManager,
+        var dataManager = new LibraryDataManager(
             cacheService,
             aggregator,
-            fileMonitor,
+            new FolderTreeBuilder(settings),
+            new PlaylistSyncOrchestrator());
+
+        var scanCoordinator = new LibraryScanCoordinator(
+            new FolderScanner(_mockMusicLibrary, settings),
+            dataManager,
+            settings);
+
+        _libraryService = new LibraryService(
+            dataManager,
+            scanCoordinator,
+            new LibraryEventCoordinator(settings, dataManager, fileMonitor),
+            new DemoDataLoader(dataManager),
             playlistManager,
+            _mockMusicLibrary,
             searchService);
 
         // Platform-safe mock path
@@ -97,6 +103,7 @@ public class LibraryAggregationTests
         // In tests, we use RescanLibraryFullAsync explicitly to ensure completion before assertion
         // (InitializeAsync triggers background tasks which are hard to test)
         await _libraryService.RescanLibraryFullAsync();
+        await WaitUntilAsync(() => _libraryService.AllAlbums.Count == 4);
 
         // Act
         var albums = _libraryService.AllAlbums;
@@ -123,5 +130,14 @@ public class LibraryAggregationTests
         Assert.NotNull(artistA);
         Assert.Equal(3, artistA.SongCount);
         Assert.Equal(2, artistA.AlbumCount);
+    }
+
+    // Scan results reach the public lists through a debounced rebuild, so wait for it.
+    private static async Task WaitUntilAsync(Func<bool> condition)
+    {
+        for (int attempt = 0; attempt < 100 && !condition(); attempt++)
+        {
+            await Task.Delay(50);
+        }
     }
 }

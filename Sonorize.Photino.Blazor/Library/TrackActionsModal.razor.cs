@@ -28,7 +28,7 @@ public partial class TrackActionsModal
     {
         if (Song is not null)
         {
-            Core.Services.System.FileExplorerService.ShowInFolder(Song.FilePath);
+            FileExplorerService.ShowInFolder(Song.FilePath);
         }
 
         _ = Cancel();
