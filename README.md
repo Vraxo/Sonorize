@@ -22,6 +22,7 @@
 
 * **.NET 10**
 * **Photino.Blazor** (Lightweight cross-platform desktop wrapper)
+* **Terminal.Gui v2** (Terminal frontend, `Sonorize.Tui`)
 * **ManagedBass** (C# wrapper for the Un4seen BASS audio library)
 * **Inflatable.Lastfm** (Scrobbling API)
 
@@ -49,12 +50,12 @@ Sonorize requires `bass.dll` and `bass_fx.dll`.
 
 The source code does not include API keys. To enable Last.fm features when building from source:
 
-1. Navigate to `Sonorize.Core/Configuration/`.
+1. Navigate to `Sonorize.Core/Scrobbling/`.
 2. Create a new file named `Secrets.Private.cs`.
 3. Paste the following code, replacing the placeholders with your own Last.fm API credentials:
 
 ```csharp
-namespace Sonorize.Core.Configuration;
+namespace Sonorize.Core.Scrobbling;
 
 public static partial class Secrets
 {
@@ -73,6 +74,33 @@ public static partial class Secrets
 ```bash
 dotnet run --project Sonorize.Photino.Blazor
 ```
+
+### 6. Terminal UI (Optional)
+
+`Sonorize.Tui` is a keyboard-driven terminal frontend built on the same `Sonorize.Core` services. It shares the settings, library cache and Last.fm session with the desktop app, so only one of the two can run at a time.
+
+```bash
+dotnet run --project Sonorize.Tui
+```
+
+It covers the core player: browsing songs, artists, albums and the queue, search, and playback controls. Playlists, the equalizer, theming and the metadata editor are only available in the desktop app.
+
+| Key | Action |
+| --- | --- |
+| `Enter` | Play song / open artist or album |
+| `Space` | Play / pause |
+| `n` / `p` | Next / previous track |
+| `←` / `→` | Seek 5 seconds |
+| `+` / `-` | Volume |
+| `s` / `r` | Shuffle / repeat |
+| `1`–`4` | Songs / Artists / Albums / Queue |
+| `/` | Search (`Esc` clears) |
+| `a` | Add a music folder |
+| `F5` | Rescan library |
+| `?` | Show all keys |
+| `q` | Quit |
+
+The BASS libraries from step 3 are needed here too (`libbass.so` / `libbass.dylib` on Linux and macOS).
 
 ## 🤝 Contributing
 

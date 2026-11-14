@@ -1,7 +1,7 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Sonorize.Core.Settings;
 
-﻿using Sonorize.Core.Settings;
+using Sonorize.Core.Settings;
 
 namespace Sonorize.Core.Tests.Settings;
 

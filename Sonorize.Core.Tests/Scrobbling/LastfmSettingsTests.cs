@@ -1,6 +1,6 @@
-using Sonorize.Core.Scrobbling;
+﻿using Sonorize.Core.Scrobbling;
 
-﻿using Sonorize.Core.Settings;
+using Sonorize.Core.Settings;
 
 namespace Sonorize.Core.Tests.Scrobbling;
 

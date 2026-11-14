@@ -1,10 +1,10 @@
-using Sonorize.Core.Core;
+﻿using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;
 using Sonorize.Core.Settings;
 
-﻿using NSubstitute;
+using NSubstitute;
 
 namespace Sonorize.Core.Tests.Library;
 

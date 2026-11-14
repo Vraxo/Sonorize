@@ -5,4 +5,5 @@
   <Project Path="Sonorize.Core.Tests/Sonorize.Core.Tests.csproj" />
   <Project Path="Sonorize.Core/Sonorize.Core.csproj" />
   <Project Path="Sonorize.Photino.Blazor/Sonorize.Photino.Blazor.csproj" />
+  <Project Path="Sonorize.Tui/Sonorize.Tui.csproj" />
 </Solution>

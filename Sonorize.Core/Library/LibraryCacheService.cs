@@ -1,6 +1,4 @@
 using System.Text.Json;
-using FileStream createStream = File.Create(_cacheFilePath);
-using FileStream openStream = File.OpenRead(_cacheFilePath);
 using Sonorize.Core.Core;
 
 namespace Sonorize.Core.Library;
@@ -33,6 +31,7 @@ public class LibraryCacheService
     {
         try
         {
+            using FileStream createStream = File.Create(_cacheFilePath);
             await JsonSerializer.SerializeAsync(createStream, songs, _jsonOptions);
         }
         catch (Exception ex)
@@ -50,6 +49,7 @@ public class LibraryCacheService
 
         try
         {
+            using FileStream openStream = File.OpenRead(_cacheFilePath);
             List<Song>? songs = await JsonSerializer.DeserializeAsync<List<Song>>(openStream, _jsonOptions);
             return songs ?? [];
         }
