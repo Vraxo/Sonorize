@@ -4,6 +4,7 @@ using Sonorize.Core.Playback;
 using Sonorize.Core.Scrobbling;
 using Sonorize.Core.Settings;
 using Terminal.Gui.App;
+using Terminal.Gui.Drivers;
 
 namespace Sonorize.Tui;
 
@@ -36,6 +37,10 @@ public static class Program
             // Instantiate the background listeners so they subscribe to player events.
             provider.GetRequiredService<PlayerSettingsPersistenceService>();
             provider.GetRequiredService<ScrobbleOrchestrator>();
+
+            // Emit the 16 ANSI colour codes instead of 24-bit RGB, so colours come
+            // from the user's terminal theme like in any other console program.
+            Driver.Force16Colors = true;
 
             using IApplication app = Application.Create().Init();
             using MainWindow window = ActivatorUtilities.CreateInstance<MainWindow>(provider);

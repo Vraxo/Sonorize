@@ -25,6 +25,14 @@ public sealed partial class MainWindow
 
     private bool ShowsSongs => _drillDown is not null || _mode is BrowseMode.Songs or BrowseMode.Queue;
 
+    private bool IsPlayingRow(int row)
+    {
+        return ShowsSongs
+            && row >= 0
+            && row < _songRows.Count
+            && _songRows[row].FilePath == _player.CurrentSong?.FilePath;
+    }
+
     private int SelectedRow => _table.Value?.SelectedCell.Y ?? -1;
 
     private void SetMode(BrowseMode mode)
