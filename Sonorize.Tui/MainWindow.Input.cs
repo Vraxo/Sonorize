@@ -19,6 +19,7 @@ public sealed partial class MainWindow
         +  -         Volume
         s            Toggle shuffle
         r            Cycle repeat (off, all, one)
+        c            Show / hide cover art
 
         1 2 3 4      Songs / Artists / Albums / Queue
         Tab          Move between search, sidebar and list
@@ -159,6 +160,10 @@ public sealed partial class MainWindow
 
             case 'r':
                 _player.ToggleRepeat();
+                return true;
+
+            case 'c':
+                ToggleCover();
                 return true;
 
             case '+':
