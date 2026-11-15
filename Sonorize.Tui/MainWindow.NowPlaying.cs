@@ -11,6 +11,7 @@ public sealed partial class MainWindow
 
     private string? _markedSongPath;
     private float _shownFraction = -1f;
+    private bool? _statusIsError;
 
     private void UpdateNowPlaying()
     {
@@ -35,6 +36,14 @@ public sealed partial class MainWindow
 
         SetText(_time, $"{FormatTime(current)} / {FormatTime(total)}");
         SetText(_status, BuildStatus());
+
+        bool statusIsError = !_player.IsAudioEngineAvailable;
+
+        if (statusIsError != _statusIsError)
+        {
+            _statusIsError = statusIsError;
+            _status.SetScheme(statusIsError ? TuiColors.Error : TuiColors.Muted);
+        }
 
         // The "▶" marker in the table is computed at draw time, so a redraw is
         // all that is needed when the current song changes.

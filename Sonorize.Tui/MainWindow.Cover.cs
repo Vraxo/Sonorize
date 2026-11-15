@@ -9,6 +9,13 @@ public sealed partial class MainWindow
 
     private bool _showCover = true;
 
+    // In 16-colour mode a cover drawn as character cells is an unreadable
+    // mosaic, so the panel hides itself unless the terminal can draw pixels.
+    // Detection is asynchronous, hence the short delay; pressing c overrides it.
+    private const int RasterCheckTick = 5;
+    private int _coverTicks;
+    private bool _coverToggledByUser;
+
     // Path of the song whose cover is shown or being loaded.
     private string? _coverSongPath;
     private bool _coverLoaded;
@@ -19,6 +26,11 @@ public sealed partial class MainWindow
     /// <summary>Called from the UI tick: starts a load on song change and applies finished ones.</summary>
     private void UpdateCover()
     {
+        if (!_coverToggledByUser && _showCover && ++_coverTicks == RasterCheckTick && !_cover.IsUsingRasterGraphics)
+        {
+            SetCoverVisible(false);
+        }
+
         if (!_showCover)
         {
             return;
@@ -54,7 +66,13 @@ public sealed partial class MainWindow
 
     private void ToggleCover()
     {
-        _showCover = !_showCover;
+        _coverToggledByUser = true;
+        SetCoverVisible(!_showCover);
+    }
+
+    private void SetCoverVisible(bool visible)
+    {
+        _showCover = visible;
         _cover.Visible = _showCover;
 
         // Without the cover the sidebar takes the full column.

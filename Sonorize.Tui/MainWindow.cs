@@ -123,6 +123,8 @@ public sealed partial class MainWindow : Runnable
         _table.Style.ShowVerticalCellLines = false;
         _table.Style.ShowVerticalHeaderLines = false;
         _table.Style.AlwaysShowHeaders = true;
+        _table.Style.HeaderScheme = TuiColors.Accent;
+        _table.Style.RowColorGetter = args => IsPlayingRow(args.RowIndex) ? TuiColors.Playing : null;
 
         _emptyHint = new Label
         {
@@ -171,6 +173,14 @@ public sealed partial class MainWindow : Runnable
             Width = Dim.Fill(1),
             Height = 1
         };
+
+        searchLabel.SetScheme(TuiColors.Accent);
+        _emptyHint.SetScheme(TuiColors.Muted);
+        _nowPlaying.SetScheme(TuiColors.Playing);
+        _progress.SetScheme(TuiColors.Accent);
+        _time.SetScheme(TuiColors.Muted);
+        _status.SetScheme(TuiColors.Muted);
+        hints.SetScheme(TuiColors.Muted);
 
         Add(searchLabel, _search, _sidebar, _cover, _table, _emptyHint, _nowPlaying, _progress, _time, _status, hints);
 
