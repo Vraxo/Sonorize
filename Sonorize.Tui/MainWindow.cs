@@ -46,6 +46,8 @@ public sealed partial class MainWindow : Runnable
     private readonly ProgressBar _progress;
     private readonly Label _time;
     private readonly Label _status;
+    private readonly Label _shuffle;
+    private readonly Label _repeat;
 
     // Core raises its events on timer and thread-pool threads. The handlers only
     // set these flags; the UI timer (OnTick) reads them on the UI thread.
@@ -55,6 +57,8 @@ public sealed partial class MainWindow : Runnable
 
     private object? _tickToken;
     private bool _closing;
+    private bool _sidebarBorderFocused;
+    private bool _tableBorderFocused;
 
     public MainWindow(
         LibraryService library,
@@ -157,9 +161,25 @@ public sealed partial class MainWindow : Runnable
             Height = 1
         };
 
-        _status = new Label
+        _shuffle = new Label
         {
             X = 1,
+            Y = Pos.AnchorEnd(FooterHeight - 2),
+            Width = ShuffleLabelWidth,
+            Height = 1
+        };
+
+        _repeat = new Label
+        {
+            X = Pos.Right(_shuffle) + StatusGap,
+            Y = Pos.AnchorEnd(FooterHeight - 2),
+            Width = RepeatLabelWidth,
+            Height = 1
+        };
+
+        _status = new Label
+        {
+            X = Pos.Right(_repeat) + StatusGap,
             Y = Pos.AnchorEnd(FooterHeight - 2),
             Width = Dim.Fill(1),
             Height = 1
@@ -182,7 +202,7 @@ public sealed partial class MainWindow : Runnable
         _status.SetScheme(TuiColors.Muted);
         hints.SetScheme(TuiColors.Muted);
 
-        Add(searchLabel, _search, _sidebar, _cover, _table, _emptyHint, _nowPlaying, _progress, _time, _status, hints);
+        Add(searchLabel, _search, _sidebar, _cover, _table, _emptyHint, _nowPlaying, _progress, _time, _shuffle, _repeat, _status, hints);
 
         _search.TextChanged += OnSearchTextChanged;
         _search.KeyDown += OnSearchKeyDown;
@@ -235,9 +255,29 @@ public sealed partial class MainWindow : Runnable
         }
 
         UpdateNowPlaying();
+        UpdateFocusBorders();
         UpdateCover();
 
         return true;
+    }
+
+    /// <summary>Colours the border of whichever pane has keyboard focus.</summary>
+    private void UpdateFocusBorders()
+    {
+        bool sidebarFocused = _sidebar.HasFocus;
+        bool tableFocused = _table.HasFocus;
+
+        if (sidebarFocused != _sidebarBorderFocused)
+        {
+            _sidebarBorderFocused = sidebarFocused;
+            _sidebar.Border.GetOrCreateView().SetScheme(sidebarFocused ? TuiColors.FocusedBorder : null);
+        }
+
+        if (tableFocused != _tableBorderFocused)
+        {
+            _tableBorderFocused = tableFocused;
+            _table.Border.GetOrCreateView().SetScheme(tableFocused ? TuiColors.FocusedBorder : null);
+        }
     }
 
     private void OnLibraryChanged()

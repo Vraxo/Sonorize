@@ -1,6 +1,7 @@
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Terminal.Gui.App;
+using Terminal.Gui.Drawing;
 using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
@@ -212,7 +213,7 @@ public sealed partial class MainWindow
 
             PinColumn(0, 1);
             PinColumn(1, titleWidth);
-            PinColumn(2, artistWidth);
+            PinColumn(2, artistWidth).ColorGetter = ArtistCellScheme;
             PinColumn(3, flexible - titleWidth - artistWidth);
         }
         else if (_mode == BrowseMode.Artists)
@@ -241,15 +242,38 @@ public sealed partial class MainWindow
             int albumWidth = flexible * 55 / 100;
 
             PinColumn(0, albumWidth);
-            PinColumn(1, flexible - albumWidth);
+            PinColumn(1, flexible - albumWidth).ColorGetter = ArtistCellScheme;
         }
     }
 
-    private void PinColumn(int column, int width)
+    private ColumnStyle PinColumn(int column, int width)
     {
         ColumnStyle style = _table.Style.GetOrCreateColumnStyle(column);
         style.MinWidth = width;
         style.MaxWidth = width;
+
+        return style;
+    }
+
+    private Scheme? _artistCellRow;
+    private Scheme? _artistCell;
+
+    /// <summary>Artist names in purple, except on the playing row, which stays one colour.</summary>
+    private Scheme? ArtistCellScheme(CellColorGetterArgs args)
+    {
+        if (args.RowScheme == TuiColors.Playing)
+        {
+            return null;
+        }
+
+        // Called for every visible row on every draw: rebuild only when the table's scheme changes.
+        if (_artistCell is null || args.RowScheme != _artistCellRow)
+        {
+            _artistCellRow = args.RowScheme;
+            _artistCell = TuiColors.ArtistCell(args.RowScheme);
+        }
+
+        return _artistCell;
     }
 
     private void UpdateEmptyHint(int rows, string query)

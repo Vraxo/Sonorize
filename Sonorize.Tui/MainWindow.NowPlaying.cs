@@ -1,5 +1,6 @@
 using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
+using Terminal.Gui.Drawing;
 using Terminal.Gui.ViewBase;
 
 namespace Sonorize.Tui;
@@ -9,9 +10,17 @@ public sealed partial class MainWindow
     // "999:59 / 999:59"
     private const int TimeLabelWidth = 15;
 
+    // "Shuffle off" and "Repeat off", the longest texts of each label.
+    private const int ShuffleLabelWidth = 11;
+    private const int RepeatLabelWidth = 10;
+    private const int StatusGap = 3;
+
     private string? _markedSongPath;
     private float _shownFraction = -1f;
     private bool? _statusIsError;
+    private Scheme? _nowPlayingScheme;
+    private bool? _shuffleShown;
+    private RepeatMode? _repeatShown;
 
     private void UpdateNowPlaying()
     {
@@ -20,6 +29,16 @@ public sealed partial class MainWindow
         SetText(_nowPlaying, song is null
             ? "Nothing playing"
             : $"{(_player.IsPlaying ? "▶" : "‖")} {song.Title} — {song.Artist} · {song.Album}");
+
+        Scheme nowPlayingScheme = song is null
+            ? TuiColors.Muted
+            : _player.IsPlaying ? TuiColors.Playing : TuiColors.Notice;
+
+        if (!ReferenceEquals(nowPlayingScheme, _nowPlayingScheme))
+        {
+            _nowPlayingScheme = nowPlayingScheme;
+            _nowPlaying.SetScheme(nowPlayingScheme);
+        }
 
         TimeSpan current = _player.CurrentTime;
         TimeSpan total = _player.TotalTime;
@@ -43,7 +62,14 @@ public sealed partial class MainWindow
         {
             _statusIsError = statusIsError;
             _status.SetScheme(statusIsError ? TuiColors.Error : TuiColors.Muted);
+
+            // The error message takes the whole line.
+            _shuffle.Visible = !statusIsError;
+            _repeat.Visible = !statusIsError;
+            _status.X = statusIsError ? 1 : Pos.Right(_repeat) + StatusGap;
         }
+
+        UpdateShuffleAndRepeat();
 
         // The "▶" marker in the table is computed at draw time, so a redraw is
         // all that is needed when the current song changes.
@@ -54,6 +80,35 @@ public sealed partial class MainWindow
         }
     }
 
+    /// <summary>Shuffle and repeat are dim while off and yellow while on.</summary>
+    private void UpdateShuffleAndRepeat()
+    {
+        bool shuffle = _player.IsShuffle;
+
+        if (shuffle != _shuffleShown)
+        {
+            _shuffleShown = shuffle;
+            _shuffle.Text = shuffle ? "Shuffle on" : "Shuffle off";
+            _shuffle.SetScheme(shuffle ? TuiColors.Notice : TuiColors.Muted);
+        }
+
+        RepeatMode repeat = _player.RepeatMode;
+
+        if (repeat != _repeatShown)
+        {
+            _repeatShown = repeat;
+
+            _repeat.Text = repeat switch
+            {
+                RepeatMode.All => "Repeat all",
+                RepeatMode.One => "Repeat one",
+                _ => "Repeat off"
+            };
+
+            _repeat.SetScheme(repeat == RepeatMode.None ? TuiColors.Muted : TuiColors.Notice);
+        }
+    }
+
     private string BuildStatus()
     {
         if (!_player.IsAudioEngineAvailable)
@@ -61,14 +116,7 @@ public sealed partial class MainWindow
             return "Audio engine unavailable: the BASS native library was not found (see README)";
         }
 
-        string repeat = _player.RepeatMode switch
-        {
-            RepeatMode.All => "all",
-            RepeatMode.One => "one",
-            _ => "off"
-        };
-
-        string status = $"Volume {Math.Round(_player.Volume * 100)}%   Shuffle {(_player.IsShuffle ? "on" : "off")}   Repeat {repeat}";
+        string status = $"Volume {Math.Round(_player.Volume * 100)}%";
 
         return Volatile.Read(ref _activeScans) > 0
             ? status + "   Scanning library…"
