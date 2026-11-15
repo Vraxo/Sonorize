@@ -83,7 +83,7 @@ dotnet run --project Sonorize.Photino.Blazor
 dotnet run --project Sonorize.Tui
 ```
 
-It covers the core player: browsing songs, artists, albums and the queue, search, and playback controls. Playlists, the equalizer, theming and the metadata editor are only available in the desktop app.
+It covers the core player: browsing songs, artists, albums and the queue, search, and playback controls. The current track's cover art is shown under the sidebar: as a real image in terminals that support the Kitty graphics protocol or Sixel, and as coloured blocks elsewhere. Playlists, the equalizer, theming and the metadata editor are only available in the desktop app.
 
 | Key | Action |
 | --- | --- |
@@ -93,6 +93,7 @@ It covers the core player: browsing songs, artists, albums and the queue, search
 | `←` / `→` | Seek 5 seconds |
 | `+` / `-` | Volume |
 | `s` / `r` | Shuffle / repeat |
+| `c` | Show / hide cover art |
 | `1`–`4` | Songs / Artists / Albums / Queue |
 | `/` | Search (`Esc` clears) |
 | `a` | Add a music folder |

@@ -12,16 +12,21 @@ namespace Sonorize.Tui;
 
 /// <summary>
 /// The single full-screen view of the terminal frontend: search box, sidebar,
-/// track table and the now-playing bar.
+/// cover art, track table and the now-playing bar.
 /// </summary>
 /// <remarks>
 /// Split across partial files: this one owns layout and lifetime,
 /// <c>MainWindow.Browse.cs</c> fills the table, <c>MainWindow.Input.cs</c> handles
-/// keys and <c>MainWindow.NowPlaying.cs</c> the playback bar.
+/// keys, <c>MainWindow.NowPlaying.cs</c> the playback bar and
+/// <c>MainWindow.Cover.cs</c> the album art.
 /// </remarks>
 public sealed partial class MainWindow : Runnable
 {
-    private const int SidebarWidth = 14;
+    // Wide enough for a roughly square cover: terminal cells are about twice as tall as wide.
+    private const int SidebarWidth = 22;
+
+    // Four entries plus the border.
+    private const int SidebarListHeight = 6;
     private const int FooterHeight = 4;
 
     private static readonly TimeSpan TickInterval = TimeSpan.FromMilliseconds(200);
@@ -35,6 +40,7 @@ public sealed partial class MainWindow : Runnable
     private readonly TextField _search;
     private readonly ListView _sidebar;
     private readonly TableView _table;
+    private readonly ImageView _cover;
     private readonly Label _emptyHint;
     private readonly Label _nowPlaying;
     private readonly ProgressBar _progress;
@@ -81,12 +87,25 @@ public sealed partial class MainWindow : Runnable
             X = 0,
             Y = 1,
             Width = SidebarWidth,
-            Height = Dim.Fill(FooterHeight),
+            Height = SidebarListHeight,
 
             // Letters are playback shortcuts here, not type-to-search.
             KeystrokeNavigator = null
         };
         _sidebar.SetSource(new ObservableCollection<string>(Enum.GetNames<BrowseMode>()));
+
+        // Draws real pixels on terminals with Kitty graphics or Sixel, and
+        // coloured cells everywhere else.
+        _cover = new ImageView
+        {
+            Title = "Cover",
+            BorderStyle = LineStyle.Rounded,
+            X = 0,
+            Y = Pos.Bottom(_sidebar),
+            Width = SidebarWidth,
+            Height = Dim.Fill(FooterHeight),
+            CanFocus = false
+        };
 
         _table = new TableView
         {
@@ -153,7 +172,7 @@ public sealed partial class MainWindow : Runnable
             Height = 1
         };
 
-        Add(searchLabel, _search, _sidebar, _table, _emptyHint, _nowPlaying, _progress, _time, _status, hints);
+        Add(searchLabel, _search, _sidebar, _cover, _table, _emptyHint, _nowPlaying, _progress, _time, _status, hints);
 
         _search.TextChanged += OnSearchTextChanged;
         _search.KeyDown += OnSearchKeyDown;
@@ -206,6 +225,7 @@ public sealed partial class MainWindow : Runnable
         }
 
         UpdateNowPlaying();
+        UpdateCover();
 
         return true;
     }
