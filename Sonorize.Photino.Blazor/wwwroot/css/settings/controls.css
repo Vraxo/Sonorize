@@ -2,8 +2,8 @@
 .radio-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 8px;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
 }
 
     .radio-group label {
@@ -11,7 +11,7 @@
         align-items: center;
         gap: 10px;
         font-size: 1em;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         font-weight: normal;
         cursor: pointer;
     }
@@ -20,31 +20,31 @@
     .radio-group input[type="checkbox"] {
         transform: scale(1.2);
         cursor: pointer;
-        accent-color: var(--accent-primary);
+        accent-color: var(--color-accent);
     }
 
-/* --- Sliders (SettingsSlider Component) - UPDATED --- */
+/* --- Sliders (SettingsSlider Component) --- */
 .slider-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 12px;
+    margin-top: var(--space-3);
     width: 100%;
 }
 
 .slider-wrapper {
     display: flex;
     align-items: center;
-    gap: 10px; /* Restored a bit of breathing room */
+    gap: 10px; /* Retained for the existing slider layout */
     width: 100%;
-    height: 32px;
+    height: var(--space-6);
 }
 
     /* Use specific selector to override any potential global conflicts */
     .slider-wrapper .slider-label {
         width: 110px;
         font-weight: 500;
-        color: var(--text-primary);
+        color: var(--color-text-primary);
         font-size: 0.95em;
         white-space: nowrap;
         overflow: hidden;
@@ -56,7 +56,7 @@
         flex-grow: 1;
         max-width: 250px; /* Cap the width so it doesn't span the whole page */
         cursor: pointer;
-        height: 4px;
+        height: var(--space-1);
     }
 
     /* Force specific width */
@@ -68,18 +68,18 @@
         text-align: right;
         padding: 4px 6px;
         font-family: monospace;
-        background-color: var(--bg-tertiary);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: var(--border-radius);
+        background-color: var(--color-surface-raised);
+        border: 1px solid var(--color-border);
+        color: var(--color-text-primary);
+        border-radius: var(--radius-control);
         outline: none;
         -moz-appearance: textfield;
         font-size: 0.9em;
     }
 
         .slider-wrapper .number-input:focus {
-            border-color: var(--accent-primary);
-            background-color: var(--bg-secondary);
+            border-color: var(--color-accent);
+            background-color: var(--color-surface);
         }
 
         .slider-wrapper .number-input::-webkit-outer-spin-button,
@@ -90,8 +90,8 @@
 
 /* Reset Button Area */
 .reset-wrapper {
-    width: 24px;
-    height: 24px;
+    width: var(--space-5);
+    height: var(--space-5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -101,12 +101,12 @@
 .reset-icon-btn {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     padding: 0;
     font-size: 0.9em;
     opacity: 0.6;
-    transition: all 0.2s;
+    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -116,7 +116,7 @@
 
     .reset-icon-btn:hover {
         opacity: 1;
-        color: var(--accent-primary);
+        color: var(--color-accent);
     }
 
 /* Legacy/Simple Slider Container */
@@ -134,18 +134,18 @@
 
 /* --- Color Control Component --- */
 .color-control {
-    background-color: var(--bg-tertiary);
-    padding: 12px;
-    border-radius: var(--border-radius);
+    background-color: var(--color-surface-raised);
+    padding: var(--space-3);
+    border-radius: var(--radius-control);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-2);
     border: 1px solid transparent;
-    transition: border-color 0.2s;
+    transition: border-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
     .color-control:hover {
-        border-color: var(--border-color);
+        border-color: var(--color-border);
     }
 
 .color-label-row {
@@ -156,23 +156,23 @@
 
 .color-label {
     font-size: 0.85em;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-weight: 600;
 }
 
 .color-input-row {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
 }
 
 .color-swatch-wrapper {
     width: 40px;
     height: 32px;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-control);
     overflow: hidden;
     position: relative;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-border);
     flex-shrink: 0;
 }
 
@@ -200,58 +200,60 @@
 
 .hex-input {
     flex-grow: 1;
-    padding: 5px 8px;
-    background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    border-radius: var(--border-radius);
+    padding: 5px var(--space-2);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-control);
     font-family: monospace;
     font-size: 0.9em;
     text-transform: uppercase;
     width: 100%;
     min-width: 0;
     outline: none;
-    transition: border-color 0.2s, background-color 0.2s;
+    transition:
+        border-color var(--motion-duration-standard) var(--motion-easing-standard),
+        background-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
     .hex-input:focus {
-        border-color: var(--accent-primary);
-        background-color: var(--bg-secondary);
+        border-color: var(--color-accent);
+        background-color: var(--color-surface);
     }
 
 .reset-btn {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     font-size: 0.9em;
     opacity: 0.6;
-    transition: all 0.2s;
+    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
     padding: 0 4px;
 }
 
     .reset-btn:hover {
         opacity: 1;
-        color: var(--accent-primary);
+        color: var(--color-accent);
     }
 
 /* --- Select Dropdowns --- */
 .settings-view-container select {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 8px 12px;
-    border-radius: var(--border-radius);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
     font-size: 0.9em;
     cursor: pointer;
     outline: none;
-    transition: all 0.2s;
+    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
 .settings-view-container select:hover {
-    border-color: var(--accent-primary);
+    border-color: var(--color-accent);
 }
 
 .settings-view-container select:focus {
-    border-color: var(--accent-primary);
+    border-color: var(--color-accent);
 }
