@@ -100,6 +100,7 @@ public static class ThemeUtils
         _ = sb.AppendLine("--color-text-primary: var(--text-primary);");
         _ = sb.AppendLine("--color-text-secondary: var(--text-secondary);");
         _ = sb.AppendLine("--color-hover: var(--hover-bg);");
+        _ = sb.AppendLine("--color-control-track: #535353;");
 
         // A shared 4px-based spacing scale, with aliases for the existing
         // per-component spacing settings.
