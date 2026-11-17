@@ -11,13 +11,13 @@
 .album-art-container {
     width: 56px;
     height: 56px;
-    margin-right: 12px;
-    background-color: var(--bg-tertiary);
+    margin-right: var(--space-3);
+    background-color: var(--color-surface-raised);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-control);
     overflow: hidden;
 }
 
@@ -38,7 +38,7 @@
 
     .album-art-placeholder i {
         font-size: 28px;
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
     }
 
 .album-art-container.has-art #player-album-art {
@@ -58,7 +58,7 @@
     font-weight: 500;
     font-size: 0.95em;
     margin: 0;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -66,8 +66,8 @@
 
 .player-song-info .song-artist {
     font-size: 0.8em;
-    color: var(--text-secondary);
-    margin: 4px 0 0 0;
+    color: var(--color-text-secondary);
+    margin: var(--space-1) 0 0 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
