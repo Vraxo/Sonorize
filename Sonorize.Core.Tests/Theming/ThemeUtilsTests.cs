@@ -31,41 +31,87 @@ public class ThemeUtilsTests
     [Fact]
     public void GetSmartHighlightBase_DarkColor_ReturnsWhite()
     {
-        // Act
-        // Black background -> Should highlight with white overlay (or base color for hover)
-        // Note: The logic in ThemeUtils.GetSmartHighlightBase returns #FFFFFF if luminance < 128
-        // Wait, luminance > 128 (bright) -> black text/overlay.
-        // luminance <= 128 (dark) -> white text/overlay.
-
+        // Black background -> white highlight for a dark color.
         string result = ThemeUtils.GetSmartHighlightBase("#000000", 0.8f);
 
-        // Assert
         Assert.Equal("#FFFFFF", result);
     }
 
     [Fact]
     public void GetSmartHighlightBase_BrightColor_ReturnsBlack()
     {
-        // Act
         string result = ThemeUtils.GetSmartHighlightBase("#FFFFFF", 0.8f);
 
-        // Assert
         Assert.Equal("#000000", result);
     }
 
     [Fact]
     public void Lighten_IncreasesBrightness()
     {
-        // Arrange
-        string input = "#101010"; // Very dark gray
+        string input = "#101010";
 
-        // Act
         string result = ThemeUtils.Lighten(input, 0.5f);
 
-        // Assert
-        // Logic: (255 - 16)*0.5 + 16 = 119.5 + 16 = 135 (approx #878787)
-        // It should definitely not be the same
         Assert.NotEqual(input, result);
         Assert.StartsWith("#", result);
+    }
+
+    [Fact]
+    public void GenerateRootCss_EmitsSemanticDesignTokens_AndPreservesLegacyVariables()
+    {
+        SonorizeTheme theme = new()
+        {
+            AccentColor = "#123456",
+            BorderRadius = 6,
+            UsePillButtons = false,
+            BaseFontSize = 16,
+            RowVerticalPadding = 10,
+            SidebarItemPadding = 14
+        };
+
+        string css = ThemeUtils.GenerateRootCss(theme, useTransparency: false);
+
+        Assert.Contains("--accent-primary: #123456;", css);
+        Assert.Contains("--border-radius: 6px;", css);
+        Assert.Contains("--btn-radius: 6px;", css);
+        Assert.Contains("--base-font-size: 16px;", css);
+
+        Assert.Contains("--color-accent: var(--accent-primary);", css);
+        Assert.Contains("--color-background: var(--bg-primary);", css);
+        Assert.Contains("--color-surface-raised: var(--bg-tertiary);", css);
+        Assert.Contains("--color-text-primary: var(--text-primary);", css);
+
+        Assert.Contains("--space-1: 4px;", css);
+        Assert.Contains("--space-8: 48px;", css);
+        Assert.Contains("--space-row-y: var(--row-padding);", css);
+        Assert.Contains("--space-sidebar-item: var(--sidebar-item-padding);", css);
+
+        Assert.Contains("--radius-control: var(--border-radius);", css);
+        Assert.Contains("--radius-button: var(--btn-radius);", css);
+        Assert.Contains("--radius-card: calc(var(--border-radius) * 2);", css);
+
+        Assert.Contains("--font-size-body: var(--base-font-size);", css);
+        Assert.Contains("--font-size-heading: calc(var(--base-font-size) * 1.25);", css);
+        Assert.Contains("--line-height-normal: 1.5;", css);
+
+        Assert.Contains("--motion-duration-fast: 120ms;", css);
+        Assert.Contains("--motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);", css);
+        Assert.Contains("--focus-ring:", css);
+        Assert.Contains("--shadow-raised:", css);
+    }
+
+    [Fact]
+    public void GenerateRootCss_SemanticColorTokensFollowTransparentLegacyColors()
+    {
+        SonorizeTheme theme = new()
+        {
+            BgPrimary = "#112233",
+            SidebarOpacity = 0.4f
+        };
+
+        string css = ThemeUtils.GenerateRootCss(theme, useTransparency: true);
+
+        Assert.Contains("--bg-primary: rgba(17, 34, 51, 0.4);", css);
+        Assert.Contains("--color-background: var(--bg-primary);", css);
     }
 }
