@@ -60,14 +60,14 @@ public static class ThemeUtils
         _ = sb.AppendLine($"--row-padding: {theme.RowVerticalPadding}px;");
         _ = sb.AppendLine($"--sidebar-item-padding: {theme.SidebarItemPadding}px;");
 
-        // NEW: Player Bar Height
+        // Player bar sizing
         _ = sb.AppendLine($"--player-bar-height: {theme.PlayerBarHeight}px;");
 
-        // Background Filters
+        // Background filters
         _ = sb.AppendLine($"--bg-blur: {theme.BackgroundBlur}px;");
         _ = sb.AppendLine($"--bg-brightness: {theme.BackgroundBrightness.ToString("0.##", CultureInfo.InvariantCulture)};");
 
-        // Main Content Background (Gradient vs Flat)
+        // Main content background (gradient vs flat)
         string mainBg = theme.ContentGradientHeight > 0
             ? $"linear-gradient(to bottom, var(--bg-tertiary) 0%, var(--bg-secondary) {theme.ContentGradientHeight}px)"
             : "var(--bg-secondary)";
@@ -80,8 +80,69 @@ public static class ThemeUtils
             _ = sb.AppendLine("', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;");
         }
 
+        AppendDesignTokens(sb);
+
         _ = sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    private static void AppendDesignTokens(StringBuilder sb)
+    {
+        // Semantic color aliases let components use intent-based names while
+        // keeping the existing theme variables available for compatibility.
+        _ = sb.AppendLine("--color-accent: var(--accent-primary);");
+        _ = sb.AppendLine("--color-accent-hover: var(--accent-primary-hover);");
+        _ = sb.AppendLine("--color-background: var(--bg-primary);");
+        _ = sb.AppendLine("--color-surface: var(--bg-secondary);");
+        _ = sb.AppendLine("--color-surface-raised: var(--bg-tertiary);");
+        _ = sb.AppendLine("--color-player-bar: var(--player-bar-bg);");
+        _ = sb.AppendLine("--color-border: var(--border-color);");
+        _ = sb.AppendLine("--color-text-primary: var(--text-primary);");
+        _ = sb.AppendLine("--color-text-secondary: var(--text-secondary);");
+        _ = sb.AppendLine("--color-hover: var(--hover-bg);");
+
+        // A shared 4px-based spacing scale, with aliases for the existing
+        // per-component spacing settings.
+        _ = sb.AppendLine("--space-1: 4px;");
+        _ = sb.AppendLine("--space-2: 8px;");
+        _ = sb.AppendLine("--space-3: 12px;");
+        _ = sb.AppendLine("--space-4: 16px;");
+        _ = sb.AppendLine("--space-5: 24px;");
+        _ = sb.AppendLine("--space-6: 32px;");
+        _ = sb.AppendLine("--space-7: 40px;");
+        _ = sb.AppendLine("--space-8: 48px;");
+        _ = sb.AppendLine("--space-row-y: var(--row-padding);");
+        _ = sb.AppendLine("--space-sidebar-item: var(--sidebar-item-padding);");
+
+        // Shape tokens preserve the current radius controls while giving
+        // surfaces and overlays a consistent starting scale.
+        _ = sb.AppendLine("--radius-control: var(--border-radius);");
+        _ = sb.AppendLine("--radius-button: var(--btn-radius);");
+        _ = sb.AppendLine("--radius-card: calc(var(--border-radius) * 2);");
+        _ = sb.AppendLine("--radius-overlay: calc(var(--border-radius) * 3);");
+        _ = sb.AppendLine("--radius-pill: 999px;");
+
+        // Typography tokens scale with the user's selected base font size.
+        _ = sb.AppendLine("--font-family-ui: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);");
+        _ = sb.AppendLine("--font-size-caption: calc(var(--base-font-size) * 0.75);");
+        _ = sb.AppendLine("--font-size-small: calc(var(--base-font-size) * 0.875);");
+        _ = sb.AppendLine("--font-size-body: var(--base-font-size);");
+        _ = sb.AppendLine("--font-size-subheading: calc(var(--base-font-size) * 1.125);");
+        _ = sb.AppendLine("--font-size-heading: calc(var(--base-font-size) * 1.25);");
+        _ = sb.AppendLine("--font-size-display: calc(var(--base-font-size) * 1.5);");
+        _ = sb.AppendLine("--line-height-tight: 1.2;");
+        _ = sb.AppendLine("--line-height-normal: 1.5;");
+        _ = sb.AppendLine("--line-height-relaxed: 1.65;");
+
+        // Interaction tokens establish shared defaults for future component
+        // migrations without changing existing transitions or focus styles.
+        _ = sb.AppendLine("--motion-duration-fast: 120ms;");
+        _ = sb.AppendLine("--motion-duration-standard: 180ms;");
+        _ = sb.AppendLine("--motion-duration-slow: 260ms;");
+        _ = sb.AppendLine("--motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);");
+        _ = sb.AppendLine("--focus-ring: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);");
+        _ = sb.AppendLine("--shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.16);");
+        _ = sb.AppendLine("--shadow-raised: 0 8px 24px rgb(0 0 0 / 0.22);");
     }
 
     public static string GetSmartHighlightBase(string hexColor, float opacity)
@@ -96,6 +157,7 @@ public static class ThemeUtils
             double luminance = (0.299 * r) + (0.587 * g) + (0.114 * b);
             return luminance > 128 ? "#000000" : "#FFFFFF";
         }
+
         return "#000000";
     }
 
