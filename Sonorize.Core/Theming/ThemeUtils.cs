@@ -103,6 +103,7 @@ public static class ThemeUtils
         _ = sb.AppendLine("--color-control-track: #535353;");
         _ = sb.AppendLine("--color-modal: var(--modal-bg);");
         _ = sb.AppendLine("--color-backdrop: rgba(0, 0, 0, 0.7);");
+        _ = sb.AppendLine("--color-scrollbar-thumb: var(--scrollbar-thumb);");
 
         // A shared 4px-based spacing scale, with aliases for the existing
         // per-component spacing settings.

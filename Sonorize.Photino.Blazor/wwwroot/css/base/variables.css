@@ -30,6 +30,7 @@
     --color-control-track: #535353;
     --color-modal: var(--modal-bg, var(--bg-tertiary));
     --color-backdrop: rgba(0, 0, 0, 0.7);
+    --color-scrollbar-thumb: var(--scrollbar-thumb);
 
     /* Shared spacing scale */
     --space-1: 4px;
