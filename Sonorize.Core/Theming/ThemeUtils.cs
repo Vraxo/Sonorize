@@ -101,6 +101,8 @@ public static class ThemeUtils
         _ = sb.AppendLine("--color-text-secondary: var(--text-secondary);");
         _ = sb.AppendLine("--color-hover: var(--hover-bg);");
         _ = sb.AppendLine("--color-control-track: #535353;");
+        _ = sb.AppendLine("--color-modal: var(--modal-bg);");
+        _ = sb.AppendLine("--color-backdrop: rgba(0, 0, 0, 0.7);");
 
         // A shared 4px-based spacing scale, with aliases for the existing
         // per-component spacing settings.
@@ -145,6 +147,7 @@ public static class ThemeUtils
         _ = sb.AppendLine("--shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.16);");
         _ = sb.AppendLine("--shadow-raised: 0 8px 24px rgb(0 0 0 / 0.22);");
         _ = sb.AppendLine("--shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.3);");
+        _ = sb.AppendLine("--shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.7);");
     }
 
     public static string GetSmartHighlightBase(string hexColor, float opacity)
