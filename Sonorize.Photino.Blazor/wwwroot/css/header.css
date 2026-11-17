@@ -3,15 +3,15 @@
     display: grid;
     grid-template-columns: auto auto 1fr auto;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
     height: 40px;
 }
 
 .header-left, .header-center, .header-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
 .header-right {
@@ -27,14 +27,14 @@
     text-overflow: ellipsis;
     min-width: 0;
     line-height: 1.1;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 /* --- Context Controls --- */
 #header-context-controls {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-4);
 }
 
 /* --- Action Buttons --- */
@@ -42,21 +42,23 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 1.4em;
     padding: 0;
-    border-radius: 50%;
+    border-radius: var(--radius-pill);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+        background-color var(--motion-duration-standard) var(--motion-easing-standard),
+        color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
     .header-action-btn:hover {
-        background-color: var(--hover-bg); /* UPDATED */
-        color: var(--text-primary);
+        background-color: var(--color-hover);
+        color: var(--color-text-primary);
     }
 
     .header-action-btn i {
@@ -68,47 +70,22 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95em;
     padding: 6px 12px;
-    border-radius: 6px; /* Fallback if --btn-radius not defined */
-    border-radius: var(--btn-radius, 6px);
+    border-radius: var(--radius-button);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+        background-color var(--motion-duration-standard) var(--motion-easing-standard),
+        color var(--motion-duration-standard) var(--motion-easing-standard);
     white-space: nowrap;
 }
 
     .header-action-text-btn:hover {
-        background-color: var(--hover-bg);
-        color: var(--text-primary);
-    }
-
-    .header-action-text-btn i {
-        font-size: 1.1em;
-        pointer-events: none;
-    }
-
-/* Action Button with Text (e.g., "Save As...") */
-.header-action-text-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-    font-size: 0.95em;
-    padding: 6px 12px;
-    border-radius: var(--btn-radius);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
-}
-
-    .header-action-text-btn:hover {
-        background-color: var(--hover-bg);
-        color: var(--text-primary);
+        background-color: var(--color-hover);
+        color: var(--color-text-primary);
     }
 
     .header-action-text-btn i {
@@ -126,30 +103,32 @@
 
 #search-input {
     width: 100%;
-    padding: 8px 12px 8px 40px;
-    background: var(--bg-tertiary);
+    padding: var(--space-2) var(--space-3) var(--space-2) var(--space-7);
+    background: var(--color-surface-raised);
     border: 1px solid transparent;
-    color: var(--text-primary);
-    border-radius: var(--btn-radius);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-button);
     font-family: inherit;
     font-size: 1em;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    transition:
+        border-color var(--motion-duration-standard) var(--motion-easing-standard),
+        background-color var(--motion-duration-standard) var(--motion-easing-standard);
     box-sizing: border-box;
     outline: none;
     height: 36px;
 }
 
     #search-input:focus {
-        background-color: var(--bg-secondary);
-        border-color: var(--accent-primary);
+        background-color: var(--color-surface);
+        border-color: var(--color-accent);
     }
 
 .search-container .search-icon {
     position: absolute;
-    left: 12px;
+    left: var(--space-3);
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     pointer-events: none;
     font-size: 1em;
 }
