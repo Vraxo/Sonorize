@@ -1,17 +1,17 @@
 .custom-scrollbars ::-webkit-scrollbar {
-    width: 12px;
+    width: var(--space-3);
 }
 
 .custom-scrollbars ::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
+    background: var(--color-surface);
 }
 
 .custom-scrollbars ::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb);
-    border-radius: 6px;
-    border: 2px solid var(--bg-secondary);
+    background-color: var(--color-scrollbar-thumb);
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--color-surface);
 }
 
 .custom-scrollbars ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-secondary);
+    background-color: var(--color-text-secondary);
 }
