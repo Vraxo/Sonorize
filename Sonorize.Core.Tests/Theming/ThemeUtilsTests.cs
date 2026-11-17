@@ -81,6 +81,7 @@ public class ThemeUtilsTests
         Assert.Contains("--color-surface-raised: var(--bg-tertiary);", css);
         Assert.Contains("--color-text-primary: var(--text-primary);", css);
         Assert.Contains("--color-control-track: #535353;", css);
+        Assert.Contains("--shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.3);", css);
 
         Assert.Contains("--space-1: 4px;", css);
         Assert.Contains("--space-8: 48px;", css);
