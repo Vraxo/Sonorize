@@ -100,6 +100,7 @@ public static class ThemeUtils
         _ = sb.AppendLine("--color-text-primary: var(--text-primary);");
         _ = sb.AppendLine("--color-text-secondary: var(--text-secondary);");
         _ = sb.AppendLine("--color-hover: var(--hover-bg);");
+        _ = sb.AppendLine("--color-control-track: #535353;");
 
         // A shared 4px-based spacing scale, with aliases for the existing
         // per-component spacing settings.
@@ -135,7 +136,7 @@ public static class ThemeUtils
         _ = sb.AppendLine("--line-height-relaxed: 1.65;");
 
         // Interaction tokens establish shared defaults for future component
-        // migrations without changing existing transitions or focus styles.
+        // migrations without changing existing focus behavior.
         _ = sb.AppendLine("--motion-duration-fast: 120ms;");
         _ = sb.AppendLine("--motion-duration-standard: 180ms;");
         _ = sb.AppendLine("--motion-duration-slow: 260ms;");
@@ -143,6 +144,7 @@ public static class ThemeUtils
         _ = sb.AppendLine("--focus-ring: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);");
         _ = sb.AppendLine("--shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.16);");
         _ = sb.AppendLine("--shadow-raised: 0 8px 24px rgb(0 0 0 / 0.22);");
+        _ = sb.AppendLine("--shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.3);");
     }
 
     public static string GetSmartHighlightBase(string hexColor, float opacity)
