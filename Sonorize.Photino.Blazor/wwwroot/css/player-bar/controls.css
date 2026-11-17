@@ -10,36 +10,39 @@
 }
 
     .player-controls .transport-controls {
-        margin-bottom: 8px;
+        margin-bottom: var(--space-2);
     }
 
 .transport-controls {
     display: flex;
     align-items: center;
-    gap: 20px; /* Slightly wider spacing for clarity */
+    gap: 20px; /* Retained as the transport-specific spacing */
 }
 
     .transport-controls button {
         background: transparent;
         border: none;
-        color: var(--text-secondary); /* Usually lighter gray */
-        font-size: 1rem;
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-body);
         cursor: pointer;
         position: relative;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
+        width: var(--space-6);
+        height: var(--space-6);
+        border-radius: var(--radius-pill);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0;
-        transition: all 0.2s ease;
+        transition:
+            color var(--motion-duration-standard) var(--motion-easing-standard),
+            transform var(--motion-duration-fast) var(--motion-easing-standard),
+            opacity var(--motion-duration-fast) var(--motion-easing-standard);
     }
 
         .transport-controls button:hover {
-            color: var(--text-primary); /* White on hover */
+            color: var(--color-text-primary);
             transform: scale(1.05);
-            background-color: transparent; /* Ensure no bg on hover for standard icons */
+            background-color: transparent; /* Keep standard icons visually quiet */
         }
 
         .transport-controls button:active {
@@ -48,7 +51,7 @@
         }
 
         .transport-controls button.active {
-            color: var(--accent-primary);
+            color: var(--color-accent);
         }
 
             /* Dot indicator for Shuffle/Repeat */
@@ -58,37 +61,40 @@
                 bottom: 0;
                 left: 50%;
                 transform: translateX(-50%);
-                width: 4px;
-                height: 4px;
-                background-color: var(--accent-primary);
-                border-radius: 50%;
+                width: var(--space-1);
+                height: var(--space-1);
+                background-color: var(--color-accent);
+                border-radius: var(--radius-pill);
             }
 
             .transport-controls button.active.repeat-one::after {
                 content: '1';
                 font-size: 0.6em;
-                line-height: 4px;
+                line-height: var(--space-1);
                 font-weight: bold;
-                color: var(--accent-primary);
+                color: var(--color-accent);
                 background-color: transparent;
                 bottom: -2px;
             }
 
-    /* Play/Pause Button (Primary Action) - RESTORED TO ICON ONLY */
+    /* Play/Pause Button (Primary Action) - icon only */
     .transport-controls .play-pause {
         background-color: transparent;
-        color: var(--text-primary); /* Default to white */
-        width: 40px; /* Slightly larger hit area */
-        height: 40px;
-        font-size: 1.4em; /* Larger Icon */
-        border-radius: 50%;
-        transition: transform 0.2s ease;
+        color: var(--color-text-primary);
+        width: var(--space-7);
+        height: var(--space-7);
+        font-size: 1.4em; /* Preserve the larger primary icon */
+        border-radius: var(--radius-pill);
+        transition:
+            color var(--motion-duration-standard) var(--motion-easing-standard),
+            background-color var(--motion-duration-standard) var(--motion-easing-standard),
+            transform var(--motion-duration-standard) var(--motion-easing-standard);
     }
 
         .transport-controls .play-pause:hover {
             transform: scale(1.1);
-            color: var(--text-primary);
-            background-color: var(--hover-bg); /* Subtle highlight only */
+            color: var(--color-text-primary);
+            background-color: var(--color-hover);
         }
 
         .transport-controls .play-pause .fa-play {
@@ -100,13 +106,12 @@
             display: none;
         }
 
-
 .progress-bar-container {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
     width: 100%;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95em;
     font-family: monospace; /* Tabular nums for time */
     font-variant-numeric: tabular-nums;
@@ -114,8 +119,8 @@
 
 .seek-slider {
     flex-grow: 1;
-    height: 4px;
-    border-radius: 2px;
+    height: var(--space-1);
+    border-radius: var(--radius-pill);
     cursor: pointer;
     min-width: 0; /* Crucial for shrinking inside flex/grid */
 }
