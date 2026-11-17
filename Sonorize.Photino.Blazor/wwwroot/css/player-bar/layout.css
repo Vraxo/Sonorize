@@ -3,11 +3,11 @@
 .player-zone {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-4);
     height: 100%;
 }
 
-    /* 
+    /*
    Left/Right zones share remaining space.
    min-width: 0 is required to allow flex items to shrink below their content size if needed (e.g. text truncation).
 */
@@ -17,7 +17,7 @@
         justify-content: flex-start;
     }
 
-    /* 
+    /*
    Center zone prefers 40% width but clamps between 220px and 720px.
    It creates the stable center anchor for transport controls.
 */
@@ -29,7 +29,7 @@
         width: 100%;
     }
 
-    /* 
+    /*
    Right zone aligns tools to the end.
 */
     .player-zone.right {
