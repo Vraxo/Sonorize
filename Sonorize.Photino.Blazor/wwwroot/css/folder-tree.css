@@ -12,7 +12,7 @@
         top: 28px;
         bottom: 0;
         width: 1px;
-        background-color: var(--border-color);
+        background-color: var(--color-border);
         pointer-events: none; /* Ensure clicks pass through */
     }
 
@@ -25,20 +25,22 @@
 .node-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
+    gap: var(--space-2);
+    padding: 6px var(--space-2);
     cursor: pointer;
-    border-radius: 4px;
-    color: var(--text-secondary);
+    border-radius: var(--radius-control);
+    color: var(--color-text-secondary);
     position: relative;
     width: 100%;
     box-sizing: border-box;
-    transition: background-color 0.1s ease, color 0.1s ease;
+    transition:
+        background-color var(--motion-duration-fast) var(--motion-easing-standard),
+        color var(--motion-duration-fast) var(--motion-easing-standard);
 }
 
     .node-header:hover {
-        background-color: var(--hover-bg, rgba(255, 255, 255, 0.1));
-        color: var(--text-primary);
+        background-color: var(--color-hover);
+        color: var(--color-text-primary);
     }
 
 .node-caret {
@@ -50,14 +52,14 @@
 }
 
 .node-icon {
-    color: var(--text-secondary);
-    transition: color 0.2s;
+    color: var(--color-text-secondary);
+    transition: color var(--motion-duration-standard) var(--motion-easing-standard);
     flex-shrink: 0;
 }
 
 .node-header:hover .node-icon,
 .node-header.expanded .node-icon {
-    color: var(--accent-primary);
+    color: var(--color-accent);
 }
 
 .node-name {
@@ -69,7 +71,7 @@
 
 .node-count {
     font-size: 0.85em;
-    margin-left: 4px;
+    margin-left: var(--space-1);
     opacity: 0.7;
     flex-shrink: 0;
 }
@@ -83,15 +85,17 @@
 .song-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 8px 6px 28px; /* Left padding accommodates tree lines */
+    gap: var(--space-2);
+    padding: 6px var(--space-2) 6px 28px; /* Left padding accommodates tree lines */
     cursor: pointer;
-    border-radius: 4px;
-    color: var(--text-secondary);
+    border-radius: var(--radius-control);
+    color: var(--color-text-secondary);
     position: relative;
     width: 100%;
     box-sizing: border-box;
-    transition: background-color 0.1s ease, color 0.1s ease;
+    transition:
+        background-color var(--motion-duration-fast) var(--motion-easing-standard),
+        color var(--motion-duration-fast) var(--motion-easing-standard);
 }
 
     /* Horizontal connector for songs */
@@ -100,15 +104,15 @@
         position: absolute;
         left: 10px;
         top: 50%;
-        width: 12px;
+        width: var(--space-3);
         height: 1px;
-        background-color: var(--border-color);
+        background-color: var(--color-border);
         pointer-events: none;
     }
 
     .song-item:hover {
-        background-color: var(--hover-bg, rgba(255, 255, 255, 0.1));
-        color: var(--text-primary);
+        background-color: var(--color-hover);
+        color: var(--color-text-primary);
     }
 
 .song-icon {
