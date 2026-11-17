@@ -1,4 +1,4 @@
-﻿.track-list table {
+.track-list table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
@@ -6,14 +6,14 @@
 
 .track-list th, .track-list td {
     text-align: left;
-    padding-top: var(--row-padding, 12px);
-    padding-bottom: var(--row-padding, 12px);
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-top: var(--space-row-y, var(--row-padding, 12px));
+    padding-bottom: var(--space-row-y, var(--row-padding, 12px));
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
     border-bottom: 1px solid transparent;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: inherit;
-    line-height: 1.2;
+    line-height: var(--line-height-tight);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
@@ -23,43 +23,43 @@
 }
 
 .track-list th {
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border);
 }
 
 body.show-grid-lines .track-list td {
-    border-bottom-color: var(--border-color);
+    border-bottom-color: var(--color-border);
 }
 
 .active-track {
-    background-color: var(--bg-tertiary);
+    background-color: var(--color-surface-raised);
 }
 
     .active-track .col-title {
-        color: var(--accent-primary);
+        color: var(--color-accent);
         font-weight: bold;
     }
 
     .active-track .col-index {
-        color: var(--accent-primary);
+        color: var(--color-accent);
     }
 
 .selected-track {
-    background-color: var(--bg-tertiary);
+    background-color: var(--color-surface-raised);
 }
 
 .sortable-header {
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color var(--motion-duration-standard) var(--motion-easing-standard);
     user-select: none;
 }
 
     .sortable-header:hover {
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
 
 .sort-icon {
     margin-left: 6px;
-    color: var(--accent-primary);
+    color: var(--color-accent);
     font-size: 0.9em;
 }
 
@@ -78,12 +78,12 @@ body.show-grid-lines .track-list td {
 .list-art-wrapper {
     width: var(--list-art-size, 40px);
     height: var(--list-art-size, 40px);
-    border-radius: 4px;
+    border-radius: var(--radius-control);
     overflow: hidden;
-    background-color: var(--bg-secondary);
+    background-color: var(--color-surface);
     display: inline-block;
     vertical-align: middle;
-    /* Hardware acccel hint to prevent repaint on scroll */
+    /* Hardware acceleration hint to prevent repaint on scroll */
     transform: translateZ(0);
 }
 
@@ -96,7 +96,7 @@ body.show-grid-lines .track-list td {
 
 .col-title {
     width: auto;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     font-weight: 500;
 }
 
@@ -126,7 +126,7 @@ body.show-grid-lines .track-list td {
 }
 
 .track-list th {
-    font-size: 0.85em;
+    font-size: var(--font-size-small);
     text-transform: uppercase;
     font-weight: normal;
     letter-spacing: 1px;
@@ -139,23 +139,23 @@ body.show-grid-lines .track-list td {
 }
 
     .track-list tbody tr:hover {
-        background-color: var(--hover-bg);
+        background-color: var(--color-hover);
     }
 
         .track-list tbody tr:hover td {
-            color: var(--text-primary);
+            color: var(--color-text-primary);
         }
 
 .track-options-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-weight: bold;
     padding: 0;
     width: 1.1em;
     height: 1.1em;
-    border-radius: 50%;
+    border-radius: var(--radius-pill);
     letter-spacing: 1px;
     visibility: hidden;
     background: none;
@@ -168,12 +168,12 @@ body.show-grid-lines .track-list td {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-weight: bold;
     padding: 0;
     width: 1.1em;
     height: 1.1em;
-    border-radius: 50%;
+    border-radius: var(--radius-pill);
     visibility: hidden;
     background: none;
     border: none;
@@ -187,8 +187,8 @@ body.show-grid-lines .track-list td {
 }
 
 .track-options-btn:hover {
-    background-color: var(--hover-bg);
-    color: var(--text-primary);
+    background-color: var(--color-hover);
+    color: var(--color-text-primary);
 }
 
 .remove-track-btn:hover {
@@ -203,17 +203,17 @@ body.show-grid-lines .track-list td {
 }
 
 body.zebra-striping-enabled .track-list tbody tr:nth-child(even) {
-    background-color: var(--bg-secondary);
+    background-color: var(--color-surface);
 }
 
 body.zebra-striping-enabled .track-list tbody tr:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--color-surface-raised);
 }
 
 .empty-library-message {
-    padding: 40px;
+    padding: var(--space-7);
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-style: italic;
     width: 100%;
 }
