@@ -1,6 +1,6 @@
 .sidebar {
-    background-color: var(--bg-primary);
-    padding: 24px 8px 0 24px;
+    background-color: var(--color-background);
+    padding: var(--space-5) var(--space-2) 0 var(--space-5);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -8,9 +8,8 @@
     box-sizing: border-box;
     overflow: hidden; /* Important for width transition */
     /* Default: Border on the right (Left-side sidebar) */
-    border-right: 1px solid var(--border-color);
-    /* PERFORMANCE OPTIMIZATIONS */
-    /* Isolate internal layout so width changes don't cause deep re-calcs */
+    border-right: 1px solid var(--color-border);
+    /* Performance optimizations */
     contain: layout style;
     /* Hint for the width transition */
     will-change: width;
@@ -18,11 +17,13 @@
 
     /* --- Animation --- */
     .sidebar.animated {
-        transition: width 0.3s ease, padding 0.3s ease;
+        transition:
+            width var(--motion-duration-slow) var(--motion-easing-standard),
+            padding var(--motion-duration-slow) var(--motion-easing-standard);
     }
 
     /* When closed, certain styles might be overridden by inline styles in the razor component,
-   but we handle padding here for smooth transition */
+       but we handle padding here for smooth transition */
     .sidebar.closed {
         padding-left: 0;
         padding-right: 0;
@@ -40,7 +41,7 @@
     right: 0;
     left: auto;
     z-index: 10;
-    transition: background-color 0.2s;
+    transition: background-color var(--motion-duration-standard) var(--motion-easing-standard);
     border: none; /* Ensure no border on the handle itself */
 }
 
@@ -52,7 +53,7 @@
 
 .sidebar-resizer:hover,
 .sidebar-resizer:active {
-    background-color: var(--accent-primary);
+    background-color: var(--color-accent);
 }
 
 .resize-overlay {
@@ -72,10 +73,10 @@
     font-size: 1.7em; /* Relative */
     font-weight: bold;
     margin-bottom: 20px;
-    padding-left: 8px;
+    padding-left: var(--space-2);
     display: flex;
     align-items: center;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     /* Merged from inline */
     justify-content: space-between;
     padding-right: 10px;
@@ -85,7 +86,7 @@
         width: 24px;
         height: 24px;
         margin-right: 10px;
-        background-color: var(--accent-primary);
+        background-color: var(--color-accent);
         mask-image: url('../img/icon-256.png');
         -webkit-mask-image: url('../img/icon-256.png');
         mask-size: contain;
@@ -96,17 +97,19 @@
 .sidebar-toggle-btn {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     padding: 5px;
-    border-radius: 4px;
-    transition: color 0.2s, background 0.2s;
+    border-radius: var(--radius-control);
+    transition:
+        color var(--motion-duration-standard) var(--motion-easing-standard),
+        background-color var(--motion-duration-standard) var(--motion-easing-standard);
     font-size: 16px;
 }
 
     .sidebar-toggle-btn:hover {
-        color: var(--text-primary);
-        background-color: var(--bg-tertiary);
+        color: var(--color-text-primary);
+        background-color: var(--color-surface-raised);
     }
 
 /* --- Layout Wrappers --- */
@@ -122,7 +125,7 @@
 .playlists-wrapper {
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--color-border);
     overflow-y: auto;
     flex: 1;
     display: flex;
@@ -138,9 +141,9 @@
 .sidebar-nav-item-wrapper {
     display: flex;
     align-items: center;
-    border-radius: var(--border-radius);
-    margin-right: 8px;
-    transition: background-color 0.2s ease;
+    border-radius: var(--radius-control);
+    margin-right: var(--space-2);
+    transition: background-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
 .sidebar-nav-item {
@@ -150,16 +153,16 @@
     font: inherit; /* Inherit font */
     width: 100%;
     text-align: left;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-weight: bold;
     font-size: 1em;
     /* Use the variable injected by ThemeUtils based on settings */
-    padding: var(--sidebar-item-padding, 10px) 8px;
-    border-radius: var(--border-radius);
+    padding: var(--space-sidebar-item, 10px) var(--space-2);
+    border-radius: var(--radius-control);
     display: flex;
     align-items: center;
     gap: 15px;
-    transition: color 0.2s ease;
+    transition: color var(--motion-duration-standard) var(--motion-easing-standard);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -169,20 +172,20 @@
 }
 
 .sidebar-nav-item-wrapper:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--color-hover);
 }
 
     .sidebar-nav-item-wrapper:hover .sidebar-nav-item,
     .sidebar-nav-item:hover {
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
 
 .sidebar-nav-item-wrapper.active {
-    background-color: var(--bg-tertiary);
+    background-color: var(--color-surface-raised);
 }
 
     .sidebar-nav-item-wrapper.active .sidebar-nav-item {
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
 
 
@@ -199,7 +202,7 @@
 }
 
 .filter-container {
-    padding: 8px;
+    padding: var(--space-2);
 }
 
 .search-wrapper {
@@ -211,17 +214,19 @@
     width: 100%;
     background: rgba(255,255,255,0.05);
     border: 1px solid transparent;
-    border-radius: var(--border-radius);
-    padding: 6px 24px 6px 8px;
-    color: var(--text-primary);
-    font-size: 0.85em;
+    border-radius: var(--radius-control);
+    padding: 6px 24px 6px var(--space-2);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-small);
     outline: none;
-    transition: background 0.2s, border-color 0.2s;
+    transition:
+        background-color var(--motion-duration-standard) var(--motion-easing-standard),
+        border-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
     .sidebar-filter-input:focus {
         background: rgba(255,255,255,0.1);
-        border-color: var(--accent-primary);
+        border-color: var(--color-accent);
     }
 
     .sidebar-filter-input::placeholder {
@@ -235,7 +240,7 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 1.2em;
     line-height: 1;
     cursor: pointer;
@@ -248,7 +253,7 @@
 }
 
     .clear-filter-btn:hover {
-        color: var(--text-primary);
+        color: var(--color-text-primary);
     }
 
 #playlist-nav-container {
@@ -264,7 +269,7 @@
 
 /* Action Buttons (Plus / Delete) */
 .action-icon-btn {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 1em;
     padding: 0 8px;
     line-height: 1;
@@ -275,7 +280,7 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    transition: color 0.2s;
+    transition: color var(--motion-duration-standard) var(--motion-easing-standard);
     opacity: 0.7;
 }
 
@@ -291,6 +296,6 @@
 }
 
 .action-icon-btn:hover {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     opacity: 1;
 }
