@@ -4,10 +4,10 @@ html {
 }
 
 body {
-    font-family: var(--font-family);
-    font-size: var(--base-font-size); /* Responsive base size */
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    font-family: var(--font-family-ui);
+    font-size: var(--font-size-body);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -26,16 +26,16 @@ a {
 }
 
 a:hover {
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 /* --- Global Form Element Overrides --- */
 textarea {
-    background-color: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
-    border-color: var(--border-color) !important;
+    background-color: var(--color-surface) !important;
+    color: var(--color-text-primary) !important;
+    border-color: var(--color-border) !important;
 }
 
 input[type="checkbox"] {
-    accent-color: var(--accent-primary) !important;
+    accent-color: var(--color-accent) !important;
 }
