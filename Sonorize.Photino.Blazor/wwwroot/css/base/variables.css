@@ -15,4 +15,61 @@
     --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     /* New: Global Font Scaling Fallback */
     --base-font-size: 14px;
+
+    /* Semantic color tokens */
+    --color-accent: var(--accent-primary);
+    --color-accent-hover: var(--accent-primary-hover);
+    --color-background: var(--bg-primary);
+    --color-surface: var(--bg-secondary);
+    --color-surface-raised: var(--bg-tertiary);
+    --color-player-bar: var(--player-bar-bg);
+    --color-border: var(--border-color);
+    --color-text-primary: var(--text-primary);
+    --color-text-secondary: var(--text-secondary);
+    --color-hover: var(--hover-bg, rgba(255, 255, 255, 0.1));
+    --color-control-track: #535353;
+    --color-modal: var(--modal-bg, var(--bg-tertiary));
+    --color-backdrop: rgba(0, 0, 0, 0.7);
+
+    /* Shared spacing scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 40px;
+    --space-8: 48px;
+    --space-row-y: var(--row-padding, 12px);
+    --space-sidebar-item: var(--sidebar-item-padding, 10px);
+
+    /* Shape tokens */
+    --radius-control: var(--border-radius);
+    --radius-button: var(--btn-radius);
+    --radius-card: calc(var(--border-radius) * 2);
+    --radius-overlay: calc(var(--border-radius) * 3);
+    --radius-pill: 999px;
+
+    /* Typography scale */
+    --font-family-ui: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    --font-size-caption: calc(var(--base-font-size) * 0.75);
+    --font-size-small: calc(var(--base-font-size) * 0.875);
+    --font-size-body: var(--base-font-size);
+    --font-size-subheading: calc(var(--base-font-size) * 1.125);
+    --font-size-heading: calc(var(--base-font-size) * 1.25);
+    --font-size-display: calc(var(--base-font-size) * 1.5);
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.65;
+
+    /* Motion, focus, and elevation */
+    --motion-duration-fast: 120ms;
+    --motion-duration-standard: 180ms;
+    --motion-duration-slow: 260ms;
+    --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --focus-ring: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+    --shadow-subtle: 0 1px 2px rgb(0 0 0 / 0.16);
+    --shadow-raised: 0 8px 24px rgb(0 0 0 / 0.22);
+    --shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.7);
 }
