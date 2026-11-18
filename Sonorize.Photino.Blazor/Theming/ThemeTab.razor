@@ -9,6 +9,9 @@
     <!-- Saved Themes (full combo) -->
     <SettingsCard Title="Saved Themes" Description="Switch between presets that include both colors and layout">
         <HeaderAction>
+            <button class="header-action-text-btn" @onclick="OpenImportDialog" title="Import a theme package">
+                <i class="fas fa-file-import"></i> Import...
+            </button>
             <button class="header-action-text-btn" @onclick="OpenSaveModal" title="Save Current as Full Theme">
                 <i class="fas fa-save"></i> Save As...
             </button>
@@ -64,6 +67,28 @@
     <ThemeColorsCard />
 
 </div>
+
+@if (_showImportWarning)
+{
+    <div class="modal-backdrop" @onclick="CancelImport">
+        <div class="modal-container" @onclick:stopPropagation>
+            <div class="modal-header">Import Theme with Custom CSS?</div>
+            <div class="modal-body">
+                <p>This theme package contains custom CSS. CSS can significantly change Sonorize's appearance and may load external resources.</p>
+                <p>Only import themes from sources you trust. The CSS will be stored with the theme but won't be applied until you select that theme.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @onclick="CancelImport">Cancel</button>
+                <button class="btn btn-primary" @onclick="ConfirmImport">Import Theme</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(_importMessage))
+{
+    <p class="@(_importFailed ? "text-danger" : "text-success")" role="status">@_importMessage</p>
+}
 
 <!-- Modals -->
 <SaveThemeModal IsVisible="_showSaveModal" OnClose="CloseSaveModal" OnConfirm="ConfirmSaveTheme" />
