@@ -1,0 +1,10 @@
+.playlist-modal-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
+}
+
+.playlist-delete-warning {
+    font-size: 0.9em;
+    color: #aaa;
+}
