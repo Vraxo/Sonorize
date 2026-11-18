@@ -6,28 +6,28 @@
     margin-top: var(--space-2);
 }
 
-    .radio-group label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 1em;
-        color: var(--color-text-primary);
-        font-weight: normal;
-        cursor: pointer;
-    }
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+    font-weight: normal;
+    cursor: pointer;
+}
 
-    .radio-group input[type="radio"],
-    .radio-group input[type="checkbox"] {
-        transform: scale(1.2);
-        cursor: pointer;
-        accent-color: var(--color-accent);
-    }
+.radio-group input[type="radio"],
+.radio-group input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+    accent-color: var(--color-accent);
+}
 
 /* --- Sliders (SettingsSlider Component) --- */
 .slider-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-3);
     margin-top: var(--space-3);
     width: 100%;
 }
@@ -35,58 +35,56 @@
 .slider-wrapper {
     display: flex;
     align-items: center;
-    gap: 10px; /* Retained for the existing slider layout */
+    gap: var(--space-3);
     width: 100%;
     height: var(--space-6);
 }
 
-    /* Use specific selector to override any potential global conflicts */
-    .slider-wrapper .slider-label {
-        width: 110px;
-        font-weight: 500;
-        color: var(--color-text-primary);
-        font-size: 0.95em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        flex-shrink: 0;
-    }
+.slider-wrapper .slider-label {
+    width: 110px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-small);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+}
 
-    .slider-wrapper .range-input {
-        flex-grow: 1;
-        max-width: 250px; /* Cap the width so it doesn't span the whole page */
-        cursor: pointer;
-        height: var(--space-1);
-    }
+.slider-wrapper .range-input {
+    flex-grow: 1;
+    max-width: 250px;
+    cursor: pointer;
+    height: var(--space-1);
+}
 
-    /* Force specific width */
-    .slider-wrapper .number-input {
-        width: 60px !important; /* Doubled width as requested */
-        max-width: 60px !important;
-        flex-grow: 0 !important;
-        flex-shrink: 0 !important;
-        text-align: right;
-        padding: 4px 6px;
-        font-family: monospace;
-        background-color: var(--color-surface-raised);
-        border: 1px solid var(--color-border);
-        color: var(--color-text-primary);
-        border-radius: var(--radius-control);
-        outline: none;
-        -moz-appearance: textfield;
-        font-size: 0.9em;
-    }
+/* Fixed-width numeric value */
+.slider-wrapper .number-input {
+    width: 60px !important;
+    max-width: 60px !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    text-align: right;
+    padding: var(--space-1) var(--space-2);
+    font-family: monospace;
+    background-color: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-control);
+    -moz-appearance: textfield;
+    font-size: var(--font-size-small);
+}
 
-        .slider-wrapper .number-input:focus {
-            border-color: var(--color-accent);
-            background-color: var(--color-surface);
-        }
+.slider-wrapper .number-input:focus {
+    border-color: var(--color-accent);
+    background-color: var(--color-surface);
+}
 
-        .slider-wrapper .number-input::-webkit-outer-spin-button,
-        .slider-wrapper .number-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+.slider-wrapper .number-input::-webkit-outer-spin-button,
+.slider-wrapper .number-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 
 /* Reset Button Area */
 .reset-wrapper {
@@ -104,9 +102,11 @@
     color: var(--color-text-secondary);
     cursor: pointer;
     padding: 0;
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
     opacity: 0.6;
-    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
+    transition:
+        color var(--motion-duration-standard) var(--motion-easing-standard),
+        opacity var(--motion-duration-standard) var(--motion-easing-standard);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -114,23 +114,23 @@
     height: 100%;
 }
 
-    .reset-icon-btn:hover {
-        opacity: 1;
-        color: var(--color-accent);
-    }
+.reset-icon-btn:hover {
+    opacity: 1;
+    color: var(--color-accent);
+}
 
 /* Legacy/Simple Slider Container */
 .slider-container {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: var(--space-4);
     width: 100%;
     max-width: 400px;
 }
 
-    .slider-container input[type="range"] {
-        flex-grow: 1;
-    }
+.slider-container input[type="range"] {
+    flex-grow: 1;
+}
 
 /* --- Color Control Component --- */
 .color-control {
@@ -144,9 +144,9 @@
     transition: border-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
-    .color-control:hover {
-        border-color: var(--color-border);
-    }
+.color-control:hover {
+    border-color: var(--color-border);
+}
 
 .color-label-row {
     display: flex;
@@ -155,7 +155,7 @@
 }
 
 .color-label {
-    font-size: 0.85em;
+    font-size: var(--font-size-small);
     color: var(--color-text-secondary);
     font-weight: 600;
 }
@@ -167,8 +167,8 @@
 }
 
 .color-swatch-wrapper {
-    width: 40px;
-    height: 32px;
+    width: var(--space-7);
+    height: var(--space-6);
     border-radius: var(--radius-control);
     overflow: hidden;
     position: relative;
@@ -188,54 +188,55 @@
     -webkit-appearance: none;
 }
 
-    .color-picker-input::-webkit-color-swatch-wrapper {
-        padding: 0;
-    }
+.color-picker-input::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
 
-    .color-picker-input::-webkit-color-swatch {
-        border: none;
-        border-radius: 0;
-        box-sizing: border-box;
-    }
+.color-picker-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 0;
+    box-sizing: border-box;
+}
 
 .hex-input {
     flex-grow: 1;
-    padding: 5px var(--space-2);
+    padding: var(--space-1) var(--space-2);
     background-color: var(--color-background);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
     border-radius: var(--radius-control);
     font-family: monospace;
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
     text-transform: uppercase;
     width: 100%;
     min-width: 0;
-    outline: none;
     transition:
         border-color var(--motion-duration-standard) var(--motion-easing-standard),
         background-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
-    .hex-input:focus {
-        border-color: var(--color-accent);
-        background-color: var(--color-surface);
-    }
+.hex-input:focus {
+    border-color: var(--color-accent);
+    background-color: var(--color-surface);
+}
 
 .reset-btn {
     background: none;
     border: none;
     color: var(--color-text-secondary);
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
     opacity: 0.6;
-    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
-    padding: 0 4px;
+    transition:
+        color var(--motion-duration-standard) var(--motion-easing-standard),
+        opacity var(--motion-duration-standard) var(--motion-easing-standard);
+    padding: 0 var(--space-1);
 }
 
-    .reset-btn:hover {
-        opacity: 1;
-        color: var(--color-accent);
-    }
+.reset-btn:hover {
+    opacity: 1;
+    color: var(--color-accent);
+}
 
 /* --- Select Dropdowns --- */
 .settings-view-container select {
@@ -244,16 +245,14 @@
     color: var(--color-text-primary);
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-control);
-    font-size: 0.9em;
+    font-size: var(--font-size-small);
     cursor: pointer;
-    outline: none;
-    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
+    transition:
+        border-color var(--motion-duration-standard) var(--motion-easing-standard),
+        background-color var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
-.settings-view-container select:hover {
-    border-color: var(--color-accent);
-}
-
+.settings-view-container select:hover,
 .settings-view-container select:focus {
     border-color: var(--color-accent);
 }
