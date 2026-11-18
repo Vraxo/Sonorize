@@ -9,3 +9,7 @@
     flex: 1;
     min-width: 150px;
 }
+
+.player-bar-layout-editor {
+    padding: 15px;
+}
