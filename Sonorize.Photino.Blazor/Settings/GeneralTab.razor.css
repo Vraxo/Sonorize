@@ -19,26 +19,6 @@
     border-radius: var(--radius-control);
 }
 
-/* Toggles */
-.toggle-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    padding: var(--space-1) 0;
-}
-
-.toggle-label {
-    font-size: var(--font-size-body);
-    color: var(--color-text-primary);
-}
-
-.toggle-input {
-    transform: scale(1.3);
-    accent-color: var(--color-accent);
-    cursor: pointer;
-}
-
 .divider {
     height: 1px;
     background-color: var(--color-border);
