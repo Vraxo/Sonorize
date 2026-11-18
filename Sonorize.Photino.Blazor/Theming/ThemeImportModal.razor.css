@@ -1,4 +1,8 @@
-.theme-textarea {
+.theme-import-instruction {
+        margin-bottom: 10px;
+    }
+
+    .theme-textarea {
         min-height: 200px;
         font-family: monospace;
         font-size: 12px;
