@@ -31,6 +31,10 @@
     --color-modal: var(--modal-bg, var(--bg-tertiary));
     --color-backdrop: rgba(0, 0, 0, 0.7);
     --color-scrollbar-thumb: var(--scrollbar-thumb);
+    --color-danger: #ff4d4d;
+    --color-danger-subtle: rgba(255, 77, 77, 0.1);
+    --color-warning: #ffd700;
+    --color-warning-subtle: rgba(255, 215, 0, 0.1);
 
     /* Shared spacing scale */
     --space-1: 4px;

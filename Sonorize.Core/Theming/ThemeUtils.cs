@@ -104,6 +104,10 @@ public static class ThemeUtils
         _ = sb.AppendLine("--color-modal: var(--modal-bg);");
         _ = sb.AppendLine("--color-backdrop: rgba(0, 0, 0, 0.7);");
         _ = sb.AppendLine("--color-scrollbar-thumb: var(--scrollbar-thumb);");
+        _ = sb.AppendLine("--color-danger: #ff4d4d;");
+        _ = sb.AppendLine("--color-danger-subtle: rgba(255, 77, 77, 0.1);");
+        _ = sb.AppendLine("--color-warning: #ffd700;");
+        _ = sb.AppendLine("--color-warning-subtle: rgba(255, 215, 0, 0.1);");
 
         // A shared 4px-based spacing scale, with aliases for the existing
         // per-component spacing settings.

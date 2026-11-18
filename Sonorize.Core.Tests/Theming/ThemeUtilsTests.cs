@@ -84,6 +84,10 @@ public class ThemeUtilsTests
         Assert.Contains("--color-modal: var(--modal-bg);", css);
         Assert.Contains("--color-backdrop: rgba(0, 0, 0, 0.7);", css);
         Assert.Contains("--color-scrollbar-thumb: var(--scrollbar-thumb);", css);
+        Assert.Contains("--color-danger: #ff4d4d;", css);
+        Assert.Contains("--color-danger-subtle: rgba(255, 77, 77, 0.1);", css);
+        Assert.Contains("--color-warning: #ffd700;", css);
+        Assert.Contains("--color-warning-subtle: rgba(255, 215, 0, 0.1);", css);
         Assert.Contains("--shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.3);", css);
         Assert.Contains("--shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.7);", css);
 
