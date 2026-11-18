@@ -118,3 +118,13 @@
     visibility: hidden;
     pointer-events: none;
 }
+/* Artist grid presentation */
+.artist-art-wrapper,
+.artist-art-wrapper img {
+    border-radius: 50%;
+}
+
+.artist-grid-title,
+.artist-grid-subtitle {
+    text-align: center;
+}
