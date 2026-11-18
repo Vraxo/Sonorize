@@ -94,6 +94,90 @@ public class ThemeServiceTests
     }
 
     [Fact]
+    public void ExportThemePackage_UsesRelativeBackgroundAsset_AndKeepsSavedThemeUnchanged()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            string backgroundPath = Path.Combine(themesDirectory, "cover.png");
+            byte[] backgroundBytes = [10, 20, 30, 40, 50];
+            File.WriteAllBytes(backgroundPath, backgroundBytes);
+
+            service.SaveTheme("Night", new SonorizeTheme
+            {
+                AccentColor = "#123456",
+                BackgroundImagePath = backgroundPath,
+                CustomCss = ".player-bar { opacity: 0.9; }"
+            });
+
+            using MemoryStream packageStream = new();
+            service.ExportThemePackage(
+                "Night",
+                packageStream,
+                description: "A portable dark theme",
+                author: "Sonorize");
+
+            Assert.True(packageStream.CanRead);
+            packageStream.Position = 0;
+
+            ThemePackage package = ThemePackageArchive.Read(packageStream);
+
+            Assert.Equal("Night", package.Manifest.Name);
+            Assert.Equal("A portable dark theme", package.Manifest.Description);
+            Assert.Equal("Sonorize", package.Manifest.Author);
+            Assert.Equal("#123456", package.Colors.AccentColor);
+            Assert.Equal("assets/backgrounds/background.png", package.Layout.BackgroundImagePath);
+            Assert.Equal(".player-bar { opacity: 0.9; }", package.Layout.CustomCss);
+            Assert.Equal(backgroundBytes, package.Assets["backgrounds/background.png"]);
+
+            SonorizeTheme savedTheme = Assert.IsType<SonorizeTheme>(service.LoadTheme("Night"));
+            Assert.Equal(backgroundPath, savedTheme.BackgroundImagePath);
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ExportThemePackage_WhenBackgroundIsMissing_ThrowsFileNotFound()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            service.SaveTheme("Missing Background", new SonorizeTheme
+            {
+                BackgroundImagePath = Path.Combine(themesDirectory, "missing.png")
+            });
+
+            using MemoryStream packageStream = new();
+
+            Assert.Throws<FileNotFoundException>(
+                () => service.ExportThemePackage("Missing Background", packageStream));
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void LoadTheme_WhenLayoutPresetIsMissing_UsesDefaultLayout()
     {
         string themesDirectory = Path.Combine(
