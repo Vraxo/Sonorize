@@ -1,0 +1,85 @@
+/* Shared button foundation */
+button {
+    font-family: inherit;
+}
+
+button:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 36px;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-button);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-ui);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    line-height: var(--line-height-tight);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color var(--motion-duration-standard) var(--motion-easing-standard),
+        border-color var(--motion-duration-standard) var(--motion-easing-standard),
+        color var(--motion-duration-standard) var(--motion-easing-standard);
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--color-hover);
+    border-color: var(--color-accent);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-background);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    color: var(--color-background);
+}
+
+.btn-secondary {
+    background: var(--color-surface-raised);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--color-hover);
+    border-color: var(--color-accent);
+}
+
+.btn-danger {
+    color: var(--color-danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: var(--color-danger-subtle);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.btn-sm {
+    min-height: 32px;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-small);
+}
