@@ -143,20 +143,7 @@
 
     .btn-outline {
         width: 100%;
-        padding: 10px;
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: 4px;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
+        padding: var(--space-2);
         justify-content: center;
-        gap: 8px;
     }
 
-        .btn-outline:hover {
-            border-color: var(--text-primary);
-            background: rgba(255,255,255,0.05);
-        }
