@@ -91,6 +91,22 @@ public class ThemePackageArchiveTests
     }
 
     [Fact]
+    public void Write_RejectsNonHexColorValues()
+    {
+        using MemoryStream stream = new();
+        ThemePackage package = new()
+        {
+            Manifest = new ThemePackageManifest { Name = "Unsafe" },
+            Colors = new ThemeColors
+            {
+                AccentColor = "#fff; background-image: url(https://example.invalid)"
+            }
+        };
+
+        Assert.Throws<InvalidDataException>(() => ThemePackageArchive.Write(stream, package));
+    }
+
+    [Fact]
     public void Write_RejectsAssetPathTraversal()
     {
         using MemoryStream stream = new();
