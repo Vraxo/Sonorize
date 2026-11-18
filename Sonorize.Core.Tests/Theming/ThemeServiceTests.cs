@@ -507,6 +507,31 @@ public class ThemeServiceTests
     }
 
     [Fact]
+    public void DeleteTheme_RejectsPathSegments()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+
+            Assert.Throws<ArgumentException>(() => service.DeleteTheme("../outside"));
+            Assert.Empty(Directory.EnumerateFiles(themesDirectory));
+            Assert.Empty(Directory.EnumerateDirectories(themesDirectory));
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void LoadTheme_WhenLayoutPresetIsMissing_UsesDefaultLayout()
     {
         string themesDirectory = Path.Combine(
