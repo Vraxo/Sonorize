@@ -3,7 +3,7 @@
 {
     <div class="modal-backdrop" @onclick="Cancel">
         <div class="modal-container" @onclick:stopPropagation>
-            <div class="modal-header">Save Theme</div>
+            <div class="modal-header">@Title</div>
             <div class="modal-body">
                 <label class="save-theme-label">Theme Name</label>
                 <input type="text" class="form-control" @bind="_themeName" placeholder="My Custom Theme" @onkeyup="HandleKeyUp" />
