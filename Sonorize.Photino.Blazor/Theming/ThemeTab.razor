@@ -18,6 +18,10 @@
         </HeaderAction>
         <ChildContent>
             <ThemeListSection @ref="_themeList" OnLoadTheme="ApplyLoadedTheme" />
+            @if (!string.IsNullOrWhiteSpace(_importMessage))
+            {
+                <p class="@(_importFailed ? "text-danger" : "text-success")" role="status">@_importMessage</p>
+            }
         </ChildContent>
     </SettingsCard>
 
@@ -85,10 +89,6 @@
     </div>
 }
 
-@if (!string.IsNullOrWhiteSpace(_importMessage))
-{
-    <p class="@(_importFailed ? "text-danger" : "text-success")" role="status">@_importMessage</p>
-}
 
 <!-- Modals -->
 <SaveThemeModal IsVisible="_showSaveModal" OnClose="CloseSaveModal" OnConfirm="ConfirmSaveTheme" />
