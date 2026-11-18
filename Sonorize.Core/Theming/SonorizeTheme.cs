@@ -14,6 +14,8 @@ public class SonorizeTheme
     public string BorderColor { get; set; } = "#282828";
     public string TextPrimary { get; set; } = "#FFFFFF";
     public string TextSecondary { get; set; } = "#B3B3B3";
+    public string DangerColor { get; set; } = "#FF4D4D";
+    public string WarningColor { get; set; } = "#FFD700";
 
     // Styling
     public int BorderRadius { get; set; } = 4;
