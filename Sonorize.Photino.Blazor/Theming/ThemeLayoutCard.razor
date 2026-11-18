@@ -37,7 +37,7 @@
     </div>
 </SettingsCard>
 
-<div style="margin-top: 24px;"></div>
+<div class="theme-section-spacer"></div>
 
 <SettingsCard Title="Typography">
     <div class="control-group">
@@ -48,7 +48,7 @@
                @bind-value:after="Save"
                placeholder="Default (System UI)" />
     </div>
-    <div style="margin-top: 15px;">
+    <div class="typography-slider-spacing">
         <SettingsSlider Label="Base Size" @bind-Value="BaseFontSizeInt" Min="10" Max="24" Step="1" Unit="px" ShowNumberInput="false" />
     </div>
 </SettingsCard>
