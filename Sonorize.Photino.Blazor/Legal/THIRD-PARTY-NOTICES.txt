@@ -16,27 +16,27 @@ licence from Un4seen Developments.
 Website: http://www.un4seen.com/
 
 --------------------------------------------------------------------------------
-2. SixLabors.ImageSharp
+2. SkiaSharp
 --------------------------------------------------------------------------------
-Copyright (c) Six Labors.
+Copyright (c) Microsoft Corporation.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+SkiaSharp is licensed under the MIT License.
+The license text is available at:
 
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Note: ImageSharp uses a Split License. This open-source project uses the
-Apache 2.0 terms. Commercial forks may require a separate license.
+    https://github.com/mono/SkiaSharp/blob/main/LICENSE
 
 --------------------------------------------------------------------------------
-3. FontAwesome Free (Icons)
+3. Skia Graphics Library
+--------------------------------------------------------------------------------
+Copyright 2011 Google Inc.
+
+Skia is licensed under the BSD 3-Clause License.
+The license text is available at:
+
+    https://skia.org/docs/user/license/
+
+--------------------------------------------------------------------------------
+4. FontAwesome Free (Icons)
 --------------------------------------------------------------------------------
 Copyright (c) Fonticons, Inc.
 
@@ -45,14 +45,14 @@ Fonts: SIL OFL 1.1 License (https://scripts.sil.org/OFL)
 Code:  MIT License (https://opensource.org/licenses/MIT)
 
 --------------------------------------------------------------------------------
-4. Photino
+5. Photino
 --------------------------------------------------------------------------------
 Copyright (c) TRY Photino.
 
 Licensed under the Apache License, Version 2.0.
 
 --------------------------------------------------------------------------------
-5. Sonorize (This Application)
+6. Sonorize (This Application)
 --------------------------------------------------------------------------------
 Copyright (c) 2025 Sonorize Contributors.
 
