@@ -58,7 +58,7 @@ body.show-grid-lines .track-list td {
     }
 
 .sort-icon {
-    margin-left: 6px;
+    margin-left: var(--space-2);
     color: var(--color-accent);
     font-size: 0.9em;
 }
@@ -192,8 +192,8 @@ body.show-grid-lines .track-list td {
 }
 
 .remove-track-btn:hover {
-    color: #ff6b6b;
-    background-color: rgba(255, 107, 107, 0.1);
+    color: var(--color-danger);
+    background-color: var(--color-danger-subtle);
 }
 
 .truncate-track-text .track-list td {
