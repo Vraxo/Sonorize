@@ -16,18 +16,18 @@
 
     <GridTemplate Context="artist">
         <div class="library-grid-item" @onclick="() => OpenArtist(artist)">
-            <div class="art-wrapper" style="border-radius: 50%;">
+            <div class="art-wrapper artist-art-wrapper">
                 @if (artist.RepresentativeFilePath is not null)
                 {
-                    <img src="@GetArtUrl(artist.RepresentativeFilePath)" loading="lazy" style="border-radius: 50%;" />
+                    <img class="artist-art-image" src="@GetArtUrl(artist.RepresentativeFilePath)" loading="lazy" />
                 }
                 else
                 {
                     <div class="art-placeholder"><i class="fas fa-microphone"></i></div>
                 }
             </div>
-            <p class="item-title" style="text-align:center;" title="@artist.Name">@artist.Name</p>
-            <p class="item-subtitle" style="text-align:center;">
+            <p class="item-title artist-grid-title" title="@artist.Name">@artist.Name</p>
+            <p class="item-subtitle artist-grid-subtitle">
                 @artist.AlbumCount @(artist.AlbumCount == 1 ? "album" : "albums")  @artist.SongCount songs
             </p>
         </div>
