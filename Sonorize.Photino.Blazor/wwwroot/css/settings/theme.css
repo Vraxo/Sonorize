@@ -2,54 +2,54 @@
 .color-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-    margin-top: 12px;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
 }
 
 /* --- Theme List Actions --- */
 .theme-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
 .theme-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--bg-tertiary);
-    padding: 10px 16px;
-    border-radius: var(--border-radius);
+    background-color: var(--color-surface-raised);
+    padding: 10px var(--space-4);
+    border-radius: var(--radius-control);
     border: 1px solid transparent;
 }
 
     .theme-row:hover {
-        border-color: var(--border-color);
-        background-color: var(--hover-bg);
+        border-color: var(--color-border);
+        background-color: var(--color-hover);
     }
 
 .theme-name {
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
 .theme-actions {
     display: flex;
-    gap: 8px;
+    gap: var(--space-2);
 }
 
 /* Helper Buttons for Theme Lists */
 .btn-sm {
-    padding: 4px 12px;
+    padding: var(--space-1) var(--space-3);
     font-size: 0.85em;
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
+    background-color: var(--color-surface);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
 }
 
     .btn-sm:hover {
-        background-color: var(--border-color);
-        color: var(--text-primary);
+        background-color: var(--color-border);
+        color: var(--color-text-primary);
         transform: none;
     }
 
