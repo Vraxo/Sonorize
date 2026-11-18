@@ -25,3 +25,8 @@
             margin-bottom: 20px;
             opacity: 0.5;
         }
+
+.queue-track-count {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
