@@ -37,7 +37,7 @@
     align-items: center;
     gap: var(--space-3);
     width: 100%;
-    height: var(--space-6);
+    height: var(--control-height-compact);
 }
 
 .slider-wrapper .slider-label {
