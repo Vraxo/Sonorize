@@ -120,15 +120,6 @@
     }
 
     /* Checkbox Grid */
-    .group-label {
-        display: block;
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 0.9em;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-    }
-
     .checkbox-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
