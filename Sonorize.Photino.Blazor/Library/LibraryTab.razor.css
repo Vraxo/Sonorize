@@ -1,107 +1,108 @@
-    .slider-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
+.slider-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
 
-    .divider {
-        height: 1px;
-        background-color: var(--border-color);
-        margin: 15px 0;
-        opacity: 0.5;
-    }
+.divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: var(--space-3) 0;
+    opacity: 0.5;
+}
 
-    /* Toggle */
-    .toggle-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        padding: 5px 0;
-    }
+/* Toggle */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: var(--space-1) 0;
+}
 
-    .toggle-label {
-        font-size: 1em;
-        color: var(--text-primary);
-    }
+.toggle-label {
+    font-size: var(--font-size-body);
+    color: var(--color-text-primary);
+}
 
-    .toggle-input {
-        transform: scale(1.3);
-        accent-color: var(--accent-primary);
-        cursor: pointer;
-    }
+.toggle-input {
+    transform: scale(1.3);
+    accent-color: var(--color-accent);
+    cursor: pointer;
+}
 
-    /* Folders */
-    .folder-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 15px;
-    }
+/* Folders */
+.folder-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
 
-    .folder-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background-color: rgba(0, 0, 0, 0.2); /* Softened */
-        padding: 10px 15px;
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-    }
+.folder-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background-color: var(--color-surface);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
+    border: 1px solid var(--color-border);
+}
 
-    .folder-icon {
-        color: var(--text-secondary);
-    }
+.folder-icon {
+    color: var(--color-text-secondary);
+}
 
-    .folder-path {
-        flex: 1;
-        font-family: monospace;
-        font-size: 0.9em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: var(--text-primary);
-    }
+.folder-path {
+    flex: 1;
+    font-family: monospace;
+    font-size: var(--font-size-small);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-primary);
+}
 
-    .btn-remove {
-        background: none;
-        border: none;
-        color: #888;
-        font-size: 1.2em;
-        cursor: pointer;
-        padding: 4px;
-        line-height: 1;
-        display: flex;
-        align-items: center;
-        transition: color 0.2s;
-    }
+.btn-remove {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-subheading);
+    cursor: pointer;
+    padding: var(--space-1);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    transition:
+        background-color var(--motion-duration-standard) var(--motion-easing-standard),
+        color var(--motion-duration-standard) var(--motion-easing-standard);
+}
 
-        .btn-remove:hover {
-            background-color: rgba(255, 77, 77, 0.1);
-            color: #ff4d4d;
-        }
+.btn-remove:hover {
+    background-color: var(--color-danger-subtle);
+    color: var(--color-danger);
+}
 
-    .empty-state {
-        padding: 20px;
-        text-align: center;
-        color: var(--text-secondary);
-        background: rgba(255,255,255,0.02);
-        border-radius: 6px;
-        border: 1px dashed var(--border-color);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
+.empty-state {
+    padding: var(--space-5);
+    text-align: center;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border-radius: var(--radius-control);
+    border: 1px dashed var(--color-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+}
 
-        .empty-state i {
-            font-size: 24px;
-            opacity: 0.5;
-        }
+.empty-state i {
+    font-size: var(--font-size-display);
+    opacity: 0.5;
+}
 
-    .btn-outline {
-        width: 100%;
-        padding: var(--space-2);
-        justify-content: center;
-    }
-
+.btn-outline {
+    width: 100%;
+    padding: var(--space-2);
+    justify-content: center;
+}
