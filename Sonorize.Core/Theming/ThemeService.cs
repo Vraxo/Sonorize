@@ -377,6 +377,15 @@ public class ThemeService
 
     public void DeleteTheme(string name)
     {
+        if (string.IsNullOrWhiteSpace(name)
+            || Path.IsPathRooted(name)
+            || name is "." or ".."
+            || name.Contains('/')
+            || name.Contains('\\'))
+        {
+            throw new ArgumentException("Theme names must be simple file names.", nameof(name));
+        }
+
         string colorsPath = Path.Combine(_themesDir, $"{name}.colors.json");
         string layoutPath = Path.Combine(_themesDir, $"{name}.layout.json");
 
