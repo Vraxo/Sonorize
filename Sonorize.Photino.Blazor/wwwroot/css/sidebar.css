@@ -72,20 +72,20 @@
 .sidebar .logo {
     font-size: 1.7em; /* Relative */
     font-weight: bold;
-    margin-bottom: 20px;
+    margin-bottom: var(--space-5);
     padding-left: var(--space-2);
     display: flex;
     align-items: center;
     color: var(--color-text-primary);
     /* Merged from inline */
     justify-content: space-between;
-    padding-right: 10px;
+    padding-right: var(--space-3);
 }
 
     .sidebar .logo .logo-icon {
-        width: 24px;
-        height: 24px;
-        margin-right: 10px;
+        width: var(--space-5);
+        height: var(--space-5);
+        margin-right: var(--space-3);
         background-color: var(--color-accent);
         mask-image: url('../img/icon-256.png');
         -webkit-mask-image: url('../img/icon-256.png');
@@ -99,12 +99,12 @@
     border: none;
     color: var(--color-text-secondary);
     cursor: pointer;
-    padding: 5px;
+    padding: var(--space-1);
     border-radius: var(--radius-control);
     transition:
         color var(--motion-duration-standard) var(--motion-easing-standard),
         background-color var(--motion-duration-standard) var(--motion-easing-standard);
-    font-size: 16px;
+    font-size: var(--font-size-subheading);
 }
 
     .sidebar-toggle-btn:hover {
@@ -123,8 +123,8 @@
 }
 
 .playlists-wrapper {
-    margin-top: 10px;
-    padding-top: 10px;
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
     border-top: 1px solid var(--color-border);
     overflow-y: auto;
     flex: 1;
@@ -161,7 +161,7 @@
     border-radius: var(--radius-control);
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: var(--space-4);
     transition: color var(--motion-duration-standard) var(--motion-easing-standard);
     white-space: nowrap;
     overflow: hidden;
@@ -212,10 +212,10 @@
 
 .sidebar-filter-input {
     width: 100%;
-    background: rgba(255,255,255,0.05);
+    background: var(--color-surface-raised);
     border: 1px solid transparent;
     border-radius: var(--radius-control);
-    padding: 6px 24px 6px var(--space-2);
+    padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2);
     color: var(--color-text-primary);
     font-size: var(--font-size-small);
     outline: none;
@@ -225,28 +225,29 @@
 }
 
     .sidebar-filter-input:focus {
-        background: rgba(255,255,255,0.1);
+        background: var(--color-surface);
         border-color: var(--color-accent);
     }
 
     .sidebar-filter-input::placeholder {
-        color: rgba(255,255,255,0.3);
+        color: var(--color-text-secondary);
+        opacity: 0.5;
     }
 
 .clear-filter-btn {
     position: absolute;
-    right: 6px;
+    right: var(--space-2);
     top: 50%;
     transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--color-text-secondary);
-    font-size: 1.2em;
+    font-size: var(--font-size-subheading);
     line-height: 1;
     cursor: pointer;
     padding: 0;
-    width: 16px;
-    height: 16px;
+    width: var(--space-4);
+    height: var(--space-4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -271,7 +272,7 @@
 .action-icon-btn {
     color: var(--color-text-secondary);
     font-size: 1em;
-    padding: 0 8px;
+    padding: 0 var(--space-2);
     line-height: 1;
     background: none;
     border: none;
