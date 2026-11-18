@@ -48,7 +48,9 @@ public static class ThemeUtils
         _ = sb.AppendLine($"--text-primary: {theme.TextPrimary};");
         _ = sb.AppendLine($"--text-secondary: {theme.TextSecondary};");
         _ = sb.AppendLine($"--color-danger: {theme.DangerColor};");
+        _ = sb.AppendLine($"--color-danger-subtle: {HexToRgba(theme.DangerColor, 0.1f)};");
         _ = sb.AppendLine($"--color-warning: {theme.WarningColor};");
+        _ = sb.AppendLine($"--color-warning-subtle: {HexToRgba(theme.WarningColor, 0.1f)};");
 
         string border = useTransparency ? "rgba(255,255,255,0.1)" : theme.BorderColor;
         _ = sb.AppendLine($"--border-color: {border};");

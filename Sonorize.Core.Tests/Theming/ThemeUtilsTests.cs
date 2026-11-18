@@ -89,7 +89,9 @@ public class ThemeUtilsTests
         Assert.Contains("--color-accent-contrast: #FFFFFF;", css);
         Assert.Contains("--color-accent-hover-contrast: #FFFFFF;", css);
         Assert.Contains("--color-danger: #C1121F;", css);
+        Assert.Contains("--color-danger-subtle: rgba(193, 18, 31, 0.1);", css);
         Assert.Contains("--color-warning: #F0A500;", css);
+        Assert.Contains("--color-warning-subtle: rgba(240, 165, 0, 0.1);", css);
         Assert.Contains("--bg-primary: #101010;", css);
         Assert.Contains("--border-radius: 6px;", css);
         Assert.Contains("--btn-radius: 6px;", css);
