@@ -1,3 +1,12 @@
+/* --- Shared Settings Layout --- */
+.settings-view-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding-bottom: var(--space-6);
+    max-width: 800px;
+}
+
 /* --- Settings Cards --- */
 .settings-card {
     background-color: var(--color-surface-raised);
@@ -8,15 +17,15 @@
 
 .card-header {
     background-color: rgba(255,255,255,0.03);
-    padding: 15px 20px;
+    padding: var(--space-4) var(--space-5);
     border-bottom: 1px solid var(--color-border);
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: var(--space-1);
 }
 
 .card-title {
-    font-size: 1em;
+    font-size: var(--font-size-body);
     font-weight: 700;
     color: var(--color-text-primary);
     letter-spacing: 0.5px;
@@ -24,12 +33,12 @@
 }
 
 .card-desc {
-    font-size: 0.85em;
+    font-size: var(--font-size-small);
     color: var(--color-text-secondary);
 }
 
 .card-content {
-    padding: 20px;
+    padding: var(--space-5);
 }
 
 .group-label {
