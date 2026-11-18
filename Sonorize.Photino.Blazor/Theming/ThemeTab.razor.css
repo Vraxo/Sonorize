@@ -1,12 +1,4 @@
-.settings-view-container { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 24px; 
-    padding-bottom: 30px; 
-    max-width: 800px; 
-}
-    
-    .btn-header-action {
+.btn-header-action {
         background: rgba(255,255,255,0.1); 
         border: none; 
         color: var(--text-primary); 
