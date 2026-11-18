@@ -47,6 +47,12 @@
     --space-6: 32px;
     --space-7: 40px;
     --space-8: 48px;
+
+    /* Shared control dimensions */
+    --control-height: 36px;
+    --control-height-compact: 32px;
+    --control-icon-button-size: 40px;
+
     --space-row-y: var(--row-padding, 12px);
     --space-sidebar-item: var(--sidebar-item-padding, 10px);
 
