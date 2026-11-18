@@ -125,15 +125,13 @@ The source code for **Sonorize** is licensed under the **MIT License**.
    
    - For the most current and complete licensing terms, please refer to the official BASS website.
 
-2. **SixLabors.ImageSharp**
-   
-   - This project uses **ImageSharp** for album art processing.
-   
-   - ImageSharp is licensed under the **Six Labors Split License**, which provides **Apache 2.0 terms for open-source use** and **commercial licensing options for certain proprietary or high-revenue scenarios**.
-   
-   - ImageSharp is free for use in this open-source project, but commercial forks—especially those with annual gross revenue exceeding $1M USD—may require a commercial license.
-   
-   - For the most current and complete licensing terms, please refer to the official Six Labors licensing documentation.
+2. **SkiaSharp and Skia**
+
+   - This project uses **SkiaSharp** for album art decoding, resizing, and pixel analysis.
+   - SkiaSharp is licensed under the **MIT License**.
+   - The underlying Skia graphics library is licensed under the **BSD 3-Clause License**.
+   - The application includes platform-specific native Skia assets for supported targets.
+
 
 > **Disclaimer:**  
 > Sonorize includes third-party libraries that are licensed separately by their respective authors.  

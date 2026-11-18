@@ -1,11 +1,6 @@
-﻿using System.Text;
-using SixLabors.ImageSharp.Drawing.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using System.Text;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
-
-using SixLabors.ImageSharp;
 
 namespace Sonorize.Photino.Blazor.Shell;
 
@@ -53,7 +48,7 @@ public static class SchemeHandlers
         // Handle Demo Data Art Generation
         if (filePath.StartsWith("demo://"))
         {
-            contentType = "image/png";
+            contentType = "image/svg+xml";
             return GenerateDemoArt(filePath);
         }
 
@@ -84,38 +79,29 @@ public static class SchemeHandlers
 
     private static MemoryStream GenerateDemoArt(string filePath)
     {
-        int seed = filePath.GetHashCode();
-        Random rng = new(seed);
+        Random rng = new(filePath.GetHashCode());
 
-        // Generate random nice colors
-        Color c1 = GenerateRandomColor(rng);
-        Color c2 = GenerateRandomColor(rng);
+        string startColor = GenerateRandomColor(rng);
+        string endColor = GenerateRandomColor(rng);
 
-        // Create 200x200 image
-        using Image<Rgba32> image = new(200, 200);
-        image.Mutate(x => x.Fill(new LinearGradientBrush(
-            new PointF(0, 0),
-            new PointF(200, 200),
-            GradientRepetitionMode.None,
-            new ColorStop(0, c1),
-            new ColorStop(1, c2)
-        )));
+        string svg = $$"""
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+                <defs>
+                    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="{{startColor}}" />
+                        <stop offset="100%" stop-color="{{endColor}}" />
+                    </linearGradient>
+                </defs>
+                <rect width="200" height="200" fill="url(#background)" />
+            </svg>
+            """;
 
-        MemoryStream ms = new();
-
-        image.SaveAsPng(ms);
-
-        ms.Position = 0;
-
-        return ms;
+        return new MemoryStream(Encoding.UTF8.GetBytes(svg));
     }
 
-    private static Color GenerateRandomColor(Random rng)
+    private static string GenerateRandomColor(Random rng)
     {
-        return Color.FromRgb(
-            (byte)rng.Next(50, 255),
-            (byte)rng.Next(50, 255),
-            (byte)rng.Next(50, 255));
+        return $"#{rng.Next(50, 255):X2}{rng.Next(50, 255):X2}{rng.Next(50, 255):X2}";
     }
 
     private static Stream HandleLocalFile(Uri uri, out string contentType)

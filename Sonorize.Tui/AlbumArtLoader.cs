@@ -1,6 +1,4 @@
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using SkiaSharp;
 using TuiColor = Terminal.Gui.Drawing.Color;
 
 namespace Sonorize.Tui;
@@ -18,7 +16,7 @@ public static class AlbumArtLoader
     /// <returns>Pixels indexed [x, y], or null when the file has no usable cover.</returns>
     public static TuiColor[,]? Load(string filePath)
     {
-        if (!System.IO.File.Exists(filePath))
+        if (!File.Exists(filePath))
         {
             return null;
         }
@@ -33,13 +31,30 @@ public static class AlbumArtLoader
                 return null;
             }
 
-            using Image<Rgba32> image = Image.Load<Rgba32>(picture.Data.Data);
+            using SKBitmap? decodedImage = SKBitmap.Decode(picture.Data.Data);
 
-            image.Mutate(x => x.Resize(new ResizeOptions
+            if (decodedImage is null)
             {
-                Size = new Size(MaxEdge, MaxEdge),
-                Mode = ResizeMode.Max
-            }));
+                return null;
+            }
+
+            int largestEdge = Math.Max(decodedImage.Width, decodedImage.Height);
+            double scale = Math.Min(1.0, (double)MaxEdge / largestEdge);
+            int width = Math.Max(1, (int)Math.Round(decodedImage.Width * scale));
+            int height = Math.Max(1, (int)Math.Round(decodedImage.Height * scale));
+
+            using SKBitmap? resizedImage = scale < 1.0
+                ? decodedImage.Resize(
+                    new SKImageInfo(width, height),
+                    new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
+                : null;
+
+            SKBitmap image = resizedImage ?? decodedImage;
+
+            if (scale < 1.0 && resizedImage is null)
+            {
+                return null;
+            }
 
             TuiColor[,] pixels = new TuiColor[image.Width, image.Height];
 
@@ -47,13 +62,13 @@ public static class AlbumArtLoader
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    Rgba32 pixel = image[x, y];
+                    SKColor pixel = image.GetPixel(x, y);
 
                     // Flatten transparency onto black; terminals have no alpha here.
                     pixels[x, y] = new TuiColor(
-                        pixel.R * pixel.A / 255,
-                        pixel.G * pixel.A / 255,
-                        pixel.B * pixel.A / 255);
+                        pixel.Red * pixel.Alpha / 255,
+                        pixel.Green * pixel.Alpha / 255,
+                        pixel.Blue * pixel.Alpha / 255);
                 }
             }
 
