@@ -300,3 +300,7 @@
     color: var(--color-text-primary);
     opacity: 1;
 }
+.sidebar .logo-brand {
+    display: flex;
+    align-items: center;
+}
