@@ -16,9 +16,19 @@ public class ThemeService
     };
 
     public ThemeService()
+        : this(AppDataHelper.GetSubDirectory("Themes"), loadBuiltInThemes: true)
     {
-        _themesDir = AppDataHelper.GetSubDirectory("Themes");
-        EnsureBuiltInThemes();
+    }
+
+    internal ThemeService(string themesDirectory, bool loadBuiltInThemes)
+    {
+        _themesDir = Path.GetFullPath(themesDirectory);
+        _ = Directory.CreateDirectory(_themesDir);
+
+        if (loadBuiltInThemes)
+        {
+            EnsureBuiltInThemes();
+        }
     }
 
     private void EnsureBuiltInThemes()
