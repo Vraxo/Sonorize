@@ -178,6 +178,212 @@ public class ThemeServiceTests
     }
 
     [Fact]
+    public void ImportThemePackage_ExtractsAssetsAndPreservesPackageStyles()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            byte[] backgroundBytes = [9, 8, 7, 6, 5];
+            string stylesCss = ".player-bar { opacity: 0.85; }";
+            using MemoryStream packageStream = CreateThemePackageStream(new ThemePackage
+            {
+                Manifest = new ThemePackageManifest
+                {
+                    Name = "Portable Night",
+                    Description = "Imported package",
+                    Author = "Test"
+                },
+                Colors = new ThemeColors
+                {
+                    AccentColor = "#123456"
+                },
+                Layout = new ThemeLayout
+                {
+                    BorderRadius = 12,
+                    BackgroundImagePath = "assets/Backgrounds/Cover.PNG",
+                    CustomCss = stylesCss
+                },
+                Assets =
+                {
+                    ["backgrounds/cover.png"] = backgroundBytes,
+                    ["fonts/example.woff2"] = [1, 3, 5]
+                }
+            });
+
+            string importedName = service.ImportThemePackage(packageStream);
+
+            Assert.Equal("Portable Night", importedName);
+            Assert.Contains(importedName, service.GetAvailableColorThemes());
+
+            string assetsDirectory = Path.Combine(themesDirectory, $"{importedName}.assets");
+            string importedBackgroundPath = Path.Combine(assetsDirectory, "backgrounds", "cover.png");
+            string importedFontPath = Path.Combine(assetsDirectory, "fonts", "example.woff2");
+
+            Assert.True(File.Exists(importedBackgroundPath));
+            Assert.True(File.Exists(importedFontPath));
+            Assert.Equal(backgroundBytes, File.ReadAllBytes(importedBackgroundPath));
+
+            SonorizeTheme loaded = Assert.IsType<SonorizeTheme>(service.LoadTheme(importedName));
+            Assert.Equal("#123456", loaded.AccentColor);
+            Assert.Equal(12, loaded.BorderRadius);
+            Assert.Equal(stylesCss, loaded.CustomCss);
+            Assert.Equal(importedBackgroundPath, loaded.BackgroundImagePath);
+
+            service.DeleteTheme(importedName);
+
+            Assert.False(Directory.Exists(assetsDirectory));
+            Assert.Null(service.LoadTheme(importedName));
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ImportThemePackage_DoesNotOverwriteAnExistingTheme()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            service.SaveTheme("Existing", new SonorizeTheme
+            {
+                AccentColor = "#112233"
+            });
+
+            using MemoryStream packageStream = CreateThemePackageStream(new ThemePackage
+            {
+                Manifest = new ThemePackageManifest { Name = "existing" },
+                Colors = new ThemeColors { AccentColor = "#AABBCC" }
+            });
+
+            Assert.Throws<InvalidOperationException>(() => service.ImportThemePackage(packageStream));
+
+            SonorizeTheme existing = Assert.IsType<SonorizeTheme>(service.LoadTheme("Existing"));
+            Assert.Equal("#112233", existing.AccentColor);
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ImportThemePackage_RejectsBackgroundOutsidePackageAssets()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            using MemoryStream packageStream = CreateThemePackageStream(new ThemePackage
+            {
+                Manifest = new ThemePackageManifest { Name = "Unsafe Background" },
+                Layout = new ThemeLayout
+                {
+                    BackgroundImagePath = Path.Combine(Path.GetTempPath(), "outside.png")
+                }
+            });
+
+            Assert.Throws<InvalidDataException>(() => service.ImportThemePackage(packageStream));
+            Assert.Empty(service.GetAvailableColorThemes());
+            Assert.Empty(Directory.EnumerateDirectories(themesDirectory));
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void ImportThemePackage_RejectsMissingBackgroundAsset()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            using MemoryStream packageStream = CreateThemePackageStream(new ThemePackage
+            {
+                Manifest = new ThemePackageManifest { Name = "Missing Asset" },
+                Layout = new ThemeLayout
+                {
+                    BackgroundImagePath = "assets/backgrounds/missing.png"
+                }
+            });
+
+            Assert.Throws<InvalidDataException>(() => service.ImportThemePackage(packageStream));
+            Assert.Empty(service.GetAvailableColorThemes());
+            Assert.Empty(Directory.EnumerateDirectories(themesDirectory));
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    private static MemoryStream CreateThemePackageStream(ThemePackage package)
+    {
+        MemoryStream stream = new();
+        ThemePackageArchive.Write(stream, package);
+        stream.Position = 0;
+        return stream;
+    }
+
+    [Fact]
+    public void DeleteTheme_RejectsPathSegments()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+
+            Assert.Throws<ArgumentException>(() => service.DeleteTheme("../outside"));
+            Assert.Empty(Directory.EnumerateFiles(themesDirectory));
+            Assert.Empty(Directory.EnumerateDirectories(themesDirectory));
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void LoadTheme_WhenLayoutPresetIsMissing_UsesDefaultLayout()
     {
         string themesDirectory = Path.Combine(

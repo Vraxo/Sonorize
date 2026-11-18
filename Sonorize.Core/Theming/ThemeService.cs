@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
@@ -162,7 +163,7 @@ public class ThemeService
         if (colors == null)
             return null;
 
-        var layout = LoadThemeLayout(name);
+        ThemeLayout layout = LoadThemeLayout(name) ?? new ThemeLayout();
         return CombineToSonorizeTheme(colors, layout);
     }
 
@@ -258,8 +259,136 @@ public class ThemeService
         ThemePackageArchive.Write(destination, package);
     }
 
+    public string ImportThemePackage(Stream source)
+    {
+        ThemePackage package = ThemePackageArchive.Read(source);
+        string themeName = NormalizeThemePackageName(package.Manifest.Name);
+
+        if (ThemeExists(themeName))
+        {
+            throw new InvalidOperationException($"A theme named '{themeName}' already exists.");
+        }
+
+        string? backgroundAssetPath = null;
+        if (!string.IsNullOrWhiteSpace(package.Layout.BackgroundImagePath))
+        {
+            const string assetPrefix = "assets/";
+            if (!package.Layout.BackgroundImagePath.StartsWith(assetPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException("Theme package backgrounds must reference an asset inside the package.");
+            }
+
+            string requestedAssetPath = package.Layout.BackgroundImagePath[assetPrefix.Length..];
+            backgroundAssetPath = package.Assets.Keys.FirstOrDefault(
+                assetPath => assetPath.Equals(requestedAssetPath, StringComparison.OrdinalIgnoreCase));
+
+            if (backgroundAssetPath is null)
+            {
+                throw new InvalidDataException("The theme package background asset is missing.");
+            }
+        }
+
+        string finalAssetsDirectory = Path.Combine(_themesDir, $"{themeName}.assets");
+        string stagingDirectory = Path.Combine(_themesDir, $".{themeName}.{Guid.NewGuid():N}.importing");
+        bool assetsMoved = false;
+        bool colorsFileCreated = false;
+        bool layoutFileCreated = false;
+        string colorsPath = Path.Combine(_themesDir, $"{themeName}.colors.json");
+        string layoutPath = Path.Combine(_themesDir, $"{themeName}.layout.json");
+
+        try
+        {
+            if (package.Assets.Count > 0)
+            {
+                _ = Directory.CreateDirectory(stagingDirectory);
+
+                foreach ((string assetPath, byte[] bytes) in package.Assets)
+                {
+                    string destinationPath = GetContainedAssetPath(stagingDirectory, assetPath);
+                    string? destinationDirectory = Path.GetDirectoryName(destinationPath);
+                    if (destinationDirectory is not null)
+                    {
+                        _ = Directory.CreateDirectory(destinationDirectory);
+                    }
+
+                    using FileStream destination = new(
+                        destinationPath,
+                        FileMode.CreateNew,
+                        FileAccess.Write,
+                        FileShare.None);
+                    destination.Write(bytes, 0, bytes.Length);
+                }
+
+                Directory.Move(stagingDirectory, finalAssetsDirectory);
+                assetsMoved = true;
+            }
+
+            ThemeLayout layout = package.Layout.Clone();
+            layout.BackgroundImagePath = backgroundAssetPath is null
+                ? null
+                : GetContainedAssetPath(finalAssetsDirectory, backgroundAssetPath);
+
+            using (FileStream colorsFile = new(
+                colorsPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None))
+            {
+                colorsFileCreated = true;
+                JsonSerializer.Serialize(colorsFile, package.Colors, _jsonOptions);
+            }
+
+            using (FileStream layoutFile = new(
+                layoutPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None))
+            {
+                layoutFileCreated = true;
+                JsonSerializer.Serialize(layoutFile, layout, _jsonOptions);
+            }
+
+            return themeName;
+        }
+        catch
+        {
+            if (colorsFileCreated && File.Exists(colorsPath))
+            {
+                File.Delete(colorsPath);
+            }
+
+            if (layoutFileCreated && File.Exists(layoutPath))
+            {
+                File.Delete(layoutPath);
+            }
+
+            if (assetsMoved && Directory.Exists(finalAssetsDirectory))
+            {
+                Directory.Delete(finalAssetsDirectory, recursive: true);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (Directory.Exists(stagingDirectory))
+            {
+                Directory.Delete(stagingDirectory, recursive: true);
+            }
+        }
+    }
+
     public void DeleteTheme(string name)
     {
+        if (string.IsNullOrWhiteSpace(name)
+            || Path.IsPathRooted(name)
+            || name is "." or ".."
+            || name.Contains('/')
+            || name.Contains('\\'))
+        {
+            throw new ArgumentException("Theme names must be simple file names.", nameof(name));
+        }
+
         string colorsPath = Path.Combine(_themesDir, $"{name}.colors.json");
         string layoutPath = Path.Combine(_themesDir, $"{name}.layout.json");
 
@@ -267,6 +396,104 @@ public class ThemeService
             File.Delete(colorsPath);
         if (File.Exists(layoutPath))
             File.Delete(layoutPath);
+
+        string assetsDirectory = Path.Combine(_themesDir, $"{name}.assets");
+        if (Directory.Exists(assetsDirectory))
+            Directory.Delete(assetsDirectory, recursive: true);
+    }
+
+    private bool ThemeExists(string name)
+    {
+        string colorsFileName = $"{name}.colors.json";
+        string layoutFileName = $"{name}.layout.json";
+        string assetsDirectoryName = $"{name}.assets";
+
+        return Directory.EnumerateFiles(_themesDir)
+                .Any(path =>
+                    Path.GetFileName(path).Equals(colorsFileName, StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetFileName(path).Equals(layoutFileName, StringComparison.OrdinalIgnoreCase))
+            || Directory.EnumerateDirectories(_themesDir)
+                .Any(path => Path.GetFileName(path).Equals(assetsDirectoryName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string NormalizeThemePackageName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidDataException("The theme package name is empty.");
+        }
+
+        StringBuilder builder = new();
+        foreach (char character in name.Trim())
+        {
+            bool invalid = char.IsControl(character)
+                || "<>:\"/\\|?*".Contains(character)
+                || Path.GetInvalidFileNameChars().Contains(character);
+            _ = builder.Append(invalid ? '_' : character);
+        }
+
+        string safeName = builder.ToString().Trim().TrimEnd('.', ' ');
+        if (safeName.Length > 64)
+        {
+            safeName = safeName[..64].TrimEnd('.', ' ');
+        }
+
+        if (string.IsNullOrWhiteSpace(safeName) || safeName is "." or "..")
+        {
+            throw new InvalidDataException("The theme package name cannot be used as a file name.");
+        }
+
+        string reservedName = safeName.Split('.')[0];
+        if (reservedName.Equals("CON", StringComparison.OrdinalIgnoreCase)
+            || reservedName.Equals("PRN", StringComparison.OrdinalIgnoreCase)
+            || reservedName.Equals("AUX", StringComparison.OrdinalIgnoreCase)
+            || reservedName.Equals("NUL", StringComparison.OrdinalIgnoreCase)
+            || IsNumberedDeviceName(reservedName, "COM")
+            || IsNumberedDeviceName(reservedName, "LPT"))
+        {
+            safeName = $"_{safeName}";
+        }
+
+        return safeName;
+    }
+
+    private static bool IsNumberedDeviceName(string value, string prefix)
+    {
+        return value.Length == prefix.Length + 1
+            && value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            && value[^1] is >= '1' and <= '9';
+    }
+
+    private static string GetContainedAssetPath(string baseDirectory, string relativeAssetPath)
+    {
+        if (string.IsNullOrWhiteSpace(relativeAssetPath)
+            || relativeAssetPath.StartsWith('/')
+            || relativeAssetPath.Contains('\\')
+            || relativeAssetPath.Contains(':')
+            || relativeAssetPath.Contains('\0'))
+        {
+            throw new InvalidDataException("Theme package asset paths must be relative.");
+        }
+
+        string[] segments = relativeAssetPath.Split('/');
+        if (segments.Any(segment => string.IsNullOrWhiteSpace(segment) || segment is "." or ".."))
+        {
+            throw new InvalidDataException("The theme package contains an unsafe asset path.");
+        }
+
+        string fullRoot = Path.GetFullPath(baseDirectory)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+        string fullPath = Path.GetFullPath(Path.Combine(
+            fullRoot,
+            Path.Combine(segments)));
+
+        if (!fullPath.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("The theme package asset resolves outside its theme directory.");
+        }
+
+        return fullPath;
     }
 
     private static byte[] ReadThemeAsset(string path)
