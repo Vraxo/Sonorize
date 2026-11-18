@@ -11,7 +11,7 @@ namespace Sonorize.Photino.Blazor;
 
 public class Program
 {
-    // Removed "Global\" prefix to ensure compatibility with Linux/macOS
+    // Removed "Global\\" prefix to ensure compatibility with Linux/macOS
     private const string MutexName = "Sonorize_SingleInstance_Mutex";
 
     [STAThread]
@@ -68,10 +68,34 @@ public class Program
         services.GetRequiredService<ScrobbleOrchestrator>();
 
         LibraryService library = services.GetRequiredService<LibraryService>();
-        services.GetRequiredService<SonorizeSettings>();
+        SonorizeSettings settings = services.GetRequiredService<SonorizeSettings>();
 
-        // InitializeAsync handles both Cache loading and Background scanning internally
-        library.InitializeAsync();
+        // Keep library loading and scanning off the UI startup path.
+        _ = InitializeLibraryAsync(library, settings, logger);
+    }
+
+    private static async Task InitializeLibraryAsync(
+        LibraryService library,
+        SonorizeSettings settings,
+        LogService logger)
+    {
+        try
+        {
+            await library.InitializeAsync();
+
+            if (!settings.Library.ScanOnStartup || settings.Library.MusicFolderPaths.Count == 0)
+            {
+                return;
+            }
+
+            logger.Info("Starting startup library scan...");
+            await library.RefreshLibraryAsync();
+            logger.Info("Startup library scan completed.");
+        }
+        catch (Exception ex)
+        {
+            logger.Error("Library initialization or startup scan failed", ex);
+        }
     }
 
     private static void SetupWindowAndPersistence(PhotinoBlazorApp app)
