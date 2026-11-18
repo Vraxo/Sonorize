@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using NativeFileDialogs.Net;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
 using Sonorize.Core.Theming;
@@ -11,6 +12,10 @@ public partial class ThemeTab
     private bool _showSaveModal = false;
     private bool _showSaveColorModal = false;
     private bool _showSaveLayoutModal = false;
+    private bool _showImportWarning;
+    private bool _importFailed;
+    private byte[]? _pendingImportPackage;
+    private string? _importMessage;
 
     private List<string> _colorThemes = new();
     private List<string> _layoutThemes = new();
@@ -101,6 +106,92 @@ public partial class ThemeTab
         _selectedColorTheme = ThemeService.GetAvailableColorThemes().FirstOrDefault() ?? "";
         _selectedLayoutTheme = ThemeService.GetAvailableLayoutThemes().FirstOrDefault() ?? "";
         StateHasChanged();
+    }
+
+    private void OpenImportDialog()
+    {
+        Dictionary<string, string> filters = new()
+        {
+            { "Sonorize Theme", "sonorize-theme" }
+        };
+
+        if (Nfd.OpenDialog(out string? path, filters) != NfdStatus.Ok
+            || string.IsNullOrWhiteSpace(path))
+        {
+            return;
+        }
+
+        try
+        {
+            FileInfo packageFile = new(path);
+            const long maxPackageFileBytes = 32L * 1024 * 1024;
+            if (packageFile.Length > maxPackageFileBytes)
+            {
+                throw new InvalidDataException("The theme package file exceeds the 32 MB size limit.");
+            }
+
+            byte[] packageBytes = File.ReadAllBytes(path);
+            using MemoryStream packageStream = new(packageBytes, writable: false);
+            ThemePackage package = ThemePackageArchive.Read(packageStream);
+
+            _pendingImportPackage = packageBytes;
+            _importMessage = null;
+            _importFailed = false;
+
+            if (!string.IsNullOrWhiteSpace(package.Layout.CustomCss))
+            {
+                _showImportWarning = true;
+                return;
+            }
+
+            ImportPendingPackage();
+        }
+        catch (Exception exception)
+        {
+            _pendingImportPackage = null;
+            _importFailed = true;
+            _importMessage = $"Theme import failed: {exception.Message}";
+        }
+    }
+
+    private void ConfirmImport()
+    {
+        _showImportWarning = false;
+        ImportPendingPackage();
+    }
+
+    private void CancelImport()
+    {
+        _showImportWarning = false;
+        _pendingImportPackage = null;
+    }
+
+    private void ImportPendingPackage()
+    {
+        if (_pendingImportPackage is null)
+        {
+            return;
+        }
+
+        try
+        {
+            using MemoryStream packageStream = new(_pendingImportPackage, writable: false);
+            string importedName = ThemeService.ImportThemePackage(packageStream);
+
+            _themeList?.RefreshThemes();
+            RefreshThemeLists();
+            _importFailed = false;
+            _importMessage = $"Imported '{importedName}'. Select it from Saved Themes to apply it.";
+        }
+        catch (Exception exception)
+        {
+            _importFailed = true;
+            _importMessage = $"Theme import failed: {exception.Message}";
+        }
+        finally
+        {
+            _pendingImportPackage = null;
+        }
     }
 
     private void OpenSaveModal() => _showSaveModal = true;
