@@ -1,4 +1,4 @@
-/* 
+/*
    Updated for Virtualized Grid Rows.
    The native CSS Grid container is replaced by Flexbox rows in the component markup,
    but we keep these classes for item styling and containment.
@@ -8,7 +8,7 @@
     display: block;
     width: 100%;
     padding-top: 20px;
-    padding-bottom: 40px;
+    padding-bottom: var(--space-7);
 }
 
 /* Standard Layout (CSS Grid) - Updated for Static Width & Centering */
@@ -32,10 +32,10 @@
 
 /* Item Styles */
 .library-grid-item {
-    background-color: var(--bg-tertiary);
-    border-radius: var(--border-radius);
+    background-color: var(--color-surface-raised);
+    border-radius: var(--radius-control);
     padding: var(--card-padding, 16px);
-    transition: background-color 0.2s ease;
+    transition: background-color var(--motion-duration-standard) var(--motion-easing-standard);
     cursor: pointer;
     box-sizing: border-box;
     overflow: hidden;
@@ -55,17 +55,17 @@
 }
 
 .library-grid-item:hover {
-    background-color: var(--hover-bg);
+    background-color: var(--color-hover);
 }
 
 .art-wrapper {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    margin-bottom: 12px;
-    border-radius: var(--border-radius);
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-control);
     overflow: hidden;
-    background-color: var(--bg-secondary);
+    background-color: var(--color-surface);
     transform: translateZ(0);
 }
 
@@ -89,17 +89,17 @@
 
 .item-title {
     font-weight: bold;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 0 0 4px 0;
+    margin: 0 0 var(--space-1) 0;
     font-size: 1em;
 }
 
 .item-subtitle {
     font-size: 0.9em;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -108,8 +108,8 @@
 
 .empty-message {
     text-align: center;
-    color: var(--text-secondary);
-    padding: 40px;
+    color: var(--color-text-secondary);
+    padding: var(--space-7);
     font-style: italic;
     width: 100%;
 }
