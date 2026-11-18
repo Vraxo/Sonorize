@@ -26,7 +26,8 @@
     align-items: center;
     pointer-events: none; /* Let events pass through initially */
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition:
+        opacity var(--motion-duration-standard) var(--motion-easing-standard);
 }
 
     .drag-overlay.active {
@@ -36,13 +37,13 @@
 
 .drag-message {
     text-align: center;
-    color: var(--text-primary);
+    color: var(--color-text-primary);
 }
 
     .drag-message i {
         font-size: 4em;
         margin-bottom: 20px;
-        color: var(--accent-primary);
+        color: var(--color-accent);
     }
 
     .drag-message h2 {
@@ -51,7 +52,7 @@
     }
 
     .drag-message p {
-        color: var(--text-secondary);
+        color: var(--color-text-secondary);
         font-size: 1.1em;
         margin-top: 10px;
     }
@@ -115,11 +116,13 @@
     background: var(--main-content-bg); /* Dynamic Gradient or Flat */
     overflow-y: auto;
     /* CRITICAL: overflow-x hidden is required for the Layout Locking technique.
-       When the sidebar opens, the main content container shrinks. 
+       When the sidebar opens, the main content container shrinks.
        Because we lock the inner content width, it becomes wider than the container.
        We want it to clip (hide), not show a horizontal scrollbar. */
     overflow-x: hidden;
-    transition: padding-left 0.3s ease, padding-right 0.3s ease;
+    transition:
+        padding-left var(--motion-duration-slow) var(--motion-easing-standard),
+        padding-right var(--motion-duration-slow) var(--motion-easing-standard);
     /* PERFORMANCE OPTIMIZATIONS */
     contain: layout size;
     will-change: padding-left, padding-right;
@@ -132,12 +135,12 @@
 /* --- Player Bar --- */
 .player-bar {
     height: var(--player-bar-height); /* UPDATED: Dynamic Height */
-    background-color: var(--player-bar-bg);
-    border-top: 1px solid var(--border-color);
+    background-color: var(--color-player-bar);
+    border-top: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    padding: 0 var(--space-4);
     box-sizing: border-box;
     z-index: 10;
     flex-shrink: 0;
@@ -152,14 +155,14 @@
     width: 32px;
     height: 32px;
     background: rgba(0,0,0,0.5);
-    border: 1px solid var(--border-color);
-    color: #ccc;
-    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-control);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all var(--motion-duration-standard) var(--motion-easing-standard);
     opacity: 1;
     pointer-events: auto;
 }
@@ -171,11 +174,10 @@
     }
 
     .sidebar-restore-btn:hover {
-        background: #333;
-        color: white;
+        background: var(--color-surface-raised);
+        color: var(--color-text-primary);
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
-
 
 /* --- Layout Archetypes (Flex Order Magic) --- */
 
@@ -183,14 +185,14 @@
 .layout-root.bar-pos-top .player-bar {
     order: -1; /* Moves visually to top */
     border-top: none;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border);
 }
 
 /* 2. Sidebar Positioning */
 .middle-container.sidebar-pos-right .sidebar {
     order: 1; /* Moves visually to right */
     border-right: none;
-    border-left: 1px solid var(--border-color);
+    border-left: 1px solid var(--color-border);
 }
 
 /* Update Sidebar Restore Button Position based on layout */
