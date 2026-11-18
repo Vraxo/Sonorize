@@ -68,6 +68,18 @@ button:disabled {
     border-color: var(--color-accent);
 }
 
+.btn-outline {
+    background: transparent;
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: var(--color-hover);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
 .btn-danger {
     color: var(--color-danger);
 }
