@@ -8,14 +8,14 @@
     flex-grow: 1;
     min-width: 0;
     padding: var(--space-1) var(--space-2);
-    height: var(--space-6);
+    height: var(--control-height-compact);
 }
 
 .theme-selector-row > .btn {
-    width: var(--space-6);
-    min-width: var(--space-6);
-    height: var(--space-6);
-    min-height: var(--space-6);
+    width: var(--control-height-compact);
+    min-width: var(--control-height-compact);
+    height: var(--control-height-compact);
+    min-height: var(--control-height-compact);
     padding: 0;
     flex-shrink: 0;
     display: inline-flex;
