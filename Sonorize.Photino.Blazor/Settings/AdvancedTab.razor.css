@@ -72,26 +72,6 @@
         flex-wrap: wrap;
     }
 
-    .btn-outline {
-        padding: 10px 20px;
-        background: transparent;
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-    }
-
-        .btn-outline:hover {
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-            background: rgba(255,255,255,0.05);
-        }
-
     .helper-text {
         margin-top: 15px;
         font-size: 0.85em;
