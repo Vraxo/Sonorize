@@ -208,7 +208,9 @@ public class ThemeServiceTests
                 },
                 Colors = new ThemeColors
                 {
-                    AccentColor = "#123456"
+                    AccentColor = "#123456",
+                    DangerColor = "#C1121F",
+                    WarningColor = "#F0A500"
                 },
                 Layout = new ThemeLayout
                 {
@@ -238,6 +240,8 @@ public class ThemeServiceTests
 
             SonorizeTheme loaded = Assert.IsType<SonorizeTheme>(service.LoadTheme(importedName));
             Assert.Equal("#123456", loaded.AccentColor);
+            Assert.Equal("#C1121F", loaded.DangerColor);
+            Assert.Equal("#F0A500", loaded.WarningColor);
             Assert.Equal(12, loaded.BorderRadius);
             Assert.Equal(stylesCss, loaded.CustomCss);
             Assert.Equal(importedBackgroundPath, loaded.BackgroundImagePath);
