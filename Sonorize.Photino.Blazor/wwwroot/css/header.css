@@ -5,7 +5,7 @@
     align-items: center;
     gap: var(--space-4);
     margin-bottom: var(--space-4);
-    height: 40px;
+    height: var(--control-icon-button-size);
 }
 
 .header-left, .header-center, .header-right {
@@ -49,7 +49,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
+    width: var(--control-icon-button-size);
     height: 40px;
     transition:
         background-color var(--motion-duration-standard) var(--motion-easing-standard),
@@ -115,7 +115,7 @@
         background-color var(--motion-duration-standard) var(--motion-easing-standard);
     box-sizing: border-box;
     outline: none;
-    height: 36px;
+    height: var(--control-height);
 }
 
     #search-input:focus {
