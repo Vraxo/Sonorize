@@ -1,6 +1,4 @@
 using System.Text;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 
@@ -50,7 +48,7 @@ public static class SchemeHandlers
         // Handle Demo Data Art Generation
         if (filePath.StartsWith("demo://"))
         {
-            contentType = "image/png";
+            contentType = "image/svg+xml";
             return GenerateDemoArt(filePath);
         }
 
@@ -81,45 +79,29 @@ public static class SchemeHandlers
 
     private static MemoryStream GenerateDemoArt(string filePath)
     {
-        int seed = filePath.GetHashCode();
-        Random rng = new(seed);
+        Random rng = new(filePath.GetHashCode());
 
-        Rgba32 start = GenerateRandomColor(rng);
-        Rgba32 end = GenerateRandomColor(rng);
+        string startColor = GenerateRandomColor(rng);
+        string endColor = GenerateRandomColor(rng);
 
-        using Image<Rgba32> image = new(200, 200);
+        string svg = $$"""
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+                <defs>
+                    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="{{startColor}}" />
+                        <stop offset="100%" stop-color="{{endColor}}" />
+                    </linearGradient>
+                </defs>
+                <rect width="200" height="200" fill="url(#background)" />
+            </svg>
+            """;
 
-        for (int y = 0; y < image.Height; y++)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                float amount = (x + y) / (float)(image.Width + image.Height - 2);
-
-                image[x, y] = new Rgba32(
-                    Interpolate(start.R, end.R, amount),
-                    Interpolate(start.G, end.G, amount),
-                    Interpolate(start.B, end.B, amount));
-            }
-        }
-
-        MemoryStream ms = new();
-        image.SaveAsPng(ms);
-        ms.Position = 0;
-
-        return ms;
+        return new MemoryStream(Encoding.UTF8.GetBytes(svg));
     }
 
-    private static Rgba32 GenerateRandomColor(Random rng)
+    private static string GenerateRandomColor(Random rng)
     {
-        return new Rgba32(
-            (byte)rng.Next(50, 255),
-            (byte)rng.Next(50, 255),
-            (byte)rng.Next(50, 255));
-    }
-
-    private static byte Interpolate(byte start, byte end, float amount)
-    {
-        return (byte)Math.Round(start + ((end - start) * amount));
+        return $"#{rng.Next(50, 255):X2}{rng.Next(50, 255):X2}{rng.Next(50, 255):X2}";
     }
 
     private static Stream HandleLocalFile(Uri uri, out string contentType)
