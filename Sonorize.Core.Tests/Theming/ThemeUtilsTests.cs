@@ -57,61 +57,40 @@ public class ThemeUtilsTests
     }
 
     [Fact]
-    public void GenerateRootCss_EmitsSemanticDesignTokens_AndPreservesLegacyVariables()
+    public void GenerateRootCss_EmitsRuntimeThemeValues_WithoutDuplicatingSharedTokens()
     {
         SonorizeTheme theme = new()
         {
             AccentColor = "#123456",
+            BgPrimary = "#101010",
             BorderRadius = 6,
             UsePillButtons = false,
             BaseFontSize = 16,
             RowVerticalPadding = 10,
-            SidebarItemPadding = 14
+            SidebarItemPadding = 14,
+            PlayerBarHeight = 96
         };
 
         string css = ThemeUtils.GenerateRootCss(theme, useTransparency: false);
 
         Assert.Contains("--accent-primary: #123456;", css);
+        Assert.Contains("--bg-primary: #101010;", css);
         Assert.Contains("--border-radius: 6px;", css);
         Assert.Contains("--btn-radius: 6px;", css);
         Assert.Contains("--base-font-size: 16px;", css);
+        Assert.Contains("--row-padding: 10px;", css);
+        Assert.Contains("--sidebar-item-padding: 14px;", css);
+        Assert.Contains("--player-bar-height: 96px;", css);
 
-        Assert.Contains("--color-accent: var(--accent-primary);", css);
-        Assert.Contains("--color-background: var(--bg-primary);", css);
-        Assert.Contains("--color-surface-raised: var(--bg-tertiary);", css);
-        Assert.Contains("--color-text-primary: var(--text-primary);", css);
-        Assert.Contains("--color-control-track: #535353;", css);
-        Assert.Contains("--color-modal: var(--modal-bg);", css);
-        Assert.Contains("--color-backdrop: rgba(0, 0, 0, 0.7);", css);
-        Assert.Contains("--color-scrollbar-thumb: var(--scrollbar-thumb);", css);
-        Assert.Contains("--color-danger: #ff4d4d;", css);
-        Assert.Contains("--color-danger-subtle: rgba(255, 77, 77, 0.1);", css);
-        Assert.Contains("--color-warning: #ffd700;", css);
-        Assert.Contains("--color-warning-subtle: rgba(255, 215, 0, 0.1);", css);
-        Assert.Contains("--shadow-control-thumb: 0 2px 4px rgba(0, 0, 0, 0.3);", css);
-        Assert.Contains("--shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.7);", css);
-
-        Assert.Contains("--space-1: 4px;", css);
-        Assert.Contains("--space-8: 48px;", css);
-        Assert.Contains("--space-row-y: var(--row-padding);", css);
-        Assert.Contains("--space-sidebar-item: var(--sidebar-item-padding);", css);
-
-        Assert.Contains("--radius-control: var(--border-radius);", css);
-        Assert.Contains("--radius-button: var(--btn-radius);", css);
-        Assert.Contains("--radius-card: calc(var(--border-radius) * 2);", css);
-
-        Assert.Contains("--font-size-body: var(--base-font-size);", css);
-        Assert.Contains("--font-size-heading: calc(var(--base-font-size) * 1.25);", css);
-        Assert.Contains("--line-height-normal: 1.5;", css);
-
-        Assert.Contains("--motion-duration-fast: 120ms;", css);
-        Assert.Contains("--motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);", css);
-        Assert.Contains("--focus-ring:", css);
-        Assert.Contains("--shadow-raised:", css);
+        Assert.DoesNotContain("--color-accent:", css);
+        Assert.DoesNotContain("--space-1:", css);
+        Assert.DoesNotContain("--radius-button:", css);
+        Assert.DoesNotContain("--font-size-body:", css);
+        Assert.DoesNotContain("--motion-duration-standard:", css);
     }
 
     [Fact]
-    public void GenerateRootCss_SemanticColorTokensFollowTransparentLegacyColors()
+    public void GenerateRootCss_EmitsTransparentRuntimeColors()
     {
         SonorizeTheme theme = new()
         {
@@ -122,6 +101,6 @@ public class ThemeUtilsTests
         string css = ThemeUtils.GenerateRootCss(theme, useTransparency: true);
 
         Assert.Contains("--bg-primary: rgba(17, 34, 51, 0.4);", css);
-        Assert.Contains("--color-background: var(--bg-primary);", css);
+        Assert.DoesNotContain("--color-background:", css);
     }
 }
