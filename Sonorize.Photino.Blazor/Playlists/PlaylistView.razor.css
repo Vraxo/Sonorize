@@ -1,3 +1,10 @@
+.playlist-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
 .btn-icon {
         background: none;
         border: none;
