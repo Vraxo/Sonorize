@@ -32,6 +32,15 @@
     padding: 20px;
 }
 
+.group-label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+}
+
 /* --- Warning Banners --- */
 .warning-banner {
     background-color: var(--color-warning-subtle);
