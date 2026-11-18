@@ -209,11 +209,26 @@ public static class ThemePackageArchive
             throw new InvalidDataException("The theme package name must contain between 1 and 128 characters.");
         }
 
-        if (package.Manifest.Description.Length > 2048 ||
+        if (package.Manifest.Description is null ||
+            package.Manifest.Author is null ||
+            package.Manifest.ThemeVersion is null ||
+            package.Manifest.Description.Length > 2048 ||
             package.Manifest.Author.Length > 128 ||
             package.Manifest.ThemeVersion.Length > 64)
         {
             throw new InvalidDataException("Theme package metadata exceeds its size limit.");
+        }
+
+        if (!IsValidHexColor(package.Colors.AccentColor) ||
+            !IsValidHexColor(package.Colors.BgPrimary) ||
+            !IsValidHexColor(package.Colors.BgSecondary) ||
+            !IsValidHexColor(package.Colors.BgTertiary) ||
+            !IsValidHexColor(package.Colors.PlayerBarBg) ||
+            !IsValidHexColor(package.Colors.BorderColor) ||
+            !IsValidHexColor(package.Colors.TextPrimary) ||
+            !IsValidHexColor(package.Colors.TextSecondary))
+        {
+            throw new InvalidDataException("Theme colors must use three- or six-digit hexadecimal values.");
         }
 
         if (package.Layout.CustomCss is null ||
@@ -238,11 +253,30 @@ public static class ThemePackageArchive
             }
 
             totalAssetBytes += content.Length;
-            if (totalAssetBytes > MaxArchiveBytes)
+            long maxTotalAssetBytes = MaxArchiveBytes - MaxStylesBytes - (3L * MaxJsonEntryBytes);
+            if (totalAssetBytes > maxTotalAssetBytes)
             {
                 throw new InvalidDataException("Theme package assets exceed the total size limit.");
             }
         }
+    }
+
+    private static bool IsValidHexColor(string? value)
+    {
+        if (value is null || value.Length is not (4 or 7) || value[0] != '#')
+        {
+            return false;
+        }
+
+        for (int index = 1; index < value.Length; index++)
+        {
+            if (!Uri.IsHexDigit(value[index]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool IsKnownRootEntry(string entryName)
