@@ -422,6 +422,35 @@ public class ThemeServiceTests
     }
 
     [Fact]
+    public void LoadTheme_WhenSemanticColorsAreMissing_UsesCurrentDefaults()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            File.WriteAllText(
+                Path.Combine(themesDirectory, "Legacy.colors.json"),
+                """{"AccentColor":"#123456"}""");
+
+            SonorizeTheme loaded = Assert.IsType<SonorizeTheme>(service.LoadTheme("Legacy"));
+
+            Assert.Equal("#FF4D4D", loaded.DangerColor);
+            Assert.Equal("#FFD700", loaded.WarningColor);
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public void DeleteTheme_RemovesColorAndLayoutFiles()
     {
         string themesDirectory = Path.Combine(
