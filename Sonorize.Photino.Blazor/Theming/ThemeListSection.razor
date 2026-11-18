@@ -11,6 +11,9 @@
         }
     </select>
 
+    <button class="btn btn-sm btn-secondary" @onclick="ExportSelected" disabled="@string.IsNullOrEmpty(_selectedTheme)" title="Export selected theme">
+        <i class="fas fa-file-export"></i>
+    </button>
     <button class="btn btn-sm btn-danger" @onclick="DeleteSelected" disabled="@string.IsNullOrEmpty(_selectedTheme)" title="Delete Theme">
         <i class="fas fa-trash"></i>
     </button>
