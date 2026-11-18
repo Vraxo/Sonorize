@@ -1,0 +1,60 @@
+.audio-engine-backdrop-critical {
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+}
+
+.audio-engine-backdrop-warning {
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+}
+
+.audio-engine-modal {
+    max-width: 500px;
+}
+
+.audio-engine-modal-critical {
+    border: 1px solid var(--color-danger);
+}
+
+.audio-engine-modal-warning {
+    border: 1px solid var(--color-warning);
+}
+
+.audio-engine-modal-header-critical {
+    color: var(--color-danger);
+}
+
+.audio-engine-modal-header-warning {
+    color: var(--color-warning);
+}
+
+.audio-engine-download-panel {
+    background: var(--color-surface-raised);
+    padding: var(--space-4);
+    border-radius: var(--radius-card);
+    margin: var(--space-4) 0;
+}
+
+.audio-engine-download-link {
+    color: var(--color-accent);
+    font-weight: 700;
+    display: block;
+    margin-bottom: var(--space-3);
+}
+
+.audio-engine-platform-list {
+    margin: var(--space-1) 0 0 var(--space-5);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+}
+
+.audio-engine-panel-note {
+    font-size: var(--font-size-small);
+    margin-bottom: var(--space-3);
+}
+
+.audio-engine-restart-note {
+    font-size: var(--font-size-small);
+    color: var(--color-text-secondary);
+    text-align: center;
+}
