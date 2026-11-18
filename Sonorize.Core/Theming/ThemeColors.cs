@@ -10,4 +10,6 @@ public class ThemeColors
     public string BorderColor { get; set; } = "#2A2733";
     public string TextPrimary { get; set; } = "#FFFFFF";
     public string TextSecondary { get; set; } = "#A39EAD";
+    public string DangerColor { get; set; } = "#FF4D4D";
+    public string WarningColor { get; set; } = "#FFD700";
 }
