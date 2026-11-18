@@ -8,7 +8,7 @@
         <div class="modal-container" @onclick:stopPropagation>
             <div class="modal-header">Import Theme</div>
             <div class="modal-body">
-                <p style="margin-bottom:10px;">Paste the theme JSON below:</p>
+                <p class="theme-import-instruction">Paste the theme JSON below:</p>
                 <textarea @bind="_themeJson"
                           class="form-control theme-textarea"
                           placeholder='{"accentColor": "#1DB954", "bgPrimary": "#000000", ...}'></textarea>
