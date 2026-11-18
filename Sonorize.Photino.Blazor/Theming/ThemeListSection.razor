@@ -18,3 +18,7 @@
         <i class="fas fa-trash"></i>
     </button>
 </div>
+@if (!string.IsNullOrWhiteSpace(_exportError))
+{
+    <p class="text-danger" role="alert">@_exportError</p>
+}
