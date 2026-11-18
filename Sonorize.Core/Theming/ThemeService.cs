@@ -163,7 +163,7 @@ public class ThemeService
         if (colors == null)
             return null;
 
-        var layout = LoadThemeLayout(name);
+        ThemeLayout layout = LoadThemeLayout(name) ?? new ThemeLayout();
         return CombineToSonorizeTheme(colors, layout);
     }
 
@@ -278,8 +278,11 @@ public class ThemeService
                 throw new InvalidDataException("Theme package backgrounds must reference an asset inside the package.");
             }
 
-            backgroundAssetPath = package.Layout.BackgroundImagePath[assetPrefix.Length..];
-            if (!package.Assets.ContainsKey(backgroundAssetPath))
+            string requestedAssetPath = package.Layout.BackgroundImagePath[assetPrefix.Length..];
+            backgroundAssetPath = package.Assets.Keys.FirstOrDefault(
+                assetPath => assetPath.Equals(requestedAssetPath, StringComparison.OrdinalIgnoreCase));
+
+            if (backgroundAssetPath is null)
             {
                 throw new InvalidDataException("The theme package background asset is missing.");
             }
