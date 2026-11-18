@@ -20,7 +20,7 @@
                 <input type="checkbox" @bind="AppSettings.Updates.CheckForUpdates" @bind:after="Save" class="toggle-input" />
             </label>
 
-            <p class="helper-text" style="margin-top:10px;">
+            <p class="helper-text">
                 Current Version: <strong>@System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version</strong>
             </p>
         </div>
