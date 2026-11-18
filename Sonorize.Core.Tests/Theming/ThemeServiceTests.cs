@@ -205,7 +205,7 @@ public class ThemeServiceTests
                 Layout = new ThemeLayout
                 {
                     BorderRadius = 12,
-                    BackgroundImagePath = "assets/backgrounds/cover.png",
+                    BackgroundImagePath = "assets/Backgrounds/Cover.PNG",
                     CustomCss = stylesCss
                 },
                 Assets =
