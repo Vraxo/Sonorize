@@ -11,7 +11,7 @@ namespace Sonorize.Photino.Blazor;
 
 public class Program
 {
-    // Removed "Global\\" prefix to ensure compatibility with Linux/macOS
+    // Removed "Global\" prefix to ensure compatibility with Linux/macOS
     private const string MutexName = "Sonorize_SingleInstance_Mutex";
 
     [STAThread]
