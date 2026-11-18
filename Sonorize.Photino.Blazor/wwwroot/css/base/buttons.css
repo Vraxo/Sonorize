@@ -13,7 +13,7 @@ button:disabled {
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    min-height: 36px;
+    min-height: var(--control-height);
     padding: var(--space-2) var(--space-4);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-button);
@@ -86,7 +86,7 @@ button:disabled {
 }
 
 .btn-sm {
-    min-height: 32px;
+    min-height: var(--control-height-compact);
     padding: var(--space-1) var(--space-3);
     font-size: var(--font-size-small);
 }

@@ -28,8 +28,8 @@
 }
 
 .btn-icon-action {
-    width: 36px;
-    height: 36px;
+    width: var(--control-height);
+    height: var(--control-height);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     color: var(--color-text-primary);
