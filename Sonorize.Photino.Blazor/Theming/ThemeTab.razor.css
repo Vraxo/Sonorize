@@ -1,0 +1,11 @@
+.theme-preset-row {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.theme-preset-select {
+    flex: 1;
+    min-width: 150px;
+}
