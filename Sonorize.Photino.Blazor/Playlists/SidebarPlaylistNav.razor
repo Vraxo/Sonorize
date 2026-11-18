@@ -52,7 +52,7 @@
 <!-- CREATE MODAL -->
 <Modal IsVisible="_showCreateModal" Title="Create Playlist" ConfirmText="Create" OnCancel="CloseCreateModal" OnConfirm="ConfirmCreatePlaylist">
     <div class="setting-item">
-        <label style="display:block; margin-bottom:5px; color:#ccc;">Name</label>
+        <label class="playlist-modal-label">Name</label>
         <input type="text" class="form-control" @bind="_newPlaylistName" placeholder="My Awesome Playlist" />
     </div>
 </Modal>
@@ -60,6 +60,5 @@
 <!-- DELETE MODAL -->
 <Modal IsVisible="_showDeleteModal" Title="Delete Playlist" ConfirmText="Delete" OnCancel="CloseDeleteModal" OnConfirm="ConfirmDeletePlaylist">
     <p>Are you sure you want to delete <strong>@(_playlistToDelete?.Name ?? "this playlist")</strong>?</p>
-    <p style="font-size: 0.9em; color: #aaa;">This action cannot be undone.</p>
+    <p class="playlist-delete-warning">This action cannot be undone.</p>
 </Modal>
-
