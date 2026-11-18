@@ -50,7 +50,7 @@
     align-items: center;
     justify-content: center;
     width: var(--control-icon-button-size);
-    height: 40px;
+    height: var(--control-icon-button-size);
     transition:
         background-color var(--motion-duration-standard) var(--motion-easing-standard),
         color var(--motion-duration-standard) var(--motion-easing-standard);
