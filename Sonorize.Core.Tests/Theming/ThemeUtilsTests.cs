@@ -28,6 +28,16 @@ public class ThemeUtilsTests
         Assert.Equal("rgba(0, 0, 0, 0.5)", result);
     }
 
+    [Theory]
+    [InlineData("#D9BBFB", "#000000")]
+    [InlineData("#123456", "#FFFFFF")]
+    [InlineData("#777777", "#000000")]
+    [InlineData("invalid", "#000000")]
+    public void GetContrastingColor_ReturnsTheHigherContrastForeground(string color, string expected)
+    {
+        Assert.Equal(expected, ThemeUtils.GetContrastingColor(color));
+    }
+
     [Fact]
     public void GetSmartHighlightBase_DarkColor_ReturnsWhite()
     {
@@ -76,6 +86,8 @@ public class ThemeUtilsTests
         string css = ThemeUtils.GenerateRootCss(theme, useTransparency: false);
 
         Assert.Contains("--accent-primary: #123456;", css);
+        Assert.Contains("--color-accent-contrast: #FFFFFF;", css);
+        Assert.Contains("--color-accent-hover-contrast: #FFFFFF;", css);
         Assert.Contains("--color-danger: #C1121F;", css);
         Assert.Contains("--color-warning: #F0A500;", css);
         Assert.Contains("--bg-primary: #101010;", css);
