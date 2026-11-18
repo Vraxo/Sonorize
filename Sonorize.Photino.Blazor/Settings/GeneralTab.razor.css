@@ -109,7 +109,7 @@
 .radio-btn.active {
     border-color: var(--color-accent);
     background-color: var(--color-accent);
-    color: var(--color-background);
+    color: var(--color-accent-contrast);
     font-weight: bold;
 }
 

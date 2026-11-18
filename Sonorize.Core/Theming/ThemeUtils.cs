@@ -22,7 +22,10 @@ public static class ThemeUtils
         _ = sb.AppendLine(":root {");
 
         _ = sb.AppendLine($"--accent-primary: {theme.AccentColor};");
-        _ = sb.AppendLine($"--accent-primary-hover: {Lighten(theme.AccentColor, 0.1f)};");
+        string accentHover = Lighten(theme.AccentColor, 0.1f);
+        _ = sb.AppendLine($"--accent-primary-hover: {accentHover};");
+        _ = sb.AppendLine($"--color-accent-contrast: {GetContrastingColor(theme.AccentColor)};");
+        _ = sb.AppendLine($"--color-accent-hover-contrast: {GetContrastingColor(accentHover)};");
 
         string bgPrimary = useTransparency ? HexToRgba(theme.BgPrimary, theme.SidebarOpacity) : theme.BgPrimary;
         _ = sb.AppendLine($"--bg-primary: {bgPrimary};");
@@ -87,6 +90,24 @@ public static class ThemeUtils
         return sb.ToString();
     }
 
+    public static string GetContrastingColor(string hexColor)
+    {
+        if (!TryGetRgb(hexColor, out int red, out int green, out int blue))
+        {
+            return "#000000";
+        }
+
+        double luminance =
+            (0.2126 * ToLinearChannel(red))
+            + (0.7152 * ToLinearChannel(green))
+            + (0.0722 * ToLinearChannel(blue));
+
+        double blackContrast = (luminance + 0.05) / 0.05;
+        double whiteContrast = 1.05 / (luminance + 0.05);
+
+        return blackContrast >= whiteContrast ? "#000000" : "#FFFFFF";
+    }
+
     public static string GetSmartHighlightBase(string hexColor, float opacity)
     {
         if (opacity <= 0.5f)
@@ -132,6 +153,14 @@ public static class ThemeUtils
         }
 
         return $"#{Math.Clamp(r, 0, 255):X2}{Math.Clamp(g, 0, 255):X2}{Math.Clamp(b, 0, 255):X2}";
+    }
+
+    private static double ToLinearChannel(int channel)
+    {
+        double value = channel / 255d;
+        return value <= 0.04045
+            ? value / 12.92
+            : Math.Pow((value + 0.055) / 1.055, 2.4);
     }
 
     private static bool TryGetRgb(string hex, out int r, out int g, out int b)

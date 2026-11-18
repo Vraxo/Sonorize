@@ -43,13 +43,13 @@ button:disabled {
 .btn-primary {
     background: var(--color-accent);
     border-color: var(--color-accent);
-    color: var(--color-background);
+    color: var(--color-accent-contrast);
 }
 
 .btn-primary:hover:not(:disabled) {
     background: var(--color-accent-hover);
     border-color: var(--color-accent-hover);
-    color: var(--color-background);
+    color: var(--color-accent-hover-contrast);
 }
 
 .btn-secondary {

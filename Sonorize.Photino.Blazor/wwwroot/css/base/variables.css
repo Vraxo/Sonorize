@@ -19,6 +19,8 @@
     /* Semantic color tokens */
     --color-accent: var(--accent-primary);
     --color-accent-hover: var(--accent-primary-hover);
+    --color-accent-contrast: #000000;
+    --color-accent-hover-contrast: #000000;
     --color-background: var(--bg-primary);
     --color-surface: var(--bg-secondary);
     --color-surface-raised: var(--bg-tertiary);
