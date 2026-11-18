@@ -1,6 +1,4 @@
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp;
+using SkiaSharp;
 
 namespace Sonorize.Core.Core;
 
@@ -8,40 +6,54 @@ public class ImageAnalysisService
 {
     public async Task<bool> IsAlbumArtBrightAsync(string audioFilePath)
     {
-        return !string.IsNullOrWhiteSpace(audioFilePath) && File.Exists(audioFilePath) && await Task.Run(() =>
+        if (string.IsNullOrWhiteSpace(audioFilePath) || !File.Exists(audioFilePath))
         {
-            try
+            return false;
+        }
+
+        return await Task.Run(() => AnalyzeAlbumArt(audioFilePath));
+    }
+
+    private static bool AnalyzeAlbumArt(string audioFilePath)
+    {
+        try
+        {
+            using TagLib.File file = TagLib.File.Create(audioFilePath);
+            TagLib.IPicture? picture = file.Tag.Pictures.FirstOrDefault();
+
+            if (picture is null || picture.Data.Data.Length == 0)
             {
-                // 1. Extract image data using TagLib (same logic as SchemeHandler)
-                using TagLib.File file = TagLib.File.Create(audioFilePath);
-                TagLib.IPicture? pic = file.Tag.Pictures.FirstOrDefault();
-
-                if (pic is null || pic.Data.Data.Length == 0)
-                {
-                    return false;
-                }
-
-                // 2. Load into ImageSharp
-                // ImageSharp is fully managed and cross-platform (no System.Drawing/GDI+)
-                // Fix: Resolve ambiguity with System.Net.Mime.MediaTypeNames.Image
-                using Image<Rgba32> image = Image.Load<Rgba32>(pic.Data.Data);
-                // 3. Downsample to 1x1 pixel to get the average color efficiently
-                image.Mutate(x => x.Resize(1, 1));
-
-                // 4. Analyze Luminance
-                Rgba32 pixel = image[0, 0];
-
-                // Standard relative luminance formula: 0.299R + 0.587G + 0.114B
-                double luminance = (0.299 * pixel.R) + (0.587 * pixel.G) + (0.114 * pixel.B);
-
-                // Threshold: > 140 is generally considered "light"
-                return luminance > 140;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[ImageAnalysis] Failed to analyze art: {ex.Message}");
                 return false;
             }
-        });
+
+            using SKBitmap? image = SKBitmap.Decode(picture.Data.Data);
+
+            if (image is null)
+            {
+                return false;
+            }
+
+            using SKBitmap? thumbnail = image.Resize(
+                new SKImageInfo(1, 1),
+                new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
+
+            if (thumbnail is null)
+            {
+                return false;
+            }
+
+            SKColor pixel = thumbnail.GetPixel(0, 0);
+
+            double luminance = (0.299 * pixel.Red)
+                + (0.587 * pixel.Green)
+                + (0.114 * pixel.Blue);
+
+            return luminance > 140;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ImageAnalysis] Failed to analyze art: {ex.Message}");
+            return false;
+        }
     }
 }
