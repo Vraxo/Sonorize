@@ -20,6 +20,11 @@ body {
     box-sizing: border-box;
 }
 
+:where(button, input, select, textarea):focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
 a {
     color: inherit;
     text-decoration: none;
