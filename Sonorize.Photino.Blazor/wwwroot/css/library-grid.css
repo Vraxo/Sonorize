@@ -17,15 +17,15 @@
     /* Use fixed width instead of 1fr to keep cards static as requested.
        auto-fill + justify-content: center keeps them centered. */
     grid-template-columns: repeat(auto-fill, var(--grid-min-width, 180px));
-    gap: var(--grid-gap, 24px);
+    gap: var(--grid-gap, var(--space-5));
     justify-content: center;
 }
 
 /* Virtualized Layout (Flex Rows) */
 .grid-virtual-row {
     display: flex;
-    gap: var(--grid-gap, 24px);
-    margin-bottom: var(--grid-gap, 24px);
+    gap: var(--grid-gap, var(--space-5));
+    margin-bottom: var(--grid-gap, var(--space-5));
     justify-content: center;
     overflow: hidden;
 }
@@ -34,7 +34,7 @@
 .library-grid-item {
     background-color: var(--color-surface-raised);
     border-radius: var(--radius-control);
-    padding: var(--card-padding, 16px);
+    padding: var(--card-padding, var(--space-4));
     transition: background-color var(--motion-duration-standard) var(--motion-easing-standard);
     cursor: pointer;
     box-sizing: border-box;
