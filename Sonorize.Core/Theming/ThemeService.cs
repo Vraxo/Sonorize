@@ -179,7 +179,9 @@ public class ThemeService
             PlayerBarBg = theme.PlayerBarBg,
             BorderColor = theme.BorderColor,
             TextPrimary = theme.TextPrimary,
-            TextSecondary = theme.TextSecondary
+            TextSecondary = theme.TextSecondary,
+            DangerColor = theme.DangerColor,
+            WarningColor = theme.WarningColor
         };
 
         var layout = new ThemeLayout
@@ -535,6 +537,8 @@ public class ThemeService
             BorderColor = colors.BorderColor,
             TextPrimary = colors.TextPrimary,
             TextSecondary = colors.TextSecondary,
+            DangerColor = colors.DangerColor,
+            WarningColor = colors.WarningColor,
 
             BorderRadius = layout.BorderRadius,
             UsePillButtons = layout.UsePillButtons,
