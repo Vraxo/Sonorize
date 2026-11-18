@@ -6,6 +6,7 @@ namespace Sonorize.Photino.Blazor.Theming;
 public partial class SaveThemeModal
 {
     [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Title { get; set; } = "Save Theme";
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback<string> OnConfirm { get; set; }
 
