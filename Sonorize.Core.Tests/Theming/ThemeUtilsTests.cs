@@ -62,6 +62,8 @@ public class ThemeUtilsTests
         SonorizeTheme theme = new()
         {
             AccentColor = "#123456",
+            DangerColor = "#C1121F",
+            WarningColor = "#F0A500",
             BgPrimary = "#101010",
             BorderRadius = 6,
             UsePillButtons = false,
@@ -74,6 +76,8 @@ public class ThemeUtilsTests
         string css = ThemeUtils.GenerateRootCss(theme, useTransparency: false);
 
         Assert.Contains("--accent-primary: #123456;", css);
+        Assert.Contains("--color-danger: #C1121F;", css);
+        Assert.Contains("--color-warning: #F0A500;", css);
         Assert.Contains("--bg-primary: #101010;", css);
         Assert.Contains("--border-radius: 6px;", css);
         Assert.Contains("--btn-radius: 6px;", css);

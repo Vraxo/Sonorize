@@ -51,4 +51,14 @@
             <SettingsColorControl Label="Text Secondary" @bind-Value="TextSecondary" OnReset="@(() => Reset(s => s.Theme.TextSecondary = _defaults.TextSecondary))" />
         </div>
     </div>
+
+    <div class="divider"></div>
+
+    <div class="control-group">
+        <span class="group-label">Feedback Colors</span>
+        <div class="color-grid-container">
+            <SettingsColorControl Label="Danger" @bind-Value="DangerColor" OnReset="@(() => Reset(s => s.Theme.DangerColor = _defaults.DangerColor))" />
+            <SettingsColorControl Label="Warning" @bind-Value="WarningColor" OnReset="@(() => Reset(s => s.Theme.WarningColor = _defaults.WarningColor))" />
+        </div>
+    </div>
 </SettingsCard>

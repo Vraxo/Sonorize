@@ -25,6 +25,8 @@ public class ThemeServiceTests
                 BorderColor = "#404040",
                 TextPrimary = "#F0F0F0",
                 TextSecondary = "#A0A0A0",
+                DangerColor = "#C1121F",
+                WarningColor = "#F0A500",
                 BorderRadius = 9,
                 UsePillButtons = false,
                 EnableAmbientBackground = true,
@@ -58,6 +60,8 @@ public class ThemeServiceTests
             Assert.Equal(theme.BorderColor, loaded.BorderColor);
             Assert.Equal(theme.TextPrimary, loaded.TextPrimary);
             Assert.Equal(theme.TextSecondary, loaded.TextSecondary);
+            Assert.Equal(theme.DangerColor, loaded.DangerColor);
+            Assert.Equal(theme.WarningColor, loaded.WarningColor);
 
             Assert.Equal(theme.BorderRadius, loaded.BorderRadius);
             Assert.Equal(theme.UsePillButtons, loaded.UsePillButtons);
@@ -111,6 +115,8 @@ public class ThemeServiceTests
             service.SaveTheme("Night", new SonorizeTheme
             {
                 AccentColor = "#123456",
+                DangerColor = "#C1121F",
+                WarningColor = "#F0A500",
                 BackgroundImagePath = backgroundPath,
                 CustomCss = ".player-bar { opacity: 0.9; }"
             });
@@ -131,6 +137,8 @@ public class ThemeServiceTests
             Assert.Equal("A portable dark theme", package.Manifest.Description);
             Assert.Equal("Sonorize", package.Manifest.Author);
             Assert.Equal("#123456", package.Colors.AccentColor);
+            Assert.Equal("#C1121F", package.Colors.DangerColor);
+            Assert.Equal("#F0A500", package.Colors.WarningColor);
             Assert.Equal("assets/backgrounds/background.png", package.Layout.BackgroundImagePath);
             Assert.Equal(".player-bar { opacity: 0.9; }", package.Layout.CustomCss);
             Assert.Equal(backgroundBytes, package.Assets["backgrounds/background.png"]);
@@ -200,7 +208,9 @@ public class ThemeServiceTests
                 },
                 Colors = new ThemeColors
                 {
-                    AccentColor = "#123456"
+                    AccentColor = "#123456",
+                    DangerColor = "#C1121F",
+                    WarningColor = "#F0A500"
                 },
                 Layout = new ThemeLayout
                 {
@@ -230,6 +240,8 @@ public class ThemeServiceTests
 
             SonorizeTheme loaded = Assert.IsType<SonorizeTheme>(service.LoadTheme(importedName));
             Assert.Equal("#123456", loaded.AccentColor);
+            Assert.Equal("#C1121F", loaded.DangerColor);
+            Assert.Equal("#F0A500", loaded.WarningColor);
             Assert.Equal(12, loaded.BorderRadius);
             Assert.Equal(stylesCss, loaded.CustomCss);
             Assert.Equal(importedBackgroundPath, loaded.BackgroundImagePath);
@@ -403,6 +415,35 @@ public class ThemeServiceTests
 
             Assert.Equal("#654321", loaded.AccentColor);
             Assert.Equal(new ThemeLayout().BorderRadius, loaded.BorderRadius);
+        }
+        finally
+        {
+            if (Directory.Exists(themesDirectory))
+            {
+                Directory.Delete(themesDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
+    public void LoadTheme_WhenSemanticColorsAreMissing_UsesCurrentDefaults()
+    {
+        string themesDirectory = Path.Combine(
+            Path.GetTempPath(),
+            "Sonorize.ThemeService.Tests",
+            Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            ThemeService service = new(themesDirectory, loadBuiltInThemes: false);
+            File.WriteAllText(
+                Path.Combine(themesDirectory, "Legacy.colors.json"),
+                """{"AccentColor":"#123456"}""");
+
+            SonorizeTheme loaded = Assert.IsType<SonorizeTheme>(service.LoadTheme("Legacy"));
+
+            Assert.Equal("#FF4D4D", loaded.DangerColor);
+            Assert.Equal("#FFD700", loaded.WarningColor);
         }
         finally
         {

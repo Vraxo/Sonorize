@@ -154,6 +154,38 @@ public partial class ThemeColorsCard
         }
     }
 
+    private string DangerColor
+    {
+        get => AppSettings.Theme.DangerColor;
+
+        set
+        {
+            if (AppSettings.Theme.DangerColor == value)
+            {
+                return;
+            }
+
+            AppSettings.Theme.DangerColor = value;
+            Save();
+        }
+    }
+
+    private string WarningColor
+    {
+        get => AppSettings.Theme.WarningColor;
+
+        set
+        {
+            if (AppSettings.Theme.WarningColor == value)
+            {
+                return;
+            }
+
+            AppSettings.Theme.WarningColor = value;
+            Save();
+        }
+    }
+
     // --- Existing Proxies ---
 
     private int SidebarOpacityInt
