@@ -288,6 +288,10 @@ public class ThemeService
         string finalAssetsDirectory = Path.Combine(_themesDir, $"{themeName}.assets");
         string stagingDirectory = Path.Combine(_themesDir, $".{themeName}.{Guid.NewGuid():N}.importing");
         bool assetsMoved = false;
+        bool colorsFileCreated = false;
+        bool layoutFileCreated = false;
+        string colorsPath = Path.Combine(_themesDir, $"{themeName}.colors.json");
+        string layoutPath = Path.Combine(_themesDir, $"{themeName}.layout.json");
 
         try
         {
@@ -321,22 +325,36 @@ public class ThemeService
                 ? null
                 : GetContainedAssetPath(finalAssetsDirectory, backgroundAssetPath);
 
-            SonorizeTheme theme = CombineToSonorizeTheme(package.Colors, layout);
-            SaveTheme(themeName, theme);
+            using (FileStream colorsFile = new(
+                colorsPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None))
+            {
+                colorsFileCreated = true;
+                JsonSerializer.Serialize(colorsFile, package.Colors, _jsonOptions);
+            }
+
+            using (FileStream layoutFile = new(
+                layoutPath,
+                FileMode.CreateNew,
+                FileAccess.Write,
+                FileShare.None))
+            {
+                layoutFileCreated = true;
+                JsonSerializer.Serialize(layoutFile, layout, _jsonOptions);
+            }
 
             return themeName;
         }
         catch
         {
-            string colorsPath = Path.Combine(_themesDir, $"{themeName}.colors.json");
-            string layoutPath = Path.Combine(_themesDir, $"{themeName}.layout.json");
-
-            if (File.Exists(colorsPath))
+            if (colorsFileCreated && File.Exists(colorsPath))
             {
                 File.Delete(colorsPath);
             }
 
-            if (File.Exists(layoutPath))
+            if (layoutFileCreated && File.Exists(layoutPath))
             {
                 File.Delete(layoutPath);
             }
@@ -366,6 +384,10 @@ public class ThemeService
             File.Delete(colorsPath);
         if (File.Exists(layoutPath))
             File.Delete(layoutPath);
+
+        string assetsDirectory = Path.Combine(_themesDir, $"{name}.assets");
+        if (Directory.Exists(assetsDirectory))
+            Directory.Delete(assetsDirectory, recursive: true);
     }
 
     private bool ThemeExists(string name)
