@@ -20,7 +20,7 @@
             <ThemeListSection @ref="_themeList" OnLoadTheme="ApplyLoadedTheme" />
             @if (!string.IsNullOrWhiteSpace(_importMessage))
             {
-                <p class="@(_importFailed ? "text-danger" : "text-success")" role="status">@_importMessage</p>
+                <p class="status-message @(_importFailed ? "status-message-error" : "status-message-success")" role="status">@_importMessage</p>
             }
         </ChildContent>
     </SettingsCard>
