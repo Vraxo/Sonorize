@@ -212,6 +212,52 @@ public class ThemeService
         SaveThemeLayout(name, layout);
     }
 
+    public void ExportThemePackage(
+        string name,
+        Stream destination,
+        string description = "",
+        string author = "",
+        string themeVersion = "1.0.0")
+    {
+        if (!GetAvailableColorThemes().Contains(name, StringComparer.Ordinal))
+        {
+            throw new KeyNotFoundException($"Theme not found: {name}");
+        }
+
+        ThemeColors colors = LoadThemeColors(name)
+            ?? throw new InvalidDataException($"Theme colors could not be loaded: {name}");
+        ThemeLayout layout = LoadThemeLayout(name) ?? new ThemeLayout();
+
+        ThemePackage package = new()
+        {
+            Manifest = new ThemePackageManifest
+            {
+                Name = name,
+                Description = description,
+                Author = author,
+                ThemeVersion = themeVersion
+            },
+            Colors = colors,
+            Layout = layout
+        };
+
+        if (!string.IsNullOrWhiteSpace(layout.BackgroundImagePath))
+        {
+            string backgroundPath = layout.BackgroundImagePath;
+            if (!File.Exists(backgroundPath))
+            {
+                throw new FileNotFoundException("The theme background image could not be found.", backgroundPath);
+            }
+
+            string extension = Path.GetExtension(backgroundPath).ToLowerInvariant();
+            string assetPath = $"backgrounds/background{extension}";
+            package.Assets[assetPath] = ReadThemeAsset(backgroundPath);
+            package.Layout.BackgroundImagePath = $"assets/{assetPath}";
+        }
+
+        ThemePackageArchive.Write(destination, package);
+    }
+
     public void DeleteTheme(string name)
     {
         string colorsPath = Path.Combine(_themesDir, $"{name}.colors.json");
@@ -221,6 +267,33 @@ public class ThemeService
             File.Delete(colorsPath);
         if (File.Exists(layoutPath))
             File.Delete(layoutPath);
+    }
+
+    private static byte[] ReadThemeAsset(string path)
+    {
+        const int maxAssetBytes = 8 * 1024 * 1024;
+
+        using FileStream source = File.OpenRead(path);
+        if (source.Length > maxAssetBytes)
+        {
+            throw new InvalidDataException("The theme background image exceeds the package asset size limit.");
+        }
+
+        using MemoryStream destination = new();
+        byte[] buffer = new byte[81920];
+        int bytesRead;
+
+        while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            if (destination.Length + bytesRead > maxAssetBytes)
+            {
+                throw new InvalidDataException("The theme background image exceeds the package asset size limit.");
+            }
+
+            destination.Write(buffer, 0, bytesRead);
+        }
+
+        return destination.ToArray();
     }
 
     private SonorizeTheme CombineToSonorizeTheme(ThemeColors colors, ThemeLayout layout)
