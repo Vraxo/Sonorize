@@ -62,3 +62,11 @@
     transform: scale(1.1);
     cursor: pointer;
 }
+
+.theme-section-spacer {
+    margin-top: 24px;
+}
+
+.typography-slider-spacing {
+    margin-top: 15px;
+}
