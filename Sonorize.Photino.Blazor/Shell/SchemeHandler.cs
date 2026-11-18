@@ -1,11 +1,8 @@
-﻿using System.Text;
-using SixLabors.ImageSharp.Drawing.Processing;
+using System.Text;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
-
-using SixLabors.ImageSharp;
 
 namespace Sonorize.Photino.Blazor.Shell;
 
@@ -87,35 +84,42 @@ public static class SchemeHandlers
         int seed = filePath.GetHashCode();
         Random rng = new(seed);
 
-        // Generate random nice colors
-        Color c1 = GenerateRandomColor(rng);
-        Color c2 = GenerateRandomColor(rng);
+        Rgba32 start = GenerateRandomColor(rng);
+        Rgba32 end = GenerateRandomColor(rng);
 
-        // Create 200x200 image
         using Image<Rgba32> image = new(200, 200);
-        image.Mutate(x => x.Fill(new LinearGradientBrush(
-            new PointF(0, 0),
-            new PointF(200, 200),
-            GradientRepetitionMode.None,
-            new ColorStop(0, c1),
-            new ColorStop(1, c2)
-        )));
+
+        for (int y = 0; y < image.Height; y++)
+        {
+            for (int x = 0; x < image.Width; x++)
+            {
+                float amount = (x + y) / (float)(image.Width + image.Height - 2);
+
+                image[x, y] = new Rgba32(
+                    Interpolate(start.R, end.R, amount),
+                    Interpolate(start.G, end.G, amount),
+                    Interpolate(start.B, end.B, amount));
+            }
+        }
 
         MemoryStream ms = new();
-
         image.SaveAsPng(ms);
-
         ms.Position = 0;
 
         return ms;
     }
 
-    private static Color GenerateRandomColor(Random rng)
+    private static Rgba32 GenerateRandomColor(Random rng)
     {
-        return Color.FromRgb(
+        return new Rgba32(
             (byte)rng.Next(50, 255),
             (byte)rng.Next(50, 255),
             (byte)rng.Next(50, 255));
+    }
+
+    private static byte Interpolate(byte start, byte end, float amount)
+    {
+        return (byte)Math.Round(start + ((end - start) * amount));
     }
 
     private static Stream HandleLocalFile(Uri uri, out string contentType)
