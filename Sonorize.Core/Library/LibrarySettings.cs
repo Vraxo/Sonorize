@@ -5,6 +5,16 @@ namespace Sonorize.Core.Library;
 
 public class LibrarySettings
 {
+    private static readonly string[] LegacyDefaultExtensions =
+    [
+        ".mp3",
+        ".flac",
+        ".m4a",
+        ".aac",
+        ".wav",
+        ".ogg"
+    ];
+
     public bool ScanOnStartup { get; set; } = true;
 
     public List<string> MusicFolderPaths { get; set; } = [];
@@ -16,8 +26,26 @@ public class LibrarySettings
         ".m4a",
         ".aac",
         ".wav",
-        ".ogg"
+        ".ogg",
+        ".opus"
     ];
+
+    /// <summary>
+    /// Adds Opus to settings created by older Sonorize versions, but leaves
+    /// custom extension selections untouched.
+    /// </summary>
+    public bool ApplyOpusDefaultMigration()
+    {
+        if (!SupportedFileExtensions.SequenceEqual(
+            LegacyDefaultExtensions,
+            StringComparer.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        SupportedFileExtensions.Add(".opus");
+        return true;
+    }
 
     // Individual View Modes
     [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -33,7 +61,7 @@ public class LibrarySettings
     public LibraryViewMode PlaylistsViewMode { get; set; } = LibraryViewMode.Grid;
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public LibraryViewMode PlaylistDetailViewMode { get; set; } = LibraryViewMode.List; // NEW
+    public LibraryViewMode PlaylistDetailViewMode { get; set; } = LibraryViewMode.List;
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TextOverflowMode TrackListOverflow { get; set; } = TextOverflowMode.Wrap;
