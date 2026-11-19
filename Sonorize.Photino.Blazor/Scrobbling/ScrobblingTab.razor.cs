@@ -11,6 +11,18 @@ public partial class ScrobblingTab
     private string? _authError;
     private string _password = "";
 
+    private void ResetScrobblingEnabled()
+    {
+        AppSettings.Lastfm.ScrobblingEnabled = false;
+        Save();
+    }
+
+    private void ResetUsername()
+    {
+        AppSettings.Lastfm.Username = null;
+        Save();
+    }
+
     private void ResetPercentage()
     {
         AppSettings.Lastfm.ScrobbleThresholdPercentage = 50;
