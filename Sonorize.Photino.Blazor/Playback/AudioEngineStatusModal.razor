@@ -57,7 +57,6 @@
 }
 else if (!PlayerService.IsFxAvailable && !_fxWarningDismissed)
 {
-    <!-- Non-blocking warning for missing FX lib -->
     <div class="modal-backdrop audio-engine-backdrop audio-engine-backdrop-warning" @onclick="DismissFxWarning">
         <div class="modal-container audio-engine-modal audio-engine-modal-warning" @onclick:stopPropagation>
             <div class="modal-header audio-engine-modal-header-warning">
@@ -66,7 +65,7 @@ else if (!PlayerService.IsFxAvailable && !_fxWarningDismissed)
             <div class="modal-body">
                 <p><strong>BASS_FX</strong> library was not found.</p>
                 <p>Playback will work, but <strong>Speed</strong> and <strong>Pitch</strong> controls will be disabled.</p>
-                
+
                 <div class="audio-engine-download-panel">
                     <a href="#" @onclick='() => OpenBrowser("https://www.un4seen.com/bass.html#addons")' @onclick:preventDefault class="audio-engine-download-link">
                         <i class="fas fa-external-link-alt"></i> Open Add-ons Download Page
@@ -101,6 +100,55 @@ else if (!PlayerService.IsFxAvailable && !_fxWarningDismissed)
             </div>
             <div class="modal-footer">
                 <button class="btn" @onclick="DismissFxWarning">OK, I understand</button>
+            </div>
+        </div>
+    </div>
+}
+else if (!PlayerService.IsOpusAvailable && !_opusWarningDismissed)
+{
+    <div class="modal-backdrop audio-engine-backdrop audio-engine-backdrop-warning" @onclick="DismissOpusWarning">
+        <div class="modal-container audio-engine-modal audio-engine-modal-warning" @onclick:stopPropagation>
+            <div class="modal-header audio-engine-modal-header-warning">
+                <i class="fas fa-exclamation-triangle"></i> Opus Playback Unavailable
+            </div>
+            <div class="modal-body">
+                <p>Sonorize can index your <strong>.opus</strong> files, but the optional <strong>BASSOPUS</strong> decoder was not found.</p>
+                <p>Download BASSOPUS from the official add-ons page:</p>
+
+                <div class="audio-engine-download-panel">
+                    <a href="#" @onclick='() => OpenBrowser("https://www.un4seen.com/bass.html#addons")' @onclick:preventDefault class="audio-engine-download-link">
+                        <i class="fas fa-external-link-alt"></i> Open Add-ons Download Page
+                    </a>
+                    <p class="audio-engine-panel-note">Download <strong>BASSOPUS</strong> for your operating system.</p>
+
+                    @if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        <strong><i class="fab fa-windows"></i> Installation:</strong>
+                        <ul class="audio-engine-platform-list">
+                            <li>Open the archive's <strong>x64</strong> folder.</li>
+                            <li>Copy <code>bassopus.dll</code> next to <code>bass.dll</code>.</li>
+                        </ul>
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        <strong><i class="fab fa-linux"></i> Installation:</strong>
+                        <ul class="audio-engine-platform-list">
+                            <li>Extract <code>x64/libbassopus.so</code>.</li>
+                            <li>Place it in the application folder.</li>
+                        </ul>
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        <strong><i class="fab fa-apple"></i> Installation:</strong>
+                        <ul class="audio-engine-platform-list">
+                            <li>Copy <code>libbassopus.dylib</code> next to the BASS library.</li>
+                        </ul>
+                    }
+                </div>
+                <p class="audio-engine-restart-note">Restart Sonorize after placing the plugin. Other file formats will continue to play normally.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" @onclick="DismissOpusWarning">OK, I understand</button>
             </div>
         </div>
     </div>
