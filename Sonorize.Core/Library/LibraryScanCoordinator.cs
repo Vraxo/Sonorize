@@ -57,13 +57,14 @@ public class LibraryScanCoordinator
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        _logger.LogInformation($"Scanning library folder: {path}");
+        _logger.LogInformation("Scanning library folder: {FolderPath}", path);
 
         (List<Song> songs, List<Playlist> playlists) = await _scanner.ScanAsync(path);
         ProcessScanResults(songs, playlists, cleanup: true);
 
         _logger.LogInformation(
-            $"Folder scan completed: {path} ({songs.Count} songs, {playlists.Count} playlists, {stopwatch.Elapsed.TotalSeconds:F1}s).");
+            "Folder scan completed: {FolderPath} ({SongCount} songs, {PlaylistCount} playlists, {ElapsedSeconds:F1}s).",
+            path, songs.Count, playlists.Count, stopwatch.Elapsed.TotalSeconds);
     }
 
     private void ProcessScanResults(List<Song> songs, List<Playlist> playlists, bool cleanup)
