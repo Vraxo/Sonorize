@@ -27,7 +27,42 @@ public class MusicLibraryService : IMusicLibraryService
 
         return Task.Run(() =>
         {
-            List<string> musicFiles = FileSystemHelper.GetFilesSafe(folderPath, extensionSet).ToList();
+            int directoryCount = 0;
+            int totalFileCount = 0;
+            Dictionary<string, int> extensionCounts = new(StringComparer.OrdinalIgnoreCase);
+
+            List<string> musicFiles = FileSystemHelper.GetFilesSafe(
+                folderPath,
+                extensionSet,
+                _ => directoryCount++,
+                file =>
+                {
+                    totalFileCount++;
+                    string extension = Path.GetExtension(file);
+                    extension = string.IsNullOrEmpty(extension) ? "<no extension>" : extension;
+                    extensionCounts[extension] = extensionCounts.GetValueOrDefault(extension) + 1;
+                },
+                (directory, exception) =>
+                    _logger.LogWarning(exception, "Could not enumerate library directory {DirectoryPath}.", directory))
+                .ToList();
+
+            int unsupportedFileCount = totalFileCount - musicFiles.Count;
+            string extensionSummary = string.Join(
+                ", ",
+                extensionCounts
+                    .OrderByDescending(item => item.Value)
+                    .Take(15)
+                    .Select(item => $"{item.Key}: {item.Value}"));
+
+            _logger.LogInformation(
+                "Library enumeration for {FolderPath}: visited {DirectoryCount} director(ies), found {TotalFileCount} file(s), {SupportedFileCount} supported and {UnsupportedFileCount} unsupported. Extensions: {ExtensionSummary}",
+                folderPath,
+                directoryCount,
+                totalFileCount,
+                musicFiles.Count,
+                unsupportedFileCount,
+                string.IsNullOrEmpty(extensionSummary) ? "<none>" : extensionSummary);
+
             ConcurrentBag<Song> songs = [];
             int skippedFiles = 0;
             int metadataFallbacks = 0;

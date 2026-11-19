@@ -1,8 +1,18 @@
-﻿namespace Sonorize.Core.Core;
+namespace Sonorize.Core.Core;
 
 public static class FileSystemHelper
 {
     public static IEnumerable<string> GetFilesSafe(string root, HashSet<string> validExtensions)
+    {
+        return GetFilesSafe(root, validExtensions, null, null, null);
+    }
+
+    public static IEnumerable<string> GetFilesSafe(
+        string root,
+        HashSet<string> validExtensions,
+        Action<string>? onDirectoryVisited,
+        Action<string>? onFileFound,
+        Action<string, Exception>? onError)
     {
         if (!Directory.Exists(root))
         {
@@ -15,25 +25,29 @@ public static class FileSystemHelper
         while (stack.Count > 0)
         {
             string dir = stack.Pop();
+            onDirectoryVisited?.Invoke(dir);
+
             string[]? files = null;
 
             try
             {
                 files = Directory.GetFiles(dir);
             }
-            catch (UnauthorizedAccessException) { /* Skip locked folders */ }
-            catch (Exception) { /* Skip other errors */ }
+            catch (Exception ex)
+            {
+                onError?.Invoke(dir, ex);
+            }
 
             if (files is not null)
             {
                 foreach (string file in files)
                 {
-                    if (!validExtensions.Contains(Path.GetExtension(file)))
-                    {
-                        continue;
-                    }
+                    onFileFound?.Invoke(file);
 
-                    yield return file;
+                    if (validExtensions.Contains(Path.GetExtension(file)))
+                    {
+                        yield return file;
+                    }
                 }
             }
 
@@ -44,8 +58,10 @@ public static class FileSystemHelper
                     stack.Push(subDir);
                 }
             }
-            catch (UnauthorizedAccessException) { /* Skip locked folders */ }
-            catch (Exception) { /* Skip other errors */ }
+            catch (Exception ex)
+            {
+                onError?.Invoke(dir, ex);
+            }
         }
     }
 }
