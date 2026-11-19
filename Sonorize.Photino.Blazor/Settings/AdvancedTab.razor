@@ -15,10 +15,13 @@
             <span class="card-desc">Application versioning</span>
         </div>
         <div class="card-content">
-            <label class="toggle-row">
-                <span class="toggle-label">Automatically check for updates</span>
-                <input type="checkbox" @bind="AppSettings.Updates.CheckForUpdates" @bind:after="Save" class="toggle-input" />
-            </label>
+            <div class="setting-with-reset">
+                <label class="toggle-row">
+                    <span class="toggle-label">Automatically check for updates</span>
+                    <input type="checkbox" @bind="AppSettings.Updates.CheckForUpdates" @bind:after="Save" class="toggle-input" />
+                </label>
+                <button class="reset-icon-btn" @onclick="ResetUpdateChecks" title="Reset to enabled" aria-label="Reset update checks"><i class="fas fa-undo"></i></button>
+            </div>
 
             <p class="helper-text">
                 Current Version: <strong>@System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version</strong>
@@ -33,11 +36,14 @@
             <span class="card-desc">Inject raw styles to override the application theme</span>
         </div>
         <div class="card-content">
-            <textarea class="code-editor"
-                      @bind="CustomCss"
-                      @bind:event="oninput"
-                      spellcheck="false"
-                      placeholder="/* e.g. .sidebar { display: none; } */"></textarea>
+            <div class="setting-editor-with-reset">
+                <textarea class="code-editor"
+                          @bind="CustomCss"
+                          @bind:event="oninput"
+                          spellcheck="false"
+                          placeholder="/* e.g. .sidebar { display: none; } */"></textarea>
+                <button class="reset-icon-btn" @onclick="ResetCustomCss" title="Clear custom CSS" aria-label="Reset custom CSS"><i class="fas fa-undo"></i> Reset</button>
+            </div>
 
             <div class="warning-text">
                 <i class="fas fa-exclamation-triangle"></i> Advanced feature. Use responsibly.
