@@ -47,7 +47,7 @@ public static class Program
                 logging.ClearProviders().AddSerilog(Log.Logger));
 
             using ServiceProvider provider = services.BuildServiceProvider();
-            ILogger<Program> logger = provider.GetRequiredService<ILogger<Program>>();
+            ILogger<MainWindow> logger = provider.GetRequiredService<ILogger<MainWindow>>();
             logger.LogInformation("TUI starting.");
 
             provider.GetRequiredService<PlayerSettingsPersistenceService>();

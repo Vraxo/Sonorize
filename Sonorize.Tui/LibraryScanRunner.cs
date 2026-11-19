@@ -21,7 +21,7 @@ internal sealed class LibraryScanRunner
     public LibraryScanRunner(
         LibraryService library,
         SonorizeSettings settings,
-        ILogger<LibraryScanRunner> logger,
+        ILogger logger,
         Action markLibraryDirty)
     {
         _library = library;
