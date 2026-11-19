@@ -107,20 +107,26 @@
                 A scrobble is triggered when <strong>either</strong> of these conditions is met (minimum track length: 30s).
             </p>
 
-            <div class="slider-row">
-                <div class="slider-info">
-                    <span class="slider-label">Percentage Played</span>
-                    <span class="slider-value">@AppSettings.Lastfm.ScrobbleThresholdPercentage%</span>
+            <div class="setting-with-reset">
+                <div class="slider-row">
+                    <div class="slider-info">
+                        <span class="slider-label">Percentage Played</span>
+                        <span class="slider-value">@AppSettings.Lastfm.ScrobbleThresholdPercentage%</span>
+                    </div>
+                    <input type="range" class="styled-slider" min="1" max="99" @bind="AppSettings.Lastfm.ScrobbleThresholdPercentage" @bind:after="Save" />
                 </div>
-                <input type="range" class="styled-slider" min="1" max="99" @bind="AppSettings.Lastfm.ScrobbleThresholdPercentage" @bind:after="Save" />
+                <button class="reset-icon-btn" @onclick="ResetPercentage" title="Reset to 50%" aria-label="Reset percentage threshold"><i class="fas fa-undo"></i></button>
             </div>
 
-            <div class="slider-row">
-                <div class="slider-info">
-                    <span class="slider-label">Absolute Time</span>
-                    <span class="slider-value">@AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds sec</span>
+            <div class="setting-with-reset">
+                <div class="slider-row">
+                    <div class="slider-info">
+                        <span class="slider-label">Absolute Time</span>
+                        <span class="slider-value">@AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds sec</span>
+                    </div>
+                    <input type="range" class="styled-slider" min="30" max="600" step="10" @bind="AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds" @bind:after="Save" />
                 </div>
-                <input type="range" class="styled-slider" min="30" max="600" step="10" @bind="AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds" @bind:after="Save" />
+                <button class="reset-icon-btn" @onclick="ResetAbsoluteTime" title="Reset to 240 seconds" aria-label="Reset absolute time threshold"><i class="fas fa-undo"></i></button>
             </div>
         </div>
     </div>
