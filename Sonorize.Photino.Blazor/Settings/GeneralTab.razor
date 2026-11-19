@@ -115,9 +115,9 @@
             <div class="control-group">
                 <span class="group-label">Compactness</span>
                 <div class="slider-stack">
-                    <SettingsSlider Label="Row Padding" @bind-Value="RowPadding" Min="0" Max="40" Step="1" Unit="px" />
-                    <SettingsSlider Label="Art Size" @bind-Value="ListArtSize" Min="20" Max="120" Step="4" Unit="px" />
-                    <SettingsSlider Label="Sidebar Padding" @bind-Value="SidebarItemPadding" Min="2" Max="30" Step="1" Unit="px" />
+                    <SettingsSlider Label="Row Padding" @bind-Value="RowPadding" Min="0" Max="40" Step="1" Unit="px" DefaultValue="12" />
+                    <SettingsSlider Label="Art Size" @bind-Value="ListArtSize" Min="20" Max="120" Step="4" Unit="px" DefaultValue="40" />
+                    <SettingsSlider Label="Sidebar Padding" @bind-Value="SidebarItemPadding" Min="2" Max="30" Step="1" Unit="px" DefaultValue="10" />
                 </div>
             </div>
         </div>
