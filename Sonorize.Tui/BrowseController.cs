@@ -8,8 +8,39 @@ using Terminal.Gui.Views;
 
 namespace Sonorize.Tui;
 
-public sealed partial class MainWindow
+internal sealed class BrowseController
 {
+    private readonly LibraryService _library;
+    private readonly Sonorize.Core.Playback.IPlayerService _player;
+    private readonly TextField _search;
+    private readonly ListView _sidebar;
+    private readonly TableView _table;
+    private readonly Label _emptyHint;
+    private readonly AudioEngineNotifier _audioNotifier;
+
+    public BrowseController(LibraryService library, Sonorize.Core.Playback.IPlayerService player,
+        MainWindowLayout layout, AudioEngineNotifier audioNotifier)
+    {
+        _library = library;
+        _player = player;
+        _search = layout.Search;
+        _sidebar = layout.Sidebar;
+        _table = layout.Table;
+        _emptyHint = layout.EmptyHint;
+        _audioNotifier = audioNotifier;
+
+        _table.Style.RowColorGetter = args => IsPlayingRow(args.RowIndex) ? TuiColors.Playing : null;
+        _search.TextChanged += OnSearchTextChanged;
+        _sidebar.ValueChanged += OnSidebarValueChanged;
+        _sidebar.Accepting += OnSidebarAccepting;
+        _table.Accepting += OnTableAccepting;
+        _table.ViewportChanged += OnTableViewportChanged;
+        _sidebar.Value = (int)BrowseMode.Songs;
+        RefreshRows(keepSelection: false);
+    }
+
+    public bool IsQueueView => _drillDown is null && _mode == BrowseMode.Queue;
+
     /// <summary>The songs of one artist or album, opened from the Artists/Albums lists.</summary>
     private sealed record DrillDown(string Title, Func<Song, bool> Filter);
 
@@ -24,7 +55,7 @@ public sealed partial class MainWindow
     private bool _suppressSearchRefresh;
     private int _lastTableWidth = -1;
 
-    private bool ShowsSongs => _drillDown is not null || _mode is BrowseMode.Songs or BrowseMode.Queue;
+    public bool ShowsSongs => _drillDown is not null || _mode is BrowseMode.Songs or BrowseMode.Queue;
 
     private bool IsPlayingRow(int row)
     {
@@ -36,7 +67,7 @@ public sealed partial class MainWindow
 
     private int SelectedRow => _table.Value?.SelectedCell.Y ?? -1;
 
-    private void SetMode(BrowseMode mode)
+    public void SetMode(BrowseMode mode)
     {
         if (_mode == mode && _drillDown is null)
         {
@@ -60,7 +91,7 @@ public sealed partial class MainWindow
         ClearSearchAndRefresh();
     }
 
-    private bool CloseDrillDown()
+    public bool CloseDrillDown()
     {
         if (_drillDown is null)
         {
@@ -81,7 +112,7 @@ public sealed partial class MainWindow
         RefreshRows(keepSelection: false);
     }
 
-    private void RefreshRows(bool keepSelection)
+    public void RefreshRows(bool keepSelection)
     {
         int previousRow = SelectedRow;
         int previousOffset = _table.RowOffset;
@@ -305,7 +336,7 @@ public sealed partial class MainWindow
     }
 
     /// <summary>Plays the selected song, or opens the selected artist/album.</summary>
-    private void ActivateSelectedRow()
+    public void ActivateSelectedRow()
     {
         int row = SelectedRow;
 
@@ -343,7 +374,7 @@ public sealed partial class MainWindow
     {
         if (!_player.IsAudioEngineAvailable)
         {
-            ShowAudioEngineUnavailable();
+            _audioNotifier.ShowUnavailable();
             return;
         }
 
@@ -356,7 +387,7 @@ public sealed partial class MainWindow
         _ = _player.PlaySong(song, context);
     }
 
-    private void RemoveSelectedFromQueue()
+    public void RemoveSelectedFromQueue()
     {
         int row = SelectedRow;
 

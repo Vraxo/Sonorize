@@ -5,15 +5,26 @@ using Terminal.Gui.ViewBase;
 
 namespace Sonorize.Tui;
 
-public sealed partial class MainWindow
+internal sealed class NowPlayingController
 {
-    // "999:59 / 999:59"
-    private const int TimeLabelWidth = 15;
+    private readonly IPlayerService _player;
+    private readonly LibraryScanRunner _scans;
+    private readonly Terminal.Gui.Views.Label _nowPlaying, _time, _status, _shuffle, _repeat;
+    private readonly Terminal.Gui.Views.ProgressBar _progress;
+    private readonly Terminal.Gui.Views.TableView _table;
 
-    // "Shuffle off" and "Repeat off", the longest texts of each label.
-    private const int ShuffleLabelWidth = 11;
-    private const int RepeatLabelWidth = 10;
-    private const int StatusGap = 3;
+    public NowPlayingController(IPlayerService player, LibraryScanRunner scans, MainWindowLayout layout)
+    {
+        _player = player;
+        _scans = scans;
+        _nowPlaying = layout.NowPlaying;
+        _time = layout.Time;
+        _status = layout.Status;
+        _shuffle = layout.Shuffle;
+        _repeat = layout.Repeat;
+        _progress = layout.Progress;
+        _table = layout.Table;
+    }
 
     private string? _markedSongPath;
     private float _shownFraction = -1f;
@@ -22,7 +33,7 @@ public sealed partial class MainWindow
     private bool? _shuffleShown;
     private RepeatMode? _repeatShown;
 
-    private void UpdateNowPlaying()
+    public void UpdateNowPlaying()
     {
         Song? song = _player.CurrentSong;
 
@@ -66,7 +77,7 @@ public sealed partial class MainWindow
             // The error message takes the whole line.
             _shuffle.Visible = !statusIsError;
             _repeat.Visible = !statusIsError;
-            _status.X = statusIsError ? 1 : Pos.Right(_repeat) + StatusGap;
+            _status.X = statusIsError ? 1 : Pos.Right(_repeat) + MainWindowLayout.StatusGap;
         }
 
         UpdateShuffleAndRepeat();
@@ -118,7 +129,7 @@ public sealed partial class MainWindow
 
         string status = $"Volume {Math.Round(_player.Volume * 100)}%";
 
-        return Volatile.Read(ref _activeScans) > 0
+        return _scans.IsScanning
             ? status + "   Scanning library…"
             : status;
     }

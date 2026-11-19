@@ -3,8 +3,19 @@ using Terminal.Gui.ViewBase;
 
 namespace Sonorize.Tui;
 
-public sealed partial class MainWindow
+internal sealed class CoverArtController
 {
+    private readonly Sonorize.Core.Playback.IPlayerService _player;
+    private readonly Terminal.Gui.Views.ImageView _cover;
+    private readonly Terminal.Gui.Views.ListView _sidebar;
+
+    public CoverArtController(Sonorize.Core.Playback.IPlayerService player, MainWindowLayout layout)
+    {
+        _player = player;
+        _cover = layout.Cover;
+        _sidebar = layout.Sidebar;
+    }
+
     private sealed record CoverResult(string? SongPath, Color[,]? Pixels);
 
     private bool _showCover = true;
@@ -24,7 +35,7 @@ public sealed partial class MainWindow
     private CoverResult? _pendingCover;
 
     /// <summary>Called from the UI tick: starts a load on song change and applies finished ones.</summary>
-    private void UpdateCover()
+    public void UpdateCover()
     {
         if (!_coverToggledByUser && _showCover && ++_coverTicks == RasterCheckTick && !_cover.IsUsingRasterGraphics)
         {
@@ -64,7 +75,7 @@ public sealed partial class MainWindow
         }
     }
 
-    private void ToggleCover()
+    public void ToggleCover()
     {
         _coverToggledByUser = true;
         SetCoverVisible(!_showCover);
@@ -76,7 +87,7 @@ public sealed partial class MainWindow
         _cover.Visible = _showCover;
 
         // Without the cover the sidebar takes the full column.
-        _sidebar.Height = _showCover ? Dim.Absolute(SidebarListHeight) : Dim.Fill(FooterHeight);
+        _sidebar.Height = _showCover ? Dim.Absolute(MainWindowLayout.SidebarListHeight) : Dim.Fill(MainWindowLayout.FooterHeight);
 
         if (_showCover)
         {
