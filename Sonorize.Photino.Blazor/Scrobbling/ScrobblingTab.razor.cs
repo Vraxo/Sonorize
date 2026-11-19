@@ -11,6 +11,18 @@ public partial class ScrobblingTab
     private string? _authError;
     private string _password = "";
 
+    private void ResetPercentage()
+    {
+        AppSettings.Lastfm.ScrobbleThresholdPercentage = 50;
+        Save();
+    }
+
+    private void ResetAbsoluteTime()
+    {
+        AppSettings.Lastfm.ScrobbleThresholdAbsoluteSeconds = 240;
+        Save();
+    }
+
     private void Save()
     {
         SettingsManager.Save(AppSettings);
