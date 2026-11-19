@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Playlists;
@@ -17,16 +16,10 @@ public static class TuiServiceRegistrar
 {
     public static void Configure(IServiceCollection services)
     {
-        RegisterCoreInfrastructure(services);
         RegisterSettings(services);
         RegisterLibrary(services);
         RegisterAudio(services);
         RegisterIntegrations(services);
-    }
-
-    private static void RegisterCoreInfrastructure(IServiceCollection services)
-    {
-        services.AddSingleton<LogService>();
     }
 
     private static void RegisterSettings(IServiceCollection services)

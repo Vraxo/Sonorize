@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Scrobbling;
@@ -10,45 +12,50 @@ namespace Sonorize.Tui;
 
 public static class Program
 {
-    // Same name as the desktop app: both frontends share Settings.json and the
-    // library cache, so only one of them may run at a time.
     private const string MutexName = "Sonorize_SingleInstance_Mutex";
 
     private static int Main()
     {
         using Mutex mutex = new(true, MutexName, out bool createdNew);
-
         if (!createdNew)
         {
             Console.Error.WriteLine("Sonorize is already running.");
             return 1;
         }
 
-        ServiceCollection services = new();
-        TuiServiceRegistrar.Configure(services);
-
-        using ServiceProvider provider = services.BuildServiceProvider();
-        LogService logger = provider.GetRequiredService<LogService>();
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .WriteTo.File(
+                Path.Combine(AppDataHelper.GetBaseDirectory(), "app-tui-.log"),
+                rollingInterval: RollingInterval.Day,
+                fileSizeLimitBytes: 5 * 1024 * 1024,
+                rollOnFileSizeLimit: true,
+                retainedFileCountLimit: 14,
+                shared: true,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
 
         try
         {
-            logger.Info("TUI starting...");
+            ServiceCollection services = new();
+            TuiServiceRegistrar.Configure(services);
+            services.AddLogging(logging =>
+                logging.ClearProviders().AddSerilog(Log.Logger));
 
-            // Instantiate the background listeners so they subscribe to player events.
+            using ServiceProvider provider = services.BuildServiceProvider();
+            ILogger<Program> logger = provider.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("TUI starting.");
+
             provider.GetRequiredService<PlayerSettingsPersistenceService>();
             provider.GetRequiredService<ScrobbleOrchestrator>();
 
-            // Emit the 16 ANSI colour codes instead of 24-bit RGB, so colours come
-            // from the user's terminal theme like in any other console program.
             Driver.Force16Colors = true;
 
             using IApplication app = Application.Create().Init();
             using MainWindow window = ActivatorUtilities.CreateInstance<MainWindow>(provider);
-
             app.Run(window);
 
-            // The player persists its settings on a debounce timer; flush on the way out
-            // so a volume change made right before quitting is not lost.
             provider.GetRequiredService<ISettingsManager<SonorizeSettings>>()
                 .Save(provider.GetRequiredService<SonorizeSettings>());
 
@@ -56,8 +63,12 @@ public static class Program
         }
         catch (Exception ex)
         {
-            logger.Error("FATAL TUI CRASH", ex);
+            Log.Fatal(ex, "Fatal TUI crash.");
             throw;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
         }
     }
 }
