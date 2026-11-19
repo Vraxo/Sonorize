@@ -50,8 +50,7 @@ public class ScrobblingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, 
-                $"[LastFM] UpdateNowPlaying failed for {song.Title}");
+            _logger.LogError(ex, "[LastFM] UpdateNowPlaying failed for {SongTitle}", song.Title);
         }
     }
 
@@ -85,12 +84,11 @@ public class ScrobblingService
             // Inflatable.Lastfm marks single scrobbling as obsolete in favor of batches,
             // but for a desktop player, real-time single scrobbling is the correct pattern.
             await client.Track.ScrobbleAsync(scrobble);
-            _logger.LogInformation($"[LastFM] Scrobbled: {song.Artist} - {song.Title}");
+            _logger.LogInformation("[LastFM] Scrobbled: {Artist} - {SongTitle}", song.Artist, song.Title);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, 
-                $"[LastFM] Scrobble failed for {song.Title}");
+            _logger.LogError(ex, "[LastFM] Scrobble failed for {SongTitle}", song.Title);
         }
     }
 }

@@ -27,7 +27,7 @@ public static class Program
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
             .WriteTo.File(
-                Path.Combine(AppDataHelper.GetBaseDirectory(), "app-tui-.log"),
+                Path.Combine(AppDataHelper.GetBaseDirectory(), "app-.log"),
                 rollingInterval: RollingInterval.Day,
                 fileSizeLimitBytes: 5 * 1024 * 1024,
                 rollOnFileSizeLimit: true,

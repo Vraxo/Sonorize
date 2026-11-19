@@ -29,26 +29,27 @@ public class LibraryScanCoordinator
         Stopwatch stopwatch = Stopwatch.StartNew();
         IReadOnlyList<string> folders = _settings.Library.MusicFolderPaths;
 
-        _logger.LogInformation($"Library scan started for {folders.Count} configured folder(s).");
+        _logger.LogInformation("Library scan started for {FolderCount} configured folder(s).", folders.Count);
 
         foreach (string path in folders)
         {
             await ScanFolderWithCleanupAsync(path);
         }
 
-        _logger.LogInformation($"Library scan finished in {stopwatch.Elapsed.TotalSeconds:F1}s.");
+        _logger.LogInformation("Library scan finished in {ElapsedSeconds:F1}s.", stopwatch.Elapsed.TotalSeconds);
     }
 
     public async Task ScanSingleFolderAsync(string path)
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
-        _logger.LogInformation($"Scanning library folder: {path}");
+        _logger.LogInformation("Scanning library folder: {FolderPath}", path);
 
         (List<Song> songs, List<Playlist> playlists) = await _scanner.ScanAsync(path);
         ProcessScanResults(songs, playlists, cleanup: false);
 
         _logger.LogInformation(
-            $"Folder scan completed: {path} ({songs.Count} songs, {playlists.Count} playlists, {stopwatch.Elapsed.TotalSeconds:F1}s).");
+            "Folder scan completed: {FolderPath} ({SongCount} songs, {PlaylistCount} playlists, {ElapsedSeconds:F1}s).",
+            path, songs.Count, playlists.Count, stopwatch.Elapsed.TotalSeconds);
     }
 
     private async Task ScanFolderWithCleanupAsync(string path)

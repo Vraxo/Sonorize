@@ -137,7 +137,7 @@ public class AudioService : IAudioService
 
             if (!IsAudioEngineAvailable)
             {
-                _logger.LogError(ex, $"BASS Init Failed: {Bass.LastError}");
+                _logger.LogError("BASS initialization failed: {BassError}", Bass.LastError);
             }
 
             // Check for BASS_FX
@@ -156,7 +156,7 @@ public class AudioService : IAudioService
         catch (Exception ex)
         {
             IsAudioEngineAvailable = false;
-            _logger.LogError("Critical BASS initialization failure");
+            _logger.LogError(ex, "Critical BASS initialization failure.");
         }
     }
 
@@ -223,7 +223,7 @@ public class AudioService : IAudioService
 
         if (!Bass.Init(deviceIndex, 44100, DeviceInitFlags.Default, IntPtr.Zero))
         {
-            _logger.LogError($"Failed to switch audio device: {Bass.LastError}");
+            _logger.LogError("Failed to switch audio device: {BassError}", Bass.LastError);
             return;
         }
 
@@ -261,7 +261,7 @@ public class AudioService : IAudioService
         // Guard against demo data playback
         if (filePath.StartsWith("demo://", StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogInformation($"Ignored playback request for demo track: {filePath}");
+            _logger.LogInformation("Ignored playback request for demo track: {FilePath}", filePath);
             return;
         }
 
@@ -335,7 +335,7 @@ public class AudioService : IAudioService
         }
         else
         {
-            _logger.LogError($"Failed to load stream: {filePath}. Error: {Bass.LastError}");
+            _logger.LogError("Failed to load stream for {FilePath}: {BassError}", filePath, Bass.LastError);
         }
     }
 
@@ -346,7 +346,7 @@ public class AudioService : IAudioService
             return;
         }
 
-        _logger.LogError($"Play failed: {Bass.LastError}");
+        _logger.LogError("Playback failed: {BassError}", Bass.LastError);
     }
 
     public void Pause()

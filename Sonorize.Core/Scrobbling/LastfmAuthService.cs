@@ -76,11 +76,11 @@ public class LastfmAuthService
             {
                 _settings.Lastfm.SessionKey = auth.UserSession.Token;
                 _settingsManager.Save(_settings);
-                _logger.LogInformation($"[LastFM] Successfully authenticated as {_settings.Lastfm.Username}");
+                _logger.LogInformation("[LastFM] Successfully authenticated as {Username}", _settings.Lastfm.Username);
                 return new LastfmClient(auth);
             }
 
-            _logger.LogWarning($"[LastFM] Auth response failed: {response.Status}");
+            _logger.LogWarning("[LastFM] Auth response failed: {Status}", response.Status);
         }
         catch (Exception ex)
         {

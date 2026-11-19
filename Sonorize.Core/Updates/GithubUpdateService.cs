@@ -66,7 +66,7 @@ public class GitHubUpdateService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning($"Update check failed: {ex.Message}");
+            _logger.LogWarning(ex, "Update check failed.");
         }
     }
 
