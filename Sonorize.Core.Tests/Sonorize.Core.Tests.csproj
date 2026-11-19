@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sonorize.Core\Sonorize.Core.csproj" />
+    <ProjectReference Include="..\Sonorize.Tui\Sonorize.Tui.csproj" />
   </ItemGroup>
 
   <ItemGroup>

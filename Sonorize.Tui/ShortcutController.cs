@@ -5,8 +5,40 @@ using Terminal.Gui.Views;
 
 namespace Sonorize.Tui;
 
-public sealed partial class MainWindow
+internal sealed class ShortcutController
 {
+    private readonly Sonorize.Core.Playback.IPlayerService _player;
+    private readonly Sonorize.Core.Library.LibraryService _library;
+    private readonly LibraryScanRunner _scans;
+    private readonly BrowseController _browse;
+    private readonly CoverArtController _cover;
+    private readonly MusicFolderDialog _folderDialog;
+    private readonly AudioEngineNotifier _audioNotifier;
+    private readonly Func<Terminal.Gui.App.IApplication?> _appProvider;
+    private readonly TextField _search;
+    private readonly TableView _table;
+
+    public ShortcutController(Sonorize.Core.Playback.IPlayerService player,
+        Sonorize.Core.Library.LibraryService library, LibraryScanRunner scans,
+        BrowseController browse, CoverArtController cover, MusicFolderDialog folderDialog,
+        AudioEngineNotifier audioNotifier, MainWindowLayout layout,
+        Func<Terminal.Gui.App.IApplication?> appProvider)
+    {
+        _player = player;
+        _library = library;
+        _scans = scans;
+        _browse = browse;
+        _cover = cover;
+        _folderDialog = folderDialog;
+        _audioNotifier = audioNotifier;
+        _appProvider = appProvider;
+        _search = layout.Search;
+        _table = layout.Table;
+        _search.KeyDown += OnSearchKeyDown;
+        layout.Sidebar.KeyDown += OnBrowseKeyDown;
+        _table.KeyDown += OnBrowseKeyDown;
+    }
+
     private const double SeekStepSeconds = 5;
     private const float VolumeStep = 0.05f;
 
@@ -46,7 +78,7 @@ public sealed partial class MainWindow
     }
 
     /// <summary>Fallback for when neither list has focus.</summary>
-    protected override bool OnKeyDown(Key key)
+    public bool OnKeyDown(Key key)
     {
         // While typing in the search box every printable key is text.
         return !_search.HasFocus && HandleShortcut(key);
@@ -80,7 +112,7 @@ public sealed partial class MainWindow
         {
             // Always consumed: Esc is Terminal.Gui's default quit key, and losing
             // the player to a stray Esc is unfriendly. Quit is q / Ctrl+Q.
-            if (!CloseDrillDown() && !string.IsNullOrEmpty(_search.Text))
+            if (!_browse.CloseDrillDown() && !string.IsNullOrEmpty(_search.Text))
             {
                 _search.Text = string.Empty;
             }
@@ -90,7 +122,7 @@ public sealed partial class MainWindow
 
         if (key == Key.Backspace)
         {
-            return CloseDrillDown();
+            return _browse.CloseDrillDown();
         }
 
         if (key == Key.CursorLeft)
@@ -107,15 +139,15 @@ public sealed partial class MainWindow
 
         if (key == Key.F5)
         {
-            _ = RunScanAsync(() => _library.RefreshLibraryAsync());
+            _ = _scans.RunScanAsync(() => _library.RefreshLibraryAsync());
             return true;
         }
 
         if (key == Key.Delete)
         {
-            if (_drillDown is null && _mode == BrowseMode.Queue)
+            if (_browse.IsQueueView)
             {
-                RemoveSelectedFromQueue();
+                _browse.RemoveSelectedFromQueue();
                 return true;
             }
 
@@ -124,7 +156,7 @@ public sealed partial class MainWindow
 
         if (key == Key.Q.WithCtrl)
         {
-            App?.RequestStop();
+            _appProvider()?.RequestStop();
             return true;
         }
 
@@ -163,7 +195,7 @@ public sealed partial class MainWindow
                 return true;
 
             case 'c':
-                ToggleCover();
+                _cover.ToggleCover();
                 return true;
 
             case '+':
@@ -180,7 +212,7 @@ public sealed partial class MainWindow
             case '2':
             case '3':
             case '4':
-                SetMode((BrowseMode)(rune.Value - '1'));
+                _browse.SetMode((BrowseMode)(rune.Value - '1'));
                 _table.SetFocus();
                 return true;
 
@@ -189,15 +221,15 @@ public sealed partial class MainWindow
                 return true;
 
             case 'a':
-                AddMusicFolder();
+                _folderDialog.Show();
                 return true;
 
             case '?':
-                MessageBox.Query(App!, "Keys", HelpText, "OK");
+                MessageBox.Query(_appProvider()!, "Keys", HelpText, "OK");
                 return true;
 
             case 'q':
-                App?.RequestStop();
+                _appProvider()?.RequestStop();
                 return true;
 
             default:
@@ -209,16 +241,16 @@ public sealed partial class MainWindow
     {
         if (!_player.IsAudioEngineAvailable)
         {
-            ShowAudioEngineUnavailable();
+            _audioNotifier.ShowUnavailable();
             return;
         }
 
         // Nothing queued yet: treat Space like Enter on the selected song.
         if (_player.CurrentSong is null && _player.PlaybackQueue.Count == 0)
         {
-            if (ShowsSongs)
+            if (_browse.ShowsSongs)
             {
-                ActivateSelectedRow();
+                _browse.ActivateSelectedRow();
             }
 
             return;
@@ -242,59 +274,4 @@ public sealed partial class MainWindow
         _player.Seek(Math.Clamp(target / total.TotalSeconds, 0d, 1d));
     }
 
-    private void AddMusicFolder()
-    {
-        TextField pathField = new() { Width = Dim.Fill(0, 50), Height = 1 };
-
-        string? entered = this.Prompt<TextField, string>(
-            pathField,
-            input: Environment.GetFolderPath(Environment.SpecialFolder.MyMusic),
-            beginInitHandler: prompt => prompt.Title = "Add music folder");
-
-        if (string.IsNullOrWhiteSpace(entered))
-        {
-            return;
-        }
-
-        string path = ExpandPath(entered.Trim());
-
-        if (!Directory.Exists(path))
-        {
-            MessageBox.ErrorQuery(App!, "Add music folder", $"Folder not found:\n{path}", "OK");
-            return;
-        }
-
-        if (_settings.Library.MusicFolderPaths.Contains(path))
-        {
-            MessageBox.Query(App!, "Add music folder", "That folder is already in your library.", "OK");
-            return;
-        }
-
-        _settings.Library.MusicFolderPaths.Add(path);
-        _settingsManager.Save(_settings);
-
-        _ = RunScanAsync(() => _library.ScanFolder(path));
-    }
-
-    private void ShowAudioEngineUnavailable()
-    {
-        MessageBox.ErrorQuery(
-            App!,
-            "Audio engine unavailable",
-            "The BASS native library could not be loaded, so playback is disabled.\n"
-            + "Place the BASS binaries for your platform next to the executable\n"
-            + "(see \"Setup Audio Dependencies\" in the README) and restart.",
-            "OK");
-    }
-
-    private static string ExpandPath(string path)
-    {
-        if (path == "~" || path.StartsWith("~/", StringComparison.Ordinal) || path.StartsWith("~\\", StringComparison.Ordinal))
-        {
-            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            path = Path.Combine(home, path[1..].TrimStart('/', '\\'));
-        }
-
-        return Path.GetFullPath(path);
-    }
 }
