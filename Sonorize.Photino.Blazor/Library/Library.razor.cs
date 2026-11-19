@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
