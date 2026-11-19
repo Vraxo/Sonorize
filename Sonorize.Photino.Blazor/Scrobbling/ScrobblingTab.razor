@@ -22,11 +22,12 @@
     }
 
     <!-- Global Toggle -->
-    <div class="main-toggle-row">
+    <div class="main-toggle-row setting-with-reset">
         <label class="toggle-switch-label @(!AuthService.IsAppIdConfigured ? "disabled" : "")">
             <input type="checkbox" @bind="AppSettings.Lastfm.ScrobblingEnabled" @bind:after="Save" disabled="@(!AuthService.IsAppIdConfigured)" />
             <span class="toggle-text">Enable Last.fm Scrobbling</span>
         </label>
+        <button class="reset-icon-btn" @onclick="ResetScrobblingEnabled" title="Reset to disabled" aria-label="Reset Last.fm scrobbling"><i class="fas fa-undo"></i></button>
     </div>
 
     <!-- Account Section -->
@@ -68,7 +69,10 @@
                     <div class="form-row">
                         <div class="input-group">
                             <label>Username</label>
-                            <input type="text" class="form-control" @bind="AppSettings.Lastfm.Username" placeholder="Last.fm Username" disabled="@(!AuthService.IsAppIdConfigured)" />
+                            <div class="setting-control-with-reset">
+                                <input type="text" class="form-control" @bind="AppSettings.Lastfm.Username" @bind:after="Save" placeholder="Last.fm Username" disabled="@(!AuthService.IsAppIdConfigured)" />
+                                <button class="reset-icon-btn" @onclick="ResetUsername" title="Clear username" aria-label="Reset Last.fm username"><i class="fas fa-undo"></i></button>
+                            </div>
                         </div>
                         <div class="input-group">
                             <label>Password</label>
