@@ -40,6 +40,28 @@ public partial class FileExtensionSettings
         SaveAndRefresh();
     }
 
+    private void ResetExtension(string extension)
+    {
+        bool enabledByDefault = extension is ".mp3" or ".flac" or ".wav" or ".m4a" or ".aac" or ".ogg";
+        bool isEnabled = IsActive(extension);
+
+        if (enabledByDefault == isEnabled)
+        {
+            return;
+        }
+
+        if (enabledByDefault)
+        {
+            AppSettings.Library.SupportedFileExtensions.Add(extension);
+        }
+        else
+        {
+            AppSettings.Library.SupportedFileExtensions.Remove(extension);
+        }
+
+        SaveAndRefresh();
+    }
+
     private IEnumerable<string> GetCustomExtensions()
     {
         return AppSettings.Library.SupportedFileExtensions
