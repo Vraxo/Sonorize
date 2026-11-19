@@ -24,8 +24,8 @@
     <div class="divider"></div>
 
     <div class="slider-stack">
-        <SettingsSlider Label="Corner Radius" @bind-Value="BorderRadiusInt" Min="0" Max="24" Step="1" Unit="px" ShowNumberInput="false" />
-        <SettingsSlider Label="Player Bar Height" @bind-Value="PlayerBarHeightInt" Min="60" Max="150" Step="2" Unit="px" />
+        <SettingsSlider Label="Corner Radius" @bind-Value="BorderRadiusInt" Min="0" Max="24" Step="1" Unit="px" ShowNumberInput="false" DefaultValue="4" />
+        <SettingsSlider Label="Player Bar Height" @bind-Value="PlayerBarHeightInt" Min="60" Max="150" Step="2" Unit="px" DefaultValue="90" />
     </div>
 
     <div class="divider"></div>
@@ -49,6 +49,6 @@
                placeholder="Default (System UI)" />
     </div>
     <div class="typography-slider-spacing">
-        <SettingsSlider Label="Base Size" @bind-Value="BaseFontSizeInt" Min="10" Max="24" Step="1" Unit="px" ShowNumberInput="false" />
+        <SettingsSlider Label="Base Size" @bind-Value="BaseFontSizeInt" Min="10" Max="24" Step="1" Unit="px" ShowNumberInput="false" DefaultValue="14" />
     </div>
 </SettingsCard>
