@@ -1,5 +1,5 @@
-﻿using IF.Lastfm.Core.Objects;
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging;
+using IF.Lastfm.Core.Objects;
 using Sonorize.Core.Settings;
 
 using IF.Lastfm.Core.Api;
@@ -10,9 +10,9 @@ public class ScrobblingService
 {
     private readonly LastfmAuthService _authService;
     private readonly SonorizeSettings _settings;
-    private readonly LogService _logger;
+    private readonly ILogger<ScrobblingService> _logger;
 
-    public ScrobblingService(LastfmAuthService authService, SonorizeSettings settings, LogService logger)
+    public ScrobblingService(LastfmAuthService authService, SonorizeSettings settings, ILogger<ScrobblingService> logger)
     {
         _authService = authService;
         _settings = settings;
@@ -50,9 +50,8 @@ public class ScrobblingService
         }
         catch (Exception ex)
         {
-            _logger.Error(
-                $"[LastFM] UpdateNowPlaying failed for {song.Title}",
-                ex);
+            _logger.LogError(ex, 
+                $"[LastFM] UpdateNowPlaying failed for {song.Title}");
         }
     }
 
@@ -86,13 +85,12 @@ public class ScrobblingService
             // Inflatable.Lastfm marks single scrobbling as obsolete in favor of batches,
             // but for a desktop player, real-time single scrobbling is the correct pattern.
             await client.Track.ScrobbleAsync(scrobble);
-            _logger.Info($"[LastFM] Scrobbled: {song.Artist} - {song.Title}");
+            _logger.LogInformation($"[LastFM] Scrobbled: {song.Artist} - {song.Title}");
         }
         catch (Exception ex)
         {
-            _logger.Error(
-                $"[LastFM] Scrobble failed for {song.Title}",
-                ex);
+            _logger.LogError(ex, 
+                $"[LastFM] Scrobble failed for {song.Title}");
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using IF.Lastfm.Core.Api.Helpers;
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging;
+using IF.Lastfm.Core.Api.Helpers;
 using Sonorize.Core.Settings;
 
 using IF.Lastfm.Core.Api;
@@ -10,7 +10,7 @@ public class LastfmAuthService
 {
     private readonly ISettingsManager<SonorizeSettings> _settingsManager;
     private readonly SonorizeSettings _settings;
-    private readonly LogService _logger;
+    private readonly ILogger<LastfmAuthService> _logger;
 
     private readonly string _apiKey;
     private readonly string _apiSecret;
@@ -21,7 +21,7 @@ public class LastfmAuthService
         _apiKey != "YOUR_API_KEY" &&
         _apiKey != "YOUR_LASTFM_API_KEY";
 
-    public LastfmAuthService(ISettingsManager<SonorizeSettings> settingsManager, SonorizeSettings settings, LogService logger)
+    public LastfmAuthService(ISettingsManager<SonorizeSettings> settingsManager, SonorizeSettings settings, ILogger<LastfmAuthService> logger)
     {
         _settingsManager = settingsManager;
         _settings = settings;
@@ -32,11 +32,11 @@ public class LastfmAuthService
 
         if (IsAppIdConfigured)
         {
-            _logger.Info("[LastFM] Keys configured.");
+            _logger.LogInformation("[LastFM] Keys configured.");
         }
         else
         {
-            _logger.Warn("[LastFM] Keys missing or placeholders. Scrobbling disabled.");
+            _logger.LogWarning("[LastFM] Keys missing or placeholders. Scrobbling disabled.");
         }
     }
 
@@ -62,7 +62,7 @@ public class LastfmAuthService
     {
         if (!IsAppIdConfigured)
         {
-            _logger.Warn("[LastFM] API Keys not configured.");
+            _logger.LogWarning("[LastFM] API Keys not configured.");
             return null;
         }
 
@@ -76,15 +76,15 @@ public class LastfmAuthService
             {
                 _settings.Lastfm.SessionKey = auth.UserSession.Token;
                 _settingsManager.Save(_settings);
-                _logger.Info($"[LastFM] Successfully authenticated as {_settings.Lastfm.Username}");
+                _logger.LogInformation($"[LastFM] Successfully authenticated as {_settings.Lastfm.Username}");
                 return new LastfmClient(auth);
             }
 
-            _logger.Warn($"[LastFM] Auth response failed: {response.Status}");
+            _logger.LogWarning($"[LastFM] Auth response failed: {response.Status}");
         }
         catch (Exception ex)
         {
-            _logger.Error("[LastFM] Auth failed", ex);
+            _logger.LogError(ex, "[LastFM] Auth failed");
         }
 
         return null;

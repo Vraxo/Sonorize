@@ -1,5 +1,5 @@
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using Sonorize.Core.Core;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;
 
@@ -13,9 +13,9 @@ public class MusicLibraryService : IMusicLibraryService
         ".m3u8"
     };
 
-    private readonly LogService _logger;
+    private readonly ILogger<MusicLibraryService> _logger;
 
-    public MusicLibraryService(LogService logger)
+    public MusicLibraryService(ILogger<MusicLibraryService> logger)
     {
         _logger = logger;
     }
@@ -31,7 +31,7 @@ public class MusicLibraryService : IMusicLibraryService
             int skippedFiles = 0;
             int metadataFallbacks = 0;
 
-            _logger.Info($"Found {musicFiles.Count} supported audio file(s) in {folderPath}.");
+            _logger.LogInformation($"Found {musicFiles.Count} supported audio file(s) in {folderPath}.");
 
             try
             {
@@ -65,7 +65,7 @@ public class MusicLibraryService : IMusicLibraryService
             }
             catch (OperationCanceledException)
             {
-                _logger.Warn($"Audio file scan cancelled for {folderPath}.");
+                _logger.LogWarning($"Audio file scan cancelled for {folderPath}.");
                 return [];
             }
 
@@ -75,11 +75,11 @@ public class MusicLibraryService : IMusicLibraryService
 
             if (metadataFallbacks > 0 || skippedFiles > 0)
             {
-                _logger.Warn(summary);
+                _logger.LogWarning(summary);
             }
             else
             {
-                _logger.Info(summary);
+                _logger.LogInformation(summary);
             }
 
             return loadedSongs;
@@ -120,7 +120,7 @@ public class MusicLibraryService : IMusicLibraryService
 
             if (skippedFiles > 0)
             {
-                _logger.Warn($"Skipped {skippedFiles} invalid or unreadable playlist file(s) in {folderPath}.");
+                _logger.LogWarning($"Skipped {skippedFiles} invalid or unreadable playlist file(s) in {folderPath}.");
             }
 
             return playlists;
@@ -163,7 +163,7 @@ public class MusicLibraryService : IMusicLibraryService
         }
         catch (Exception ex)
         {
-            _logger.Error($"Failed to read metadata for {filePath}.", ex);
+            _logger.LogError(ex, $"Failed to read metadata for {filePath}.");
             return null;
         }
     }
@@ -194,7 +194,7 @@ public class MusicLibraryService : IMusicLibraryService
         }
         catch (Exception ex)
         {
-            _logger.Error($"Failed to save metadata for {filePath}.", ex);
+            _logger.LogError(ex, $"Failed to save metadata for {filePath}.");
             return false;
         }
     }
