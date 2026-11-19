@@ -15,6 +15,7 @@
         <div class="card-content">
             <div class="control-row">
                 <label>Output Device</label>
+                <div class="setting-control-with-reset">
                 <select class="form-control dropdown" @onchange="OnDeviceChanged">
                     @foreach (var device in _audioDevices)
                     {
@@ -23,6 +24,8 @@
                         </option>
                     }
                 </select>
+                <button class="reset-icon-btn" @onclick="ResetOutputDevice" title="Reset to default device" aria-label="Reset output device"><i class="fas fa-undo"></i></button>
+            </div>
             </div>
         </div>
     </div>
@@ -34,17 +37,17 @@
             <span class="card-desc">Interaction and animation preferences</span>
         </div>
         <div class="card-content">
-            <label class="toggle-row">
+            <div class="setting-with-reset"><label class="toggle-row">
                 <span class="toggle-label">Play song on single click</span>
                 <input type="checkbox" @bind="PlayOnSingleClick" class="toggle-input" />
-            </label>
+            </label><button class="reset-icon-btn" @onclick="ResetPlayOnSingleClick" title="Reset to disabled" aria-label="Reset single click playback"><i class="fas fa-undo"></i></button></div>
 
             <div class="divider"></div>
 
-            <label class="toggle-row">
+            <div class="setting-with-reset"><label class="toggle-row">
                 <span class="toggle-label">Animate Sidebar Toggle</span>
                 <input type="checkbox" @bind="EnableSidebarAnimation" class="toggle-input" />
-            </label>
+            </label><button class="reset-icon-btn" @onclick="ResetSidebarAnimation" title="Reset to enabled" aria-label="Reset sidebar animation"><i class="fas fa-undo"></i></button></div>
         </div>
     </div>
 
@@ -61,7 +64,7 @@
                     <span class="group-label">UI Scale (Zoom)</span>
                     <span class="value-badge">@ZoomInt%</span>
                 </div>
-                <input type="range" min="50" max="150" step="5" @bind="ZoomInt" class="styled-slider" />
+                <div class="setting-control-with-reset"><input type="range" min="50" max="150" step="5" @bind="ZoomInt" class="styled-slider" /><button class="reset-icon-btn" @onclick="ResetZoom" title="Reset to 100%" aria-label="Reset UI scale"><i class="fas fa-undo"></i></button></div>
             </div>
 
             <div class="divider"></div>
@@ -70,11 +73,11 @@
             <div class="control-group">
                 <span class="group-label">Track List Columns</span>
                 <div class="checkbox-grid">
-                    <label><input type="checkbox" @bind="ShowIndex" /> Index (#)</label>
-                    <label><input type="checkbox" @bind="ShowArt" /> Album Art</label>
-                    <label><input type="checkbox" @bind="ShowArtist" /> Artist</label>
-                    <label><input type="checkbox" @bind="ShowAlbum" /> Album</label>
-                    <label><input type="checkbox" @bind="ShowDuration" /> Duration</label>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowIndex" /> Index (#)</label><button class="reset-icon-btn" @onclick="ResetShowIndex" title="Reset Index (#)" aria-label="Reset Index (#)"><i class="fas fa-undo"></i></button></div>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowArt" /> Album Art</label><button class="reset-icon-btn" @onclick="ResetShowArt" title="Reset Album Art" aria-label="Reset Album Art"><i class="fas fa-undo"></i></button></div>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowArtist" /> Artist</label><button class="reset-icon-btn" @onclick="ResetShowArtist" title="Reset Artist" aria-label="Reset Artist"><i class="fas fa-undo"></i></button></div>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowAlbum" /> Album</label><button class="reset-icon-btn" @onclick="ResetShowAlbum" title="Reset Album" aria-label="Reset Album"><i class="fas fa-undo"></i></button></div>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowDuration" /> Duration</label><button class="reset-icon-btn" @onclick="ResetShowDuration" title="Reset Duration" aria-label="Reset Duration"><i class="fas fa-undo"></i></button></div>
                 </div>
             </div>
 
@@ -83,7 +86,7 @@
             <!-- Overflow Mode -->
             <div class="control-group">
                 <span class="group-label">Text Overflow</span>
-                <div class="radio-row">
+                <div class="setting-with-reset"><div class="radio-row">
                     <label class="radio-btn @(AppSettings.Library.TrackListOverflow == TextOverflowMode.Wrap ? "active" : "")">
                         <input type="radio" name="overflow" checked="@(AppSettings.Library.TrackListOverflow == TextOverflowMode.Wrap)"
                                @onchange="@(() => UpdateOverflow(TextOverflowMode.Wrap))" />
@@ -94,7 +97,7 @@
                                @onchange="@(() => UpdateOverflow(TextOverflowMode.Truncate))" />
                         Truncate
                     </label>
-                </div>
+                </div><button class="reset-icon-btn" @onclick="ResetOverflow" title="Reset to wrap" aria-label="Reset text overflow"><i class="fas fa-undo"></i></button></div>
             </div>
 
             <div class="divider"></div>
@@ -103,9 +106,9 @@
             <div class="control-group">
                 <span class="group-label">List Styling</span>
                 <div class="checkbox-grid">
-                    <label><input type="checkbox" @bind="EnableZebra" /> Zebra Striping</label>
-                    <label><input type="checkbox" @bind="ShowGridLines" /> Grid Lines</label>
-                    <label><input type="checkbox" @bind="ShowThumbs" /> Slider Thumbs</label>
+                    <div class="setting-option"><label><input type="checkbox" @bind="EnableZebra" /> Zebra Striping</label><button class="reset-icon-btn" @onclick="ResetZebra" title="Reset Zebra Striping" aria-label="Reset Zebra Striping"><i class="fas fa-undo"></i></button></div>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowGridLines" /> Grid Lines</label><button class="reset-icon-btn" @onclick="ResetGridLines" title="Reset Grid Lines" aria-label="Reset Grid Lines"><i class="fas fa-undo"></i></button></div>
+                    <div class="setting-option"><label><input type="checkbox" @bind="ShowThumbs" /> Slider Thumbs</label><button class="reset-icon-btn" @onclick="ResetSliderThumbs" title="Reset Slider Thumbs" aria-label="Reset Slider Thumbs"><i class="fas fa-undo"></i></button></div>
                 </div>
             </div>
 
@@ -115,9 +118,9 @@
             <div class="control-group">
                 <span class="group-label">Compactness</span>
                 <div class="slider-stack">
-                    <SettingsSlider Label="Row Padding" @bind-Value="RowPadding" Min="0" Max="40" Step="1" Unit="px" />
-                    <SettingsSlider Label="Art Size" @bind-Value="ListArtSize" Min="20" Max="120" Step="4" Unit="px" />
-                    <SettingsSlider Label="Sidebar Padding" @bind-Value="SidebarItemPadding" Min="2" Max="30" Step="1" Unit="px" />
+                    <SettingsSlider Label="Row Padding" @bind-Value="RowPadding" Min="0" Max="40" Step="1" Unit="px" DefaultValue="12" />
+                    <SettingsSlider Label="Art Size" @bind-Value="ListArtSize" Min="20" Max="120" Step="4" Unit="px" DefaultValue="40" />
+                    <SettingsSlider Label="Sidebar Padding" @bind-Value="SidebarItemPadding" Min="2" Max="30" Step="1" Unit="px" DefaultValue="10" />
                 </div>
             </div>
         </div>

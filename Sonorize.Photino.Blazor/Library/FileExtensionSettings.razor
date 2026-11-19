@@ -13,9 +13,12 @@
         @foreach (var ext in _knownExtensions)
         {
             bool isActive = IsActive(ext);
-            <button class="extension-toggle @(isActive ? "active" : "")" @onclick="() => ToggleExtension(ext)">
-                @ext
-            </button>
+            <div class="extension-setting-option">
+                <button class="extension-toggle @(isActive ? "active" : "")" @onclick="() => ToggleExtension(ext)">
+                    @ext
+                </button>
+                <button class="reset-icon-btn" @onclick="() => ResetExtension(ext)" title="Reset @ext to default" aria-label="Reset @ext"><i class="fas fa-undo"></i></button>
+            </div>
         }
     </div>
 

@@ -37,6 +37,18 @@ public partial class AdvancedTab
         }, 500);
     }
 
+    private void ResetUpdateChecks()
+    {
+        AppSettings.Updates.CheckForUpdates = true;
+        Save();
+    }
+
+    private void ResetCustomCss()
+    {
+        CustomCss = string.Empty;
+        SettingsManager.Save(AppSettings);
+    }
+
     private void Save()
     {
         SettingsManager.Save(AppSettings);

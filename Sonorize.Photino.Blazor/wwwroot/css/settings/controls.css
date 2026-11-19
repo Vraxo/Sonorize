@@ -256,3 +256,55 @@
 .settings-view-container select:focus {
     border-color: var(--color-accent);
 }
+
+
+/* Consistent per-setting reset controls */
+.setting-with-reset,
+.setting-control-with-reset,
+.setting-editor-with-reset {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+}
+
+.setting-with-reset > :first-child,
+.setting-control-with-reset > :first-child,
+.setting-editor-with-reset > :first-child {
+    flex: 1;
+    min-width: 0;
+}
+
+.setting-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.setting-option > label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.setting-with-reset > .reset-icon-btn,
+.setting-control-with-reset > .reset-icon-btn,
+.setting-editor-with-reset > .reset-icon-btn,
+.setting-option > .reset-icon-btn {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-control);
+}
+
+
+.extension-setting-option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}

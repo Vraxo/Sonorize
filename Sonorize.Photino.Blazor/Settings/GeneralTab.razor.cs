@@ -187,6 +187,27 @@ public partial class GeneralTab
         }
     }
 
+    private void ResetOutputDevice()
+    {
+        AppSettings.Playback.OutputDeviceName = null;
+        PlayerService.ChangeOutputDevice(null);
+        Save();
+    }
+
+    private void ResetPlayOnSingleClick() => PlayOnSingleClick = false;
+    private void ResetSidebarAnimation() => EnableSidebarAnimation = true;
+    private void ResetZoom() => ZoomInt = 100;
+    private void ResetShowIndex() => ShowIndex = true;
+    private void ResetShowArt() => ShowArt = false;
+    private void ResetShowArtist() => ShowArtist = true;
+    private void ResetShowAlbum() => ShowAlbum = true;
+    private void ResetShowDuration() => ShowDuration = true;
+    private void ResetZebra() => EnableZebra = false;
+    private void ResetGridLines() => ShowGridLines = true;
+    private void ResetSliderThumbs() => ShowThumbs = true;
+
+    private void ResetOverflow() => UpdateOverflow(TextOverflowMode.Wrap);
+
     private void UpdateOverflow(TextOverflowMode mode)
     {
         AppSettings.Library.TrackListOverflow = mode;

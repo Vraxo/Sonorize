@@ -7,33 +7,39 @@
     <div class="control-grid-row">
         <div class="control-col">
             <span class="col-label">Player Bar Position</span>
-            <select class="form-control dropdown" @bind="PlayerBarPos">
+            <div class="setting-control-with-reset">
+                <select class="form-control dropdown" @bind="PlayerBarPos">
                 <option value="@PlayerBarPosition.Bottom">Bottom</option>
                 <option value="@PlayerBarPosition.Top">Top</option>
-            </select>
+                </select>
+                <button class="reset-icon-btn" @onclick="ResetPlayerBarPosition" title="Reset to bottom" aria-label="Reset player bar position"><i class="fas fa-undo"></i></button>
+            </div>
         </div>
         <div class="control-col">
             <span class="col-label">Sidebar Position</span>
-            <select class="form-control dropdown" @bind="SidebarPos">
+            <div class="setting-control-with-reset">
+                <select class="form-control dropdown" @bind="SidebarPos">
                 <option value="@SidebarPosition.Left">Left</option>
                 <option value="@SidebarPosition.Right">Right</option>
-            </select>
+                </select>
+                <button class="reset-icon-btn" @onclick="ResetSidebarPosition" title="Reset to left" aria-label="Reset sidebar position"><i class="fas fa-undo"></i></button>
+            </div>
         </div>
     </div>
 
     <div class="divider"></div>
 
     <div class="slider-stack">
-        <SettingsSlider Label="Corner Radius" @bind-Value="BorderRadiusInt" Min="0" Max="24" Step="1" Unit="px" ShowNumberInput="false" />
-        <SettingsSlider Label="Player Bar Height" @bind-Value="PlayerBarHeightInt" Min="60" Max="150" Step="2" Unit="px" />
+        <SettingsSlider Label="Corner Radius" @bind-Value="BorderRadiusInt" Min="0" Max="24" Step="1" Unit="px" ShowNumberInput="false" DefaultValue="4" />
+        <SettingsSlider Label="Player Bar Height" @bind-Value="PlayerBarHeightInt" Min="60" Max="150" Step="2" Unit="px" DefaultValue="90" />
     </div>
 
     <div class="divider"></div>
 
     <div class="checkbox-grid">
-        <label><input type="checkbox" checked="@AppSettings.Theme.UsePillButtons" @onchange="@(e => UpdateBool(v => AppSettings.Theme.UsePillButtons = v, e))" /> Pill-Shaped Buttons</label>
-        <label><input type="checkbox" checked="@AppSettings.Theme.EnableAmbientBackground" @onchange="@(e => UpdateBool(v => AppSettings.Theme.EnableAmbientBackground = v, e))" /> Ambient Background</label>
-        <label><input type="checkbox" checked="@AppSettings.Theme.EnableCustomScrollbars" @onchange="@(e => UpdateBool(v => AppSettings.Theme.EnableCustomScrollbars = v, e))" /> Custom Scrollbars</label>
+        <div class="setting-option"><label><input type="checkbox" checked="@AppSettings.Theme.UsePillButtons" @onchange="@(e => UpdateBool(v => AppSettings.Theme.UsePillButtons = v, e))" /> Pill-Shaped Buttons</label><button class="reset-icon-btn" @onclick="ResetPillButtons" title="Reset to enabled" aria-label="Reset pill buttons"><i class="fas fa-undo"></i></button></div>
+        <div class="setting-option"><label><input type="checkbox" checked="@AppSettings.Theme.EnableAmbientBackground" @onchange="@(e => UpdateBool(v => AppSettings.Theme.EnableAmbientBackground = v, e))" /> Ambient Background</label><button class="reset-icon-btn" @onclick="ResetAmbientBackground" title="Reset to disabled" aria-label="Reset ambient background"><i class="fas fa-undo"></i></button></div>
+        <div class="setting-option"><label><input type="checkbox" checked="@AppSettings.Theme.EnableCustomScrollbars" @onchange="@(e => UpdateBool(v => AppSettings.Theme.EnableCustomScrollbars = v, e))" /> Custom Scrollbars</label><button class="reset-icon-btn" @onclick="ResetCustomScrollbars" title="Reset to enabled" aria-label="Reset custom scrollbars"><i class="fas fa-undo"></i></button></div>
     </div>
 </SettingsCard>
 
@@ -42,13 +48,16 @@
 <SettingsCard Title="Typography">
     <div class="control-group">
         <span class="group-label">Font Family</span>
-        <input type="text" class="form-control dropdown full-width"
-               @bind-value="AppSettings.Theme.CustomFontFamily"
-               @bind-value:event="oninput"
-               @bind-value:after="Save"
-               placeholder="Default (System UI)" />
+        <div class="setting-control-with-reset">
+            <input type="text" class="form-control dropdown full-width"
+                   @bind-value="AppSettings.Theme.CustomFontFamily"
+                   @bind-value:event="oninput"
+                   @bind-value:after="Save"
+                   placeholder="Default (System UI)" />
+            <button class="reset-icon-btn" @onclick="ResetFontFamily" title="Reset to system font" aria-label="Reset font family"><i class="fas fa-undo"></i></button>
+        </div>
     </div>
     <div class="typography-slider-spacing">
-        <SettingsSlider Label="Base Size" @bind-Value="BaseFontSizeInt" Min="10" Max="24" Step="1" Unit="px" ShowNumberInput="false" />
+        <SettingsSlider Label="Base Size" @bind-Value="BaseFontSizeInt" Min="10" Max="24" Step="1" Unit="px" ShowNumberInput="false" DefaultValue="14" />
     </div>
 </SettingsCard>
