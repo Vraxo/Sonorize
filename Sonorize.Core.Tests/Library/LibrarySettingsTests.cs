@@ -51,6 +51,6 @@ public class LibrarySettingsTests
         bool migrated = settings.ApplyOpusDefaultMigration();
 
         Assert.False(migrated);
-        Assert.Equal([".mp3", ".flac", ".custom"], settings.SupportedFileExtensions);
+        Assert.Equal(new[] { ".mp3", ".flac", ".custom" }, settings.SupportedFileExtensions);
     }
 }
