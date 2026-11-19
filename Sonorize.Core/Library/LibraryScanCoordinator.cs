@@ -55,12 +55,6 @@ public class LibraryScanCoordinator
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        if (!Directory.Exists(path))
-        {
-            _logger.Warn($"Configured music folder does not exist and will be skipped: {path}");
-            return;
-        }
-
         _logger.Info($"Scanning library folder: {path}");
 
         (List<Song> songs, List<Playlist> playlists) = await _scanner.ScanAsync(path);
