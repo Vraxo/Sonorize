@@ -1,5 +1,7 @@
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
+using Terminal.Gui.App;
+using Terminal.Gui.Drawing;
 using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
