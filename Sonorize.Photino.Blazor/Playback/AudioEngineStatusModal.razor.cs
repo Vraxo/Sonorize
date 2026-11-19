@@ -6,11 +6,17 @@ namespace Sonorize.Photino.Blazor.Playback;
 public partial class AudioEngineStatusModal
 {
     private bool _fxWarningDismissed = false;
+    private bool _opusWarningDismissed = false;
 
     private void DismissFxWarning()
     {
         _fxWarningDismissed = true;
+        StateHasChanged();
+    }
 
+    private void DismissOpusWarning()
+    {
+        _opusWarningDismissed = true;
         StateHasChanged();
     }
 

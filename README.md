@@ -5,7 +5,7 @@
 ![Sonorize Screenshot](assets/Screenshot.png)
 
 > ⚠️ **Status: Experimental**
-> 
+>
 > This project is in early development. It has currently **only been tested on Windows**. You may encounter bugs or incomplete features.
 
 ## ✨ Features
@@ -41,10 +41,16 @@ cd sonorize
 
 ### 3. Setup Audio Dependencies (BASS)
 
-Sonorize requires `bass.dll` and `bass_fx.dll`.
+Sonorize requires the native `bass` library and `bass_fx` add-on. Opus playback additionally requires the optional `bassopus` add-on.
 
-* The application includes logic to check for these files. If they are missing at runtime, the app will show a popup with download links.
-* For development, ensure these DLLs are present in your output directory (e.g., next to `Sonorize.exe`).
+* The application checks for the core BASS and BASS_FX libraries and provides setup guidance when they are missing.
+* For development, place the native libraries in the application output directory (next to `Sonorize.exe` on Windows).
+* To enable Opus playback, download **BASSOPUS** from the [official BASS add-ons page](https://www.un4seen.com/bass.html#addons) and place the matching native plugin beside the BASS library:
+  * Windows x64: `bassopus.dll`
+  * Linux x64: `libbassopus.so`
+  * macOS: `libbassopus.dylib`
+
+Without BASSOPUS, Sonorize can still index Opus tracks, but it cannot play them. Other supported audio formats are unaffected.
 
 ### 4. Enable Scrobbling (Optional)
 
@@ -107,7 +113,7 @@ The BASS libraries from step 3 are needed here too (`libbass.so` / `libbass.dyli
 
 Contributions are very welcome!
 
- Since this project is experimental, bug reports and feature suggestions are highly appreciated. If you attempt to run this on **macOS** or **Linux**, please share your experience in the issues tab to help us improve cross-platform support.
+Since this project is experimental, bug reports and feature suggestions are highly appreciated. If you attempt to run this on **macOS** or **Linux**, please share your experience in the issues tab to help us improve cross-platform support.
 
 #### 📄 License
 
@@ -116,13 +122,10 @@ The source code for **Sonorize** is licensed under the **MIT License**.
 **Important Notes Regarding Third-Party Dependencies:**
 
 1. **BASS Audio Library**
-   
+
    - This project relies on the **BASS** audio library (Un4seen Developments) for playback.
-   
    - **BASS** is free for **non-commercial** use.
-   
    - Commercial use requires obtaining a separate license from Un4seen Developments.
-   
    - For the most current and complete licensing terms, please refer to the official BASS website.
 
 2. **SkiaSharp and Skia**
@@ -132,8 +135,7 @@ The source code for **Sonorize** is licensed under the **MIT License**.
    - The underlying Skia graphics library is licensed under the **BSD 3-Clause License**.
    - The application includes platform-specific native Skia assets for supported targets.
 
-
-> **Disclaimer:**  
-> Sonorize includes third-party libraries that are licensed separately by their respective authors.  
-> The Sonorize project and its contributors do **not** own these libraries and cannot grant or validate licenses for them.  
+> **Disclaimer:**
+> Sonorize includes third-party libraries that are licensed separately by their respective authors.
+> The Sonorize project and its contributors do **not** own these libraries and cannot grant or validate licenses for them.
 > Users are responsible for ensuring compliance with all third-party licensing requirements when using, modifying, or distributing this software.

@@ -10,6 +10,7 @@ public class AudioService : IAudioService
     private readonly ILogger<AudioService> _logger;
     private int _streamHandle;
     private int _sourceHandle; // Required for FX streams (this is the decode stream)
+    private int _opusPluginHandle;
     private bool _isManuallyStopping = false;
     private string? _preferredDeviceIndexString;
 
@@ -40,6 +41,7 @@ public class AudioService : IAudioService
 
     public bool IsAudioEngineAvailable { get; private set; } = false;
     public bool IsFxAvailable { get; private set; } = false;
+    public bool IsOpusAvailable { get; private set; } = false;
 
     public event Action? PlaybackFinished;
 
@@ -91,7 +93,6 @@ public class AudioService : IAudioService
                 return TimeSpan.Zero;
             }
 
-            // For Tempo streams, length is based on the source
             long len = Bass.ChannelGetLength(_streamHandle);
             double secs = Bass.ChannelBytes2Seconds(_streamHandle, len);
             return TimeSpan.FromSeconds(secs);
@@ -139,11 +140,14 @@ public class AudioService : IAudioService
             {
                 _logger.LogError("BASS initialization failed: {BassError}", Bass.LastError);
             }
+            else
+            {
+                LoadOpusPlugin();
+            }
 
             // Check for BASS_FX
             try
             {
-                // Just accessing this property checks if the DLL is loaded/accessible
                 Version fxVersion = BassFx.Version;
                 IsFxAvailable = fxVersion is not null;
             }
@@ -156,7 +160,38 @@ public class AudioService : IAudioService
         catch (Exception ex)
         {
             IsAudioEngineAvailable = false;
+            IsOpusAvailable = false;
             _logger.LogError(ex, "Critical BASS initialization failure.");
+        }
+    }
+
+    private void LoadOpusPlugin()
+    {
+        if (_opusPluginHandle != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            _opusPluginHandle = Bass.PluginLoad("bassopus");
+            IsOpusAvailable = _opusPluginHandle != 0;
+
+            if (IsOpusAvailable)
+            {
+                _logger.LogInformation("BASS Opus plugin loaded successfully.");
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "BASS Opus plugin is unavailable ({BassError}). Opus tracks can be indexed but cannot be played until the native bassopus plugin is installed next to bass.dll.",
+                    Bass.LastError);
+            }
+        }
+        catch (Exception ex)
+        {
+            IsOpusAvailable = false;
+            _logger.LogWarning(ex, "Could not load the optional BASS Opus plugin. Opus playback is unavailable.");
         }
     }
 
@@ -220,12 +255,16 @@ public class AudioService : IAudioService
 
         Stop();
         _ = Bass.Free();
+        _opusPluginHandle = 0;
+        IsOpusAvailable = false;
 
         if (!Bass.Init(deviceIndex, 44100, DeviceInitFlags.Default, IntPtr.Zero))
         {
             _logger.LogError("Failed to switch audio device: {BassError}", Bass.LastError);
             return;
         }
+
+        LoadOpusPlugin();
 
         if (currentFile is null)
         {
@@ -243,7 +282,6 @@ public class AudioService : IAudioService
         Play();
     }
 
-
     private string? GetCurrentFile()
     {
         return _currentFilePath;
@@ -258,7 +296,6 @@ public class AudioService : IAudioService
 
         Stop();
 
-        // Guard against demo data playback
         if (filePath.StartsWith("demo://", StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogInformation("Ignored playback request for demo track: {FilePath}", filePath);
@@ -267,21 +304,20 @@ public class AudioService : IAudioService
 
         if (Bass.DeviceCount > 0 && Bass.CurrentDevice == -1)
         {
-            _ = Bass.Init(-1, 44100, DeviceInitFlags.Default, IntPtr.Zero);
+            if (Bass.Init(-1, 44100, DeviceInitFlags.Default, IntPtr.Zero))
+            {
+                LoadOpusPlugin();
+            }
         }
 
         int stream = 0;
 
-        // Try to create FX Tempo stream first
         if (IsFxAvailable)
         {
-            // Create DECODE stream (source for FX)
             int source = Bass.CreateStream(filePath, 0, 0, BassFlags.Decode | BassFlags.Prescan | BassFlags.Float);
 
             if (source != 0)
             {
-                // Create TEMPO stream
-                // BassFlags.FxFreeSource ensures the source is freed when tempo stream is freed
                 stream = BassFx.TempoCreate(source, BassFlags.FxFreeSource);
 
                 if (stream != 0)
@@ -290,13 +326,11 @@ public class AudioService : IAudioService
                 }
                 else
                 {
-                    // Fallback if Tempo creation failed but source worked (unlikely, but safe)
                     _ = Bass.StreamFree(source);
                 }
             }
         }
 
-        // Fallback to standard stream if FX missing or failed
         if (stream == 0)
         {
             stream = Bass.CreateStream(filePath, 0, 0, BassFlags.Prescan | BassFlags.Float);
@@ -307,10 +341,8 @@ public class AudioService : IAudioService
             _streamHandle = stream;
             _currentFilePath = filePath;
 
-            // Apply Attributes
             _ = Bass.ChannelSetAttribute(_streamHandle, ChannelAttribute.Volume, Volume);
 
-            // Re-apply FX settings if valid stream
             if (IsFxAvailable && _sourceHandle != 0)
             {
                 ApplyTempoPitch();
@@ -321,7 +353,6 @@ public class AudioService : IAudioService
                 ApplyEqToStream();
             }
 
-            // Setup Sync
             _ = Bass.ChannelSetSync(_streamHandle, SyncFlags.End, 0, (h, c, d, u) =>
             {
                 _ = Task.Run(() =>
@@ -366,7 +397,6 @@ public class AudioService : IAudioService
             _isManuallyStopping = true;
             Bass.ChannelStop(_streamHandle);
             Bass.StreamFree(_streamHandle);
-            // _sourceHandle is freed automatically due to FxFreeSource flag
             _streamHandle = 0;
             _sourceHandle = 0;
             Array.Clear(_eqHandles, 0, _eqHandles.Length);
@@ -532,8 +562,6 @@ public class AudioService : IAudioService
         {
             try
             {
-                // Safety: Ensure we only free if we initialized it, and handle any random
-                // thread-race exceptions during app shutdown gracefully.
                 _ = Bass.Free();
             }
             catch { /* Swallowing shutdown errors is safer than crashing the app closing */ }

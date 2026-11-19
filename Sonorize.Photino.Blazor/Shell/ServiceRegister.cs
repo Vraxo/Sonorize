@@ -24,7 +24,19 @@ public static class ServiceRegistrar
     private static void RegisterSettings(IServiceCollection services)
     {
         services.AddSingleton<ISettingsManager<SonorizeSettings>>(_ => new SettingsManager<SonorizeSettings>("Settings.json"));
-        services.AddSingleton(sp => sp.GetRequiredService<ISettingsManager<SonorizeSettings>>().Load());
+        services.AddSingleton(sp =>
+        {
+            ISettingsManager<SonorizeSettings> manager =
+                sp.GetRequiredService<ISettingsManager<SonorizeSettings>>();
+            SonorizeSettings settings = manager.Load();
+
+            if (settings.Library.ApplyOpusDefaultMigration())
+            {
+                manager.Save(settings);
+            }
+
+            return settings;
+        });
     }
 
     private static void RegisterLibrary(IServiceCollection services)

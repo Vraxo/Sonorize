@@ -27,6 +27,7 @@ public class PlayerService : IPlayerService
     public float Pitch { get; private set; }
     public bool IsAudioEngineAvailable => _audio.IsAudioEngineAvailable;
     public bool IsFxAvailable => _audio.IsFxAvailable;
+    public bool IsOpusAvailable => _audio.IsOpusAvailable;
 
     public TimeSpan CurrentTime => _audio.CurrentTime;
     public TimeSpan TotalTime => _audio.TotalTime;
@@ -117,7 +118,7 @@ public class PlayerService : IPlayerService
 
         if (CurrentSong is null && _queue.Queue.Any())
         {
-            _queue.SetIndex(0); // Default to start
+            _queue.SetIndex(0);
             PlayCurrentSong();
         }
         else if (CurrentSong is not null)
@@ -156,7 +157,7 @@ public class PlayerService : IPlayerService
 
     private void OnPlaybackFinished()
     {
-        // BASS callback happens on a mixer thread. We must dispatch to Task pool 
+        // BASS callback happens on a mixer thread. We must dispatch to Task pool
         // to avoid deadlocks when calling BASS functions that might wait for the mixer.
         Task.Run(() =>
         {

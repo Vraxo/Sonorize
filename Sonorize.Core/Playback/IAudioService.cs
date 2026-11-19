@@ -9,7 +9,8 @@ public interface IAudioService : IDisposable
     float Volume { get; set; }
 
     bool IsAudioEngineAvailable { get; }
-    bool IsFxAvailable { get; } // NEW: Check if bass_fx is loaded
+    bool IsFxAvailable { get; }
+    bool IsOpusAvailable { get; }
 
     void Load(string filePath);
     void Play();

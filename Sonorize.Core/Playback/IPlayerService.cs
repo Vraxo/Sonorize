@@ -22,6 +22,7 @@ public interface IPlayerService : IDisposable
 
     bool IsAudioEngineAvailable { get; }
     bool IsFxAvailable { get; }
+    bool IsOpusAvailable { get; }
 
     event Action? PlaybackStateChanged;
     event Action<bool, RepeatMode>? PlaybackModesChanged;
