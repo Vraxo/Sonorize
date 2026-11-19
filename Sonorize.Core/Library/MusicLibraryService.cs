@@ -70,8 +70,17 @@ public class MusicLibraryService : IMusicLibraryService
             }
 
             List<Song> loadedSongs = songs.ToList();
-            _logger.Info(
-                $"Audio scan results for {folderPath}: {loadedSongs.Count} loaded, {skippedFiles} skipped as invalid, {metadataFallbacks} loaded using filename fallback.");
+            string summary =
+                $"Audio scan results for {folderPath}: {loadedSongs.Count} loaded, {skippedFiles} skipped as invalid, {metadataFallbacks} loaded using filename fallback.";
+
+            if (metadataFallbacks > 0 || skippedFiles > 0)
+            {
+                _logger.Warn(summary);
+            }
+            else
+            {
+                _logger.Info(summary);
+            }
 
             return loadedSongs;
         }, cancellationToken);
@@ -218,7 +227,6 @@ public class MusicLibraryService : IMusicLibraryService
         catch (Exception ex)
         {
             usedMetadataFallback = true;
-            _logger.Warn($"Could not read audio tags for {filePath}; using filename metadata. {ex.Message}");
             return CreateSongFromPath(filePath);
         }
     }
