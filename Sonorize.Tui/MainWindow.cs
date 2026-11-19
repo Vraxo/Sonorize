@@ -20,7 +20,7 @@ public sealed class MainWindow : Runnable
     private readonly UiUpdateCoordinator _updates;
 
     public MainWindow(LibraryService library, IPlayerService player, SonorizeSettings settings,
-        ISettingsManager<SonorizeSettings> settingsManager, ILogger<LibraryScanRunner> logger)
+        ISettingsManager<SonorizeSettings> settingsManager, ILogger<MainWindow> logger)
     {
         Title = "Sonorize";
         _layout = new MainWindowLayout();

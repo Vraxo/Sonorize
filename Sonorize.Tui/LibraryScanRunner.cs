@@ -13,7 +13,7 @@ internal sealed class LibraryScanRunner
 {
     private readonly LibraryService _library;
     private readonly SonorizeSettings _settings;
-    private readonly ILogger<LibraryScanRunner> _logger;
+    private readonly ILogger _logger;
     private readonly Action _markLibraryDirty;
 
     private int _activeScans;

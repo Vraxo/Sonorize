@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Playlists;
