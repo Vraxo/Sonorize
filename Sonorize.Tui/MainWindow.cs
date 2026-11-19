@@ -1,4 +1,4 @@
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
@@ -20,7 +20,7 @@ public sealed class MainWindow : Runnable
     private readonly UiUpdateCoordinator _updates;
 
     public MainWindow(LibraryService library, IPlayerService player, SonorizeSettings settings,
-        ISettingsManager<SonorizeSettings> settingsManager, LogService logger)
+        ISettingsManager<SonorizeSettings> settingsManager, ILogger<MainWindow> logger)
     {
         Title = "Sonorize";
         _layout = new MainWindowLayout();

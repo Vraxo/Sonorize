@@ -1,4 +1,4 @@
-﻿using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging;
 
 using ManagedBass;
 using ManagedBass.Fx; // Required for Tempo/Pitch
@@ -7,7 +7,7 @@ namespace Sonorize.Core.Playback;
 
 public class AudioService : IAudioService
 {
-    private readonly LogService _logger;
+    private readonly ILogger<AudioService> _logger;
     private int _streamHandle;
     private int _sourceHandle; // Required for FX streams (this is the decode stream)
     private bool _isManuallyStopping = false;
@@ -115,7 +115,7 @@ public class AudioService : IAudioService
         }
     } = 1.0f;
 
-    public AudioService(LogService logger)
+    public AudioService(ILogger<AudioService> logger)
     {
         _logger = logger;
 
@@ -137,7 +137,7 @@ public class AudioService : IAudioService
 
             if (!IsAudioEngineAvailable)
             {
-                _logger.Error($"BASS Init Failed: {Bass.LastError}");
+                _logger.LogError("BASS initialization failed: {BassError}", Bass.LastError);
             }
 
             // Check for BASS_FX
@@ -150,13 +150,13 @@ public class AudioService : IAudioService
             catch
             {
                 IsFxAvailable = false;
-                _logger.Warn("bass_fx library not found. Speed/Pitch controls disabled.");
+                _logger.LogWarning("bass_fx library not found. Speed/Pitch controls disabled.");
             }
         }
         catch (Exception ex)
         {
             IsAudioEngineAvailable = false;
-            _logger.Error("Critical BASS initialization failure", ex);
+            _logger.LogError(ex, "Critical BASS initialization failure.");
         }
     }
 
@@ -223,7 +223,7 @@ public class AudioService : IAudioService
 
         if (!Bass.Init(deviceIndex, 44100, DeviceInitFlags.Default, IntPtr.Zero))
         {
-            _logger.Error($"Failed to switch audio device: {Bass.LastError}");
+            _logger.LogError("Failed to switch audio device: {BassError}", Bass.LastError);
             return;
         }
 
@@ -261,7 +261,7 @@ public class AudioService : IAudioService
         // Guard against demo data playback
         if (filePath.StartsWith("demo://", StringComparison.OrdinalIgnoreCase))
         {
-            _logger.Info($"Ignored playback request for demo track: {filePath}");
+            _logger.LogInformation("Ignored playback request for demo track: {FilePath}", filePath);
             return;
         }
 
@@ -335,7 +335,7 @@ public class AudioService : IAudioService
         }
         else
         {
-            _logger.Error($"Failed to load stream: {filePath}. Error: {Bass.LastError}");
+            _logger.LogError("Failed to load stream for {FilePath}: {BassError}", filePath, Bass.LastError);
         }
     }
 
@@ -346,7 +346,7 @@ public class AudioService : IAudioService
             return;
         }
 
-        _logger.Error($"Play failed: {Bass.LastError}");
+        _logger.LogError("Playback failed: {BassError}", Bass.LastError);
     }
 
     public void Pause()
@@ -520,7 +520,7 @@ public class AudioService : IAudioService
         if (!Bass.FXSetParameters(_eqHandles[index], param))
         {
             // EQ param update failures are rare but good to know about
-            // _logger.Warn($"EQ update failed for band {index}");
+            // _logger.LogWarning($"EQ update failed for band {index}");
         }
     }
 

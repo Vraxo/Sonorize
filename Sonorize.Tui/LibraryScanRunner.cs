@@ -1,4 +1,4 @@
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging;
 using Sonorize.Core.Library;
 using Sonorize.Core.Settings;
 
@@ -13,7 +13,7 @@ internal sealed class LibraryScanRunner
 {
     private readonly LibraryService _library;
     private readonly SonorizeSettings _settings;
-    private readonly LogService _logger;
+    private readonly ILogger _logger;
     private readonly Action _markLibraryDirty;
 
     private int _activeScans;
@@ -21,7 +21,7 @@ internal sealed class LibraryScanRunner
     public LibraryScanRunner(
         LibraryService library,
         SonorizeSettings settings,
-        LogService logger,
+        ILogger logger,
         Action markLibraryDirty)
     {
         _library = library;
@@ -56,7 +56,7 @@ internal sealed class LibraryScanRunner
         }
         catch (Exception ex)
         {
-            _logger.Error("[TUI] Library scan failed", ex);
+            _logger.LogError(ex, "[TUI] Library scan failed");
         }
         finally
         {

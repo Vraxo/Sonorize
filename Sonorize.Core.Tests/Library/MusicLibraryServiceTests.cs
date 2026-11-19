@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 
@@ -13,7 +14,7 @@ public class MusicLibraryServiceTests : IDisposable
     {
         _tempTestDirectory = Path.Combine(Path.GetTempPath(), "SonorizeMusicLibTests_" + Guid.NewGuid());
         _ = Directory.CreateDirectory(_tempTestDirectory);
-        _musicLibraryService = new MusicLibraryService(new LogService());
+        _musicLibraryService = new MusicLibraryService(NullLogger<MusicLibraryService>.Instance);
     }
 
     public void Dispose()

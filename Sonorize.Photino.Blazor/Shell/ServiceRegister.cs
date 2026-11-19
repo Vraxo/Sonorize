@@ -14,17 +14,11 @@ public static class ServiceRegistrar
 {
     public static void Configure(IServiceCollection services)
     {
-        RegisterCoreInfrastructure(services);
         RegisterSettings(services);
         RegisterLibrary(services);
         RegisterAudio(services);
         RegisterUI(services);
         RegisterIntegrations(services);
-    }
-
-    private static void RegisterCoreInfrastructure(IServiceCollection services)
-    {
-        services.AddSingleton<LogService>();
     }
 
     private static void RegisterSettings(IServiceCollection services)

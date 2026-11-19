@@ -1,20 +1,20 @@
+using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 using System.Reflection;
-using Sonorize.Core.Core;
 
 namespace Sonorize.Core.Updates;
 
 public class GitHubUpdateService : IDisposable
 {
     private readonly HttpClient _http;
-    private readonly LogService _logger;
+    private readonly ILogger<GitHubUpdateService> _logger;
 
     public event Action<ReleaseInfo>? UpdateDetected;
 
     private const string RepoOwner = "Sonorize";
     private const string RepoName = "Sonorize";
 
-    public GitHubUpdateService(LogService logger)
+    public GitHubUpdateService(ILogger<GitHubUpdateService> logger)
     {
         _logger = logger;
         _http = new();
@@ -66,7 +66,7 @@ public class GitHubUpdateService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger.Warn($"Update check failed: {ex.Message}");
+            _logger.LogWarning(ex, "Update check failed.");
         }
     }
 
