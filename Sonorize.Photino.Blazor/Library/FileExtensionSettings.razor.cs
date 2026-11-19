@@ -42,7 +42,7 @@ public partial class FileExtensionSettings
 
     private void ResetExtension(string extension)
     {
-        bool enabledByDefault = extension is ".mp3" or ".flac" or ".wav" or ".m4a" or ".aac" or ".ogg";
+        bool enabledByDefault = extension is ".mp3" or ".flac" or ".wav" or ".m4a" or ".aac" or ".ogg" or ".opus";
         bool isEnabled = IsActive(extension);
 
         if (enabledByDefault == isEnabled)
