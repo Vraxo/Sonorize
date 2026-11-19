@@ -27,12 +27,12 @@
     <div class="control-group">
         <span class="group-label">Transparency & Effects</span>
         <div class="slider-stack">
-            <SettingsSlider Label="Bg Blur" @bind-Value="BackgroundBlur" Min="0" Max="100" Step="5" Unit="px" />
-            <SettingsSlider Label="Bg Brightness" @bind-Value="BgBrightnessInt" Min="0" Max="100" Step="5" Unit="%" />
-            <SettingsSlider Label="Sidebar Opacity" @bind-Value="SidebarOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
-            <SettingsSlider Label="Content Opacity" @bind-Value="MainContentOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
-            <SettingsSlider Label="Bar Opacity" @bind-Value="PlayerBarOpacityInt" Min="5" Max="100" Step="5" Unit="%" />
-            <SettingsSlider Label="Gradient H" @bind-Value="GradientHeightInt" Min="0" Max="800" Step="50" Unit="px" />
+            <SettingsSlider Label="Bg Blur" @bind-Value="BackgroundBlur" Min="0" Max="100" Step="5" Unit="px" DefaultValue="20" />
+            <SettingsSlider Label="Bg Brightness" @bind-Value="BgBrightnessInt" Min="0" Max="100" Step="5" Unit="%" DefaultValue="40" />
+            <SettingsSlider Label="Sidebar Opacity" @bind-Value="SidebarOpacityInt" Min="5" Max="100" Step="5" Unit="%" DefaultValue="90" />
+            <SettingsSlider Label="Content Opacity" @bind-Value="MainContentOpacityInt" Min="5" Max="100" Step="5" Unit="%" DefaultValue="90" />
+            <SettingsSlider Label="Bar Opacity" @bind-Value="PlayerBarOpacityInt" Min="5" Max="100" Step="5" Unit="%" DefaultValue="95" />
+            <SettingsSlider Label="Gradient H" @bind-Value="GradientHeightInt" Min="0" Max="800" Step="50" Unit="px" DefaultValue="250" />
         </div>
     </div>
 
