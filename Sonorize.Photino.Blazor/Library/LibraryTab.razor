@@ -29,10 +29,13 @@
             <span class="card-desc">Manage watched folders</span>
         </div>
         <div class="card-content">
-            <label class="toggle-row">
-                <span class="toggle-label">Scan library on application startup</span>
-                <input type="checkbox" @bind="ScanOnStartup" class="toggle-input" />
-            </label>
+            <div class="setting-with-reset">
+                <label class="toggle-row">
+                    <span class="toggle-label">Scan library on application startup</span>
+                    <input type="checkbox" @bind="ScanOnStartup" class="toggle-input" />
+                </label>
+                <button class="reset-icon-btn" @onclick="ResetScanOnStartup" title="Reset to enabled" aria-label="Reset startup scanning"><i class="fas fa-undo"></i></button>
+            </div>
 
             <div class="divider"></div>
 
