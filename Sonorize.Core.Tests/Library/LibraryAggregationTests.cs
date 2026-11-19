@@ -69,12 +69,13 @@ public class LibraryAggregationTests
         var scanCoordinator = new LibraryScanCoordinator(
             new FolderScanner(_mockMusicLibrary, settings),
             dataManager,
-            settings);
+            settings,
+            new LogService());
 
         _libraryService = new LibraryService(
             dataManager,
             scanCoordinator,
-            new LibraryEventCoordinator(settings, dataManager, fileMonitor),
+            new LibraryEventCoordinator(settings, dataManager, fileMonitor, _mockMusicLibrary),
             new DemoDataLoader(dataManager),
             playlistManager,
             _mockMusicLibrary,

@@ -8,15 +8,18 @@ public class LibraryEventCoordinator : IDisposable
     private readonly SonorizeSettings _settings;
     private readonly LibraryDataManager _dataManager;
     private readonly LibraryFileMonitor _fileMonitor;
+    private readonly IMusicLibraryService _musicLibrary;
 
     public LibraryEventCoordinator(
         SonorizeSettings settings,
         LibraryDataManager dataManager,
-        LibraryFileMonitor fileMonitor)
+        LibraryFileMonitor fileMonitor,
+        IMusicLibraryService musicLibrary)
     {
         _settings = settings;
         _dataManager = dataManager;
         _fileMonitor = fileMonitor;
+        _musicLibrary = musicLibrary;
 
         SubscribeToEvents();
     }
@@ -40,8 +43,7 @@ public class LibraryEventCoordinator : IDisposable
             return;
         }
 
-        MusicLibraryService musicLibrary = new();
-        Song? song = musicLibrary.CreateSongFromFileAsync(path).GetAwaiter().GetResult();
+        Song? song = _musicLibrary.CreateSongFromFileAsync(path).GetAwaiter().GetResult();
 
         if (song == null)
         {

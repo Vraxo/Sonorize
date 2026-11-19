@@ -11,8 +11,9 @@ namespace Sonorize.Photino.Blazor;
 
 public class Program
 {
-    // Removed "Global\" prefix to ensure compatibility with Linux/macOS
+    // Removed "Global\\" prefix to ensure compatibility with Linux/macOS
     private const string MutexName = "Sonorize_SingleInstance_Mutex";
+    private const string PhotinoLogVerbosityVariable = "SONORIZE_PHOTINO_LOG_VERBOSITY";
 
     [STAThread]
     private static void Main(string[] args)
@@ -20,31 +21,32 @@ public class Program
         using Mutex mutex = new(true, MutexName, out bool createdNew);
         if (!createdNew)
         {
-            // Another instance is already running
-            // In a production app, we might want to bring the other window to front here,
-            // but for now, we simply exit to prevent data corruption.
             return;
         }
 
+        LogService logger = new();
+
         try
         {
-            PhotinoBlazorAppBuilder appBuilder = PhotinoBlazorAppBuilder.CreateDefault(args);
+            logger.Info("Application startup started.");
+            logger.Info($"Application base directory: {AppContext.BaseDirectory}");
+            logger.Info($"Application log file: {Path.Combine(AppDataHelper.GetBaseDirectory(), "app.log")}");
 
+            PhotinoBlazorAppBuilder appBuilder = PhotinoBlazorAppBuilder.CreateDefault(args);
             PhotinoBlazorApp app = RegisterServices(appBuilder);
+
+            logger.Info("Services registered.");
             InitializeAppLogic(app.Services);
             SetupWindowAndPersistence(app);
             RegisterCustomSchemes(app);
 
+            logger.Info("Starting Photino window.");
             app.Run();
+            logger.Info("Photino window closed.");
         }
         catch (Exception ex)
         {
-            // Fatal Crash Handler
-            // Since DI might have failed, we instantiate a temporary logger manually
-            LogService logger = new();
-            logger.Error("FATAL APP CRASH", ex);
-
-            // Re-throw to ensure the OS knows the process failed
+            logger.Error("Fatal application crash.", ex);
             throw;
         }
     }
@@ -53,24 +55,23 @@ public class Program
     {
         ServiceRegistrar.Configure(appBuilder.Services);
         appBuilder.RootComponents.Add<App>("app");
-        PhotinoBlazorApp app = appBuilder.Build();
-        return app;
+        return appBuilder.Build();
     }
 
     private static void InitializeAppLogic(IServiceProvider services)
     {
         LogService logger = services.GetRequiredService<LogService>();
-        logger.Info("App starting...");
+        logger.Info("Initializing application services.");
 
-        services.GetRequiredService<PlayerSettingsPersistenceService>();
+        _ = services.GetRequiredService<PlayerSettingsPersistenceService>();
+        logger.Info("Player settings persistence initialized.");
 
-        // Initialize Scrobble Orchestrator so it starts listening to Player events
-        services.GetRequiredService<ScrobbleOrchestrator>();
+        _ = services.GetRequiredService<ScrobbleOrchestrator>();
+        logger.Info("Scrobbling services initialized.");
 
         LibraryService library = services.GetRequiredService<LibraryService>();
         SonorizeSettings settings = services.GetRequiredService<SonorizeSettings>();
 
-        // Keep library loading and scanning off the UI startup path.
         _ = InitializeLibraryAsync(library, settings, logger);
     }
 
@@ -81,20 +82,29 @@ public class Program
     {
         try
         {
+            logger.Info("Loading library cache and starting file monitoring.");
             await library.InitializeAsync();
+            logger.Info($"Library cache loaded: {library.AllSongs.Count} songs.");
 
-            if (!settings.Library.ScanOnStartup || settings.Library.MusicFolderPaths.Count == 0)
+            if (!settings.Library.ScanOnStartup)
             {
+                logger.Info("Startup library scan is disabled in settings.");
                 return;
             }
 
-            logger.Info("Starting startup library scan...");
+            if (settings.Library.MusicFolderPaths.Count == 0)
+            {
+                logger.Warn("Startup library scan skipped because no music folders are configured.");
+                return;
+            }
+
+            logger.Info($"Starting startup library scan for {settings.Library.MusicFolderPaths.Count} folder(s).");
             await library.RefreshLibraryAsync();
-            logger.Info("Startup library scan completed.");
+            logger.Info($"Startup library scan completed. Library now contains {library.AllSongs.Count} songs.");
         }
         catch (Exception ex)
         {
-            logger.Error("Library initialization or startup scan failed", ex);
+            logger.Error("Library initialization or startup scan failed.", ex);
         }
     }
 
@@ -109,9 +119,16 @@ public class Program
         LibraryService library = app.Services.GetRequiredService<LibraryService>();
 
         app.MainWindow.RegisterCustomSchemeHandler("sonorize",
-           (object sender, string scheme, string url, out string contentType) =>
-           {
-               return SchemeHandlers.ProcessRequest(url, library, out contentType);
-           });
+            (object sender, string scheme, string url, out string contentType) =>
+                SchemeHandlers.ProcessRequest(url, library, out contentType));
+    }
+
+    internal static int GetPhotinoLogVerbosity()
+    {
+        string? configuredValue = Environment.GetEnvironmentVariable(PhotinoLogVerbosityVariable);
+
+        return int.TryParse(configuredValue, out int verbosity)
+            ? verbosity
+            : 0;
     }
 }

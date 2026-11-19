@@ -13,7 +13,7 @@ public class MusicLibraryServiceTests : IDisposable
     {
         _tempTestDirectory = Path.Combine(Path.GetTempPath(), "SonorizeMusicLibTests_" + Guid.NewGuid());
         _ = Directory.CreateDirectory(_tempTestDirectory);
-        _musicLibraryService = new MusicLibraryService();
+        _musicLibraryService = new MusicLibraryService(new LogService());
     }
 
     public void Dispose()

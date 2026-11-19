@@ -78,12 +78,13 @@ public class LibraryServiceTests
         var scanCoordinator = new LibraryScanCoordinator(
             new FolderScanner(_mockMusicLibrary, _settings),
             dataManager,
-            _settings);
+            _settings,
+            new LogService());
 
         _libraryService = new LibraryService(
             dataManager,
             scanCoordinator,
-            new LibraryEventCoordinator(_settings, dataManager, _fileMonitor),
+            new LibraryEventCoordinator(_settings, dataManager, _fileMonitor, _mockMusicLibrary),
             new DemoDataLoader(dataManager),
             _playlistManager,
             _mockMusicLibrary,

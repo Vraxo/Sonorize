@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playlists;
 using Sonorize.Core.Settings;
@@ -9,37 +10,58 @@ public class LibraryScanCoordinator
     private readonly FolderScanner _scanner;
     private readonly LibraryDataManager _dataManager;
     private readonly SonorizeSettings _settings;
+    private readonly LogService _logger;
 
     public LibraryScanCoordinator(
         FolderScanner scanner,
         LibraryDataManager dataManager,
-        SonorizeSettings settings)
+        SonorizeSettings settings,
+        LogService logger)
     {
         _scanner = scanner;
         _dataManager = dataManager;
         _settings = settings;
+        _logger = logger;
     }
 
     public async Task ScanAllFoldersAsync()
     {
-        foreach (string path in _settings.Library.MusicFolderPaths)
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        IReadOnlyList<string> folders = _settings.Library.MusicFolderPaths;
+
+        _logger.Info($"Library scan started for {folders.Count} configured folder(s).");
+
+        foreach (string path in folders)
         {
             await ScanFolderWithCleanupAsync(path);
         }
+
+        _logger.Info($"Library scan finished in {stopwatch.Elapsed.TotalSeconds:F1}s.");
     }
 
     public async Task ScanSingleFolderAsync(string path)
     {
-        (List<Song>? songs, List<Playlist>? playlists) = await _scanner.ScanAsync(path);
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        _logger.Info($"Scanning library folder: {path}");
 
+        (List<Song> songs, List<Playlist> playlists) = await _scanner.ScanAsync(path);
         ProcessScanResults(songs, playlists, cleanup: false);
+
+        _logger.Info(
+            $"Folder scan completed: {path} ({songs.Count} songs, {playlists.Count} playlists, {stopwatch.Elapsed.TotalSeconds:F1}s).");
     }
 
     private async Task ScanFolderWithCleanupAsync(string path)
     {
-        (List<Song>? songs, List<Playlist>? playlists) = await _scanner.ScanAsync(path);
+        Stopwatch stopwatch = Stopwatch.StartNew();
 
+        _logger.Info($"Scanning library folder: {path}");
+
+        (List<Song> songs, List<Playlist> playlists) = await _scanner.ScanAsync(path);
         ProcessScanResults(songs, playlists, cleanup: true);
+
+        _logger.Info(
+            $"Folder scan completed: {path} ({songs.Count} songs, {playlists.Count} playlists, {stopwatch.Elapsed.TotalSeconds:F1}s).");
     }
 
     private void ProcessScanResults(List<Song> songs, List<Playlist> playlists, bool cleanup)
@@ -59,7 +81,7 @@ public class LibraryScanCoordinator
 
     private void RemoveMissingSongs(List<Song> foundSongs)
     {
-        HashSet<string> foundPaths = new(foundSongs.Select(s => s.FilePath), StringComparer.OrdinalIgnoreCase);
+        HashSet<string> foundPaths = new(foundSongs.Select(song => song.FilePath), StringComparer.OrdinalIgnoreCase);
 
         foreach (Song song in _dataManager.AllSongs)
         {

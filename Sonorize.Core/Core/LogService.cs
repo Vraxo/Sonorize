@@ -2,19 +2,16 @@ namespace Sonorize.Core.Core;
 
 public class LogService
 {
+    private const long MaxLogSizeBytes = 5 * 1024 * 1024;
+
     private readonly string _logPath;
     private readonly object _lock = new();
 
     public LogService()
     {
-        string dir = AppDataHelper.GetBaseDirectory();
-
-        if (!Directory.Exists(dir))
-        {
-            _ = Directory.CreateDirectory(dir);
-        }
-
-        _logPath = Path.Combine(dir, "app.log");
+        string directory = AppDataHelper.GetBaseDirectory();
+        Directory.CreateDirectory(directory);
+        _logPath = Path.Combine(directory, "app.log");
     }
 
     public void Info(string message)
@@ -29,43 +26,60 @@ public class LogService
 
     public void Error(string message, Exception? ex = null)
     {
-        string msg = ex is null
-            ? message
-            : $"{message}\n{ex}";
-
-        Write("ERROR", msg);
+        string details = ex is null ? message : $"{message}{Environment.NewLine}{ex}";
+        Write("ERROR", details);
     }
 
     private void Write(string level, string message)
     {
-        try
-        {
-            lock (_lock)
-            {
-                // Simple rolling log: if > 5MB, delete and start over
-                NameMe();
+        string line = $"[{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz}] [{level}] {message}";
 
-                string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{level}] {message}{Environment.NewLine}";
-
-                File.AppendAllText(_logPath, line);
-            }
-        }
-        catch
+        lock (_lock)
         {
-            // Fallback to console if file access fails (better than crashing the crash logger)
-            Console.WriteLine($"[LOG FAILURE] {message}");
+            WriteToConsole(line);
+            WriteToFile(line);
         }
     }
 
-    private void NameMe()
+    private static void WriteToConsole(string line)
     {
-        const int Mb5 = 5 * 1024 * 1024;
+        try
+        {
+            Console.WriteLine(line);
+        }
+        catch
+        {
+            // Logging must never interrupt the application.
+        }
+    }
 
-        if (!File.Exists(_logPath) || new FileInfo(_logPath).Length <= Mb5)
+    private void WriteToFile(string line)
+    {
+        try
+        {
+            RotateLogIfNeeded();
+            File.AppendAllText(_logPath, line + Environment.NewLine);
+        }
+        catch (Exception ex)
+        {
+            WriteToConsole($"[LOG FAILURE] Could not write '{_logPath}': {ex.Message}");
+        }
+    }
+
+    private void RotateLogIfNeeded()
+    {
+        if (!File.Exists(_logPath) || new FileInfo(_logPath).Length <= MaxLogSizeBytes)
         {
             return;
         }
 
-        File.Delete(_logPath);
+        string previousLogPath = $"{_logPath}.old";
+
+        if (File.Exists(previousLogPath))
+        {
+            File.Delete(previousLogPath);
+        }
+
+        File.Move(_logPath, previousLogPath);
     }
 }

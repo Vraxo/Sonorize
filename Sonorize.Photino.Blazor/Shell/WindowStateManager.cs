@@ -32,7 +32,7 @@ public class WindowStateManager
         _app.MainWindow
             .SetTitle("Sonorize")
             .SetIconFile(iconPath)
-            .SetLogVerbosity(0);
+            .SetLogVerbosity(Program.GetPhotinoLogVerbosity());
 
         // Enforce the minimum size at the OS level
         // This prevents the user from shrinking the window to a point where the UI breaks

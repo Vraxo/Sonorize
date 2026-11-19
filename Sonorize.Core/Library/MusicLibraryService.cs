@@ -13,18 +13,25 @@ public class MusicLibraryService : IMusicLibraryService
         ".m3u8"
     };
 
+    private readonly LogService _logger;
+
+    public MusicLibraryService(LogService logger)
+    {
+        _logger = logger;
+    }
+
     public Task<List<Song>> LoadSongsFromFolderAsync(string folderPath, IEnumerable<string> extensions, CancellationToken cancellationToken)
     {
-        // Create a fast lookup set from the provided extensions
         HashSet<string> extensionSet = new(extensions, StringComparer.OrdinalIgnoreCase);
 
         return Task.Run(() =>
         {
-            // Use shared safe walker
-            IEnumerable<string> musicFiles = FileSystemHelper.GetFilesSafe(folderPath, extensionSet);
-
-            // Thread-safe collection for parallel processing
+            List<string> musicFiles = FileSystemHelper.GetFilesSafe(folderPath, extensionSet).ToList();
             ConcurrentBag<Song> songs = [];
+            int skippedFiles = 0;
+            int metadataFallbacks = 0;
+
+            _logger.Info($"Found {musicFiles.Count} supported audio file(s) in {folderPath}.");
 
             try
             {
@@ -34,29 +41,48 @@ public class MusicLibraryService : IMusicLibraryService
                     CancellationToken = cancellationToken
                 };
 
-                _ = Parallel.ForEach(musicFiles, parallelOptions, (file) =>
+                _ = Parallel.ForEach(musicFiles, parallelOptions, file =>
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
 
-                    // Pre-check for validity before heavy parsing
                     if (!IsFileValid(file))
                     {
+                        Interlocked.Increment(ref skippedFiles);
                         return;
                     }
 
-                    songs.Add(ProcessMusicFile(file));
+                    Song song = ProcessMusicFile(file, out bool usedMetadataFallback);
+                    songs.Add(song);
+
+                    if (usedMetadataFallback)
+                    {
+                        Interlocked.Increment(ref metadataFallbacks);
+                    }
                 });
             }
             catch (OperationCanceledException)
             {
+                _logger.Warn($"Audio file scan cancelled for {folderPath}.");
                 return [];
             }
 
-            return songs.ToList();
+            List<Song> loadedSongs = songs.ToList();
+            string summary =
+                $"Audio scan results for {folderPath}: {loadedSongs.Count} loaded, {skippedFiles} skipped as invalid, {metadataFallbacks} loaded using filename fallback.";
 
+            if (metadataFallbacks > 0 || skippedFiles > 0)
+            {
+                _logger.Warn(summary);
+            }
+            else
+            {
+                _logger.Info(summary);
+            }
+
+            return loadedSongs;
         }, cancellationToken);
     }
 
@@ -66,6 +92,7 @@ public class MusicLibraryService : IMusicLibraryService
         {
             IEnumerable<string> playlistFiles = FileSystemHelper.GetFilesSafe(folderPath, PlaylistExtensions);
             List<Playlist> playlists = [];
+            int skippedFiles = 0;
 
             foreach (string file in playlistFiles)
             {
@@ -76,6 +103,7 @@ public class MusicLibraryService : IMusicLibraryService
 
                 if (!IsFileValid(file))
                 {
+                    skippedFiles++;
                     continue;
                 }
 
@@ -83,10 +111,16 @@ public class MusicLibraryService : IMusicLibraryService
 
                 if (playlist is null)
                 {
+                    skippedFiles++;
                     continue;
                 }
 
                 playlists.Add(playlist);
+            }
+
+            if (skippedFiles > 0)
+            {
+                _logger.Warn($"Skipped {skippedFiles} invalid or unreadable playlist file(s) in {folderPath}.");
             }
 
             return playlists;
@@ -99,11 +133,9 @@ public class MusicLibraryService : IMusicLibraryService
         {
             return !IsFileValid(filePath)
                 ? null
-                : ProcessMusicFile(filePath);
+                : ProcessMusicFile(filePath, out _);
         });
     }
-
-    // --- Metadata Editing ---
 
     public SongMetadata? GetMetadata(string filePath)
     {
@@ -131,7 +163,7 @@ public class MusicLibraryService : IMusicLibraryService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Error] Failed to read metadata for {filePath}: {ex.Message}");
+            _logger.Error($"Failed to read metadata for {filePath}.", ex);
             return null;
         }
     }
@@ -149,21 +181,10 @@ public class MusicLibraryService : IMusicLibraryService
             TagLib.Tag tag = file.Tag;
 
             tag.Title = metadata.Title;
-
-            tag.Performers = string.IsNullOrWhiteSpace(metadata.Artist)
-                ? []
-                : [metadata.Artist];
-
+            tag.Performers = string.IsNullOrWhiteSpace(metadata.Artist) ? [] : [metadata.Artist];
             tag.Album = metadata.Album;
-
-            tag.AlbumArtists = string.IsNullOrWhiteSpace(metadata.AlbumArtists)
-                ? []
-                : [metadata.AlbumArtists];
-
-            tag.Genres = string.IsNullOrWhiteSpace(metadata.Genre)
-                ? []
-                : [metadata.Genre];
-
+            tag.AlbumArtists = string.IsNullOrWhiteSpace(metadata.AlbumArtists) ? [] : [metadata.AlbumArtists];
+            tag.Genres = string.IsNullOrWhiteSpace(metadata.Genre) ? [] : [metadata.Genre];
             tag.Year = metadata.Year;
             tag.Track = metadata.Track;
             tag.Disc = metadata.Disc;
@@ -173,12 +194,10 @@ public class MusicLibraryService : IMusicLibraryService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Error] Failed to save metadata for {filePath}: {ex.Message}");
+            _logger.Error($"Failed to save metadata for {filePath}.", ex);
             return false;
         }
     }
-
-    // --- Helper ---
 
     private static bool IsFileValid(string path)
     {
@@ -189,7 +208,6 @@ public class MusicLibraryService : IMusicLibraryService
 
         try
         {
-            // Guard against 0-byte files which cause crashes in many parsers
             return new FileInfo(path).Length > 0;
         }
         catch
@@ -198,17 +216,17 @@ public class MusicLibraryService : IMusicLibraryService
         }
     }
 
-    // --- Internal Processors ---
-
-    private static Song ProcessMusicFile(string filePath)
+    private Song ProcessMusicFile(string filePath, out bool usedMetadataFallback)
     {
         try
         {
             using TagLib.File tagFile = TagLib.File.Create(filePath);
+            usedMetadataFallback = false;
             return CreateSongFromTags(tagFile, filePath);
         }
         catch (Exception)
         {
+            usedMetadataFallback = true;
             return CreateSongFromPath(filePath);
         }
     }
@@ -259,9 +277,7 @@ public class MusicLibraryService : IMusicLibraryService
 
     private static Song CreateSongFromTags(TagLib.File tagFile, string filePath)
     {
-        bool hasArt =
-            tagFile.Tag.Pictures is not null
-            && tagFile.Tag.Pictures.Length > 0;
+        bool hasArt = tagFile.Tag.Pictures is not null && tagFile.Tag.Pictures.Length > 0;
 
         return new()
         {
