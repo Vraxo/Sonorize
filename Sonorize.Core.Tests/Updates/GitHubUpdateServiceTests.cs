@@ -17,7 +17,7 @@ public class GitHubUpdateServiceTests
             Content = new StringContent(
                 """
                 {
-                    "tag_name": "v99.0.0",
+                    "tag_name": "v9999.0.0",
                     "body": "Release notes",
                     "prerelease": false,
                     "assets": [
@@ -48,9 +48,9 @@ public class GitHubUpdateServiceTests
             "https://api.github.com/repos/Vraxo/Sonorize/releases/latest",
             handler.RequestedUris.Single()?.ToString());
         Assert.NotNull(detectedRelease);
-        Assert.Equal("v99.0.0", detectedRelease.Version);
+        Assert.Equal("v9999.0.0", detectedRelease.Version);
         Assert.Equal("Release notes", detectedRelease.ReleaseNotes);
-        Assert.Equal(123, detectedRelease.SizeBytes);
+        Assert.Equal(123L, detectedRelease.SizeBytes);
     }
 
     [Fact]
