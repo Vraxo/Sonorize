@@ -26,6 +26,14 @@
     </div>
 
     <div class="header-controls header-right">
+        <button class="header-action-btn"
+                title="@(IsScanning ? "Scanning library..." : "Scan library")"
+                aria-label="@(IsScanning ? "Scanning library" : "Scan library")"
+                disabled="@IsScanning"
+                @onclick="OnScanClick">
+            <i class="fas @(IsScanning ? "fa-spinner fa-spin" : "fa-sync-alt")"></i>
+        </button>
+
         <!-- View Toggle: Shows the icon of the view we will switch TO -->
         <button class="header-action-btn"
                 title="@(ViewMode == LibraryViewMode.List ? "Switch to Grid" : "Switch to List")"
