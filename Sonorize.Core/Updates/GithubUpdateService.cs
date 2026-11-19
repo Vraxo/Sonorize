@@ -1,32 +1,73 @@
-using Microsoft.Extensions.Logging;
+using System.Globalization;
+using System.Net;
 using System.Net.Http.Json;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
+using Sonorize.Core.Settings;
 
 namespace Sonorize.Core.Updates;
 
 public class GitHubUpdateService : IDisposable
 {
+    private const string ReleaseApiUrl = "https://api.github.com/repos/Vraxo/Sonorize/releases/latest";
+
     private readonly HttpClient _http;
     private readonly ILogger<GitHubUpdateService> _logger;
+    private readonly SonorizeSettings _settings;
+    private readonly ISettingsManager<SonorizeSettings> _settingsManager;
 
     public event Action<ReleaseInfo>? UpdateDetected;
 
-    private const string RepoOwner = "Sonorize";
-    private const string RepoName = "Sonorize";
+    public GitHubUpdateService(
+        ILogger<GitHubUpdateService> logger,
+        SonorizeSettings settings,
+        ISettingsManager<SonorizeSettings> settingsManager)
+        : this(logger, settings, settingsManager, new HttpClient())
+    {
+    }
 
-    public GitHubUpdateService(ILogger<GitHubUpdateService> logger)
+    internal GitHubUpdateService(
+        ILogger<GitHubUpdateService> logger,
+        SonorizeSettings settings,
+        ISettingsManager<SonorizeSettings> settingsManager,
+        HttpClient http)
     {
         _logger = logger;
-        _http = new();
+        _settings = settings;
+        _settingsManager = settingsManager;
+        _http = http;
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("Sonorize-Updater");
     }
 
     public async Task CheckForUpdateAsync()
     {
+        if (IsRateLimitCooldownActive())
+        {
+            return;
+        }
+
         try
         {
-            List<GitHubRelease>? releases = await _http.GetFromJsonAsync<List<GitHubRelease>>($"https://api.github.com/repos/{RepoOwner}/{RepoName}/releases");
-            GitHubRelease? latest = releases?.FirstOrDefault(r => !r.Prerelease);
+            using HttpResponseMessage response = await _http.GetAsync(
+                ReleaseApiUrl,
+                HttpCompletionOption.ResponseHeadersRead);
+
+            if (await HandleRateLimitAsync(response))
+            {
+                return;
+            }
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.LogDebug("GitHub has no published stable release for Sonorize.");
+                return;
+            }
+
+            _ = response.EnsureSuccessStatusCode();
+
+            ClearExpiredRateLimitCooldown();
+
+            GitHubRelease? latest = await response.Content.ReadFromJsonAsync<GitHubRelease>();
 
             if (latest is null)
             {
@@ -47,7 +88,8 @@ public class GitHubUpdateService : IDisposable
                 return;
             }
 
-            GitHubAsset? asset = latest.Assets.FirstOrDefault(a => a.Name.EndsWith(".zip"));
+            GitHubAsset? asset = latest.Assets.FirstOrDefault(a =>
+                a.Name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase));
 
             if (asset is null)
             {
@@ -64,10 +106,130 @@ public class GitHubUpdateService : IDisposable
 
             UpdateDetected?.Invoke(release);
         }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "Could not check GitHub for updates.");
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogWarning(ex, "The GitHub update check timed out.");
+        }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Update check failed.");
         }
+    }
+
+    private bool IsRateLimitCooldownActive()
+    {
+        DateTimeOffset? retryAt = _settings.Updates.RateLimitResetUtc;
+
+        if (!retryAt.HasValue)
+        {
+            return false;
+        }
+
+        if (retryAt.Value > DateTimeOffset.UtcNow)
+        {
+            _logger.LogDebug(
+                "Skipping GitHub update check until the API rate limit resets at {RetryAtUtc}.",
+                retryAt.Value);
+
+            return true;
+        }
+
+        _settings.Updates.RateLimitResetUtc = null;
+        _settingsManager.Save(_settings);
+        return false;
+    }
+
+    private async Task<bool> HandleRateLimitAsync(HttpResponseMessage response)
+    {
+        if (!await IsRateLimitResponseAsync(response))
+        {
+            return false;
+        }
+
+        DateTimeOffset retryAt = GetRateLimitRetryTime(response);
+        _settings.Updates.RateLimitResetUtc = retryAt;
+        _settingsManager.Save(_settings);
+
+        _logger.LogWarning(
+            "GitHub update checks are rate limited. Sonorize will retry after {RetryAtUtc}.",
+            retryAt);
+
+        return true;
+    }
+
+    private static async Task<bool> IsRateLimitResponseAsync(HttpResponseMessage response)
+    {
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
+        {
+            return true;
+        }
+
+        if (response.StatusCode != HttpStatusCode.Forbidden)
+        {
+            return false;
+        }
+
+        if (response.Headers.RetryAfter is not null || HasRateLimitRemaining(response, "0"))
+        {
+            return true;
+        }
+
+        string body = await response.Content.ReadAsStringAsync();
+        return body.Contains("rate limit", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static DateTimeOffset GetRateLimitRetryTime(HttpResponseMessage response)
+    {
+        if (response.Headers.RetryAfter?.Date is DateTimeOffset retryDate)
+        {
+            return retryDate;
+        }
+
+        if (response.Headers.RetryAfter?.Delta is TimeSpan retryDelay)
+        {
+            return DateTimeOffset.UtcNow.Add(retryDelay);
+        }
+
+        if (HasRateLimitRemaining(response, "0")
+            && response.Headers.TryGetValues("X-RateLimit-Reset", out IEnumerable<string>? resetValues)
+            && long.TryParse(
+                resetValues.FirstOrDefault(),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture,
+                out long resetUnixSeconds))
+        {
+            try
+            {
+                return DateTimeOffset.FromUnixTimeSeconds(resetUnixSeconds);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // Fall back to a short delay when the server returns an invalid reset time.
+            }
+        }
+
+        return DateTimeOffset.UtcNow.AddMinutes(1);
+    }
+
+    private static bool HasRateLimitRemaining(HttpResponseMessage response, string expected)
+    {
+        return response.Headers.TryGetValues("X-RateLimit-Remaining", out IEnumerable<string>? values)
+            && string.Equals(values.FirstOrDefault(), expected, StringComparison.Ordinal);
+    }
+
+    private void ClearExpiredRateLimitCooldown()
+    {
+        if (!_settings.Updates.RateLimitResetUtc.HasValue)
+        {
+            return;
+        }
+
+        _settings.Updates.RateLimitResetUtc = null;
+        _settingsManager.Save(_settings);
     }
 
     public void SimulateUpdate(ReleaseInfo release)
