@@ -224,7 +224,7 @@ public class MusicLibraryService : IMusicLibraryService
             usedMetadataFallback = false;
             return CreateSongFromTags(tagFile, filePath);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             usedMetadataFallback = true;
             return CreateSongFromPath(filePath);
