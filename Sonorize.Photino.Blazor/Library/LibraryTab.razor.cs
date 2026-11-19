@@ -17,6 +17,11 @@ public partial class LibraryTab
         }
     }
 
+    private void ResetScanOnStartup()
+    {
+        ScanOnStartup = true;
+    }
+
     private int GridWidth
     {
         get => AppSettings.Library.GridItemWidth;
