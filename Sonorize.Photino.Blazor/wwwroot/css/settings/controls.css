@@ -301,3 +301,10 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-control);
 }
+
+
+.extension-setting-option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
