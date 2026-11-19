@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Sonorize.Core.Core;
 using System.Collections.Concurrent;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;

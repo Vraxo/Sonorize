@@ -1,5 +1,6 @@
 using NSubstitute;
 using Microsoft.Extensions.Logging.Abstractions;
+using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
 using Sonorize.Tui;

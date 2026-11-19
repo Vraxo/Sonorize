@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Sonorize.Core.Core;
 using IF.Lastfm.Core.Objects;
 using Sonorize.Core.Settings;
 

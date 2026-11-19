@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 
 namespace Sonorize.Core.Tests.Library;
