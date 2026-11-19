@@ -2,6 +2,7 @@
 @page "/library/album/{AlbumName}"
 @page "/library/artist/{ArtistName}"
 
+@using Microsoft.Extensions.Logging
 @using Timer = System.Timers.Timer
 @using Sonorize.Core.Settings
 @inject LibraryService LibService
@@ -9,6 +10,7 @@
 @inject SonorizeSettings AppSettings
 @inject ISettingsManager<SonorizeSettings> SettingsManager
 @inject NavigationManager Nav
+@inject ILogger<Library> Logger
 @implements IDisposable
 
 <LibraryHeader @bind-SearchQuery="_searchQuery"
@@ -16,6 +18,8 @@
                ViewMode="_viewMode"
                ViewModeChanged="OnViewModeChanged"
                OnSettingsClick="GoToSettings"
+               OnScanClick="ScanLibrary"
+               IsScanning="_isScanning"
                Title="@GetPageTitle()"
                ShowBackButton="@(AlbumName is not null || ArtistName is not null)"
                OnBackClick="ClearFilters" />

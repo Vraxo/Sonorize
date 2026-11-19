@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
@@ -20,6 +21,7 @@ public partial class Library
     private SortColumn _sortColumn = SortColumn.Title;
     private bool _isAscending = true;
     private bool _isFiltering = false;
+    private bool _isScanning;
 
     private bool _showActionsModal = false;
     private bool _showMetadataEditor = false;
@@ -222,6 +224,30 @@ public partial class Library
     private void GoToSettings()
     {
         Nav.NavigateTo("/settings");
+    }
+
+    private async Task ScanLibrary()
+    {
+        if (_isScanning)
+        {
+            return;
+        }
+
+        _isScanning = true;
+
+        try
+        {
+            await LibService.RefreshLibraryAsync();
+        }
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, "Failed to scan the music library.");
+        }
+        finally
+        {
+            _isScanning = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task OnRowClick(Song song)

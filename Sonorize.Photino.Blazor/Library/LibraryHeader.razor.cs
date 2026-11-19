@@ -18,6 +18,8 @@ public partial class LibraryHeader
     [Parameter] public EventCallback<LibraryViewMode> ViewModeChanged { get; set; }
 
     [Parameter] public EventCallback OnSettingsClick { get; set; }
+    [Parameter] public EventCallback OnScanClick { get; set; }
+    [Parameter] public bool IsScanning { get; set; }
 
     private async Task OnSearchInput(ChangeEventArgs e)
     {
