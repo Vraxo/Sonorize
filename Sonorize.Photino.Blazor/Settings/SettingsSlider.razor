@@ -20,9 +20,9 @@
     }
 
     <div class="reset-wrapper">
-        @if (DefaultValue.HasValue && Value != DefaultValue.Value)
+        @if (DefaultValue.HasValue)
         {
-            <button class="reset-icon-btn" @onclick="Reset" title="Reset to @DefaultValue.Value">
+            <button class="reset-icon-btn" @onclick="Reset" title="Reset to @DefaultValue.Value" aria-label="Reset @Label">
                 <i class="fas fa-undo"></i>
             </button>
         }
