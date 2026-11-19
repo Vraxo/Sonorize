@@ -1,5 +1,5 @@
 using NSubstitute;
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
@@ -26,7 +26,7 @@ public class ShortcutControllerTests
         try
         {
             var notifier = new AudioEngineNotifier(() => null);
-            var scans = new LibraryScanRunner(library, settings, new LogService(), () => { });
+            var scans = new LibraryScanRunner(library, settings, NullLogger<LibraryScanRunner>.Instance, () => { });
             var browse = new BrowseController(library, player, layout, notifier);
             var cover = new CoverArtController(player, layout);
             var folders = new MusicFolderService(settings, manager, _ => { });

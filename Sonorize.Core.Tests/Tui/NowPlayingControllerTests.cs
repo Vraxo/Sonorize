@@ -1,5 +1,5 @@
 using NSubstitute;
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Settings;
 using Sonorize.Tui;
@@ -20,7 +20,7 @@ public class NowPlayingControllerTests
         player.Volume.Returns(0.5f);
         player.IsShuffle.Returns(true);
         player.RepeatMode.Returns(RepeatMode.One);
-        var scans = new LibraryScanRunner(null!, new SonorizeSettings(), new LogService(), () => { });
+        var scans = new LibraryScanRunner(null!, new SonorizeSettings(), NullLogger<LibraryScanRunner>.Instance, () => { });
         var layout = new MainWindowLayout();
         try
         {

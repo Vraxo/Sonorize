@@ -1,4 +1,4 @@
-using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sonorize.Core.Settings;
 using Sonorize.Tui;
 
@@ -10,7 +10,7 @@ public class LibraryScanRunnerTests
     public async Task Concurrent_scans_stay_active_until_both_complete_and_each_marks_dirty()
     {
         int changes = 0;
-        var runner = new LibraryScanRunner(null!, new SonorizeSettings(), new LogService(),
+        var runner = new LibraryScanRunner(null!, new SonorizeSettings(), NullLogger<LibraryScanRunner>.Instance,
             () => Interlocked.Increment(ref changes));
         var first = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var second = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -32,7 +32,7 @@ public class LibraryScanRunnerTests
     public async Task Failed_scan_is_caught_and_marks_library_dirty()
     {
         int changes = 0;
-        var runner = new LibraryScanRunner(null!, new SonorizeSettings(), new LogService(),
+        var runner = new LibraryScanRunner(null!, new SonorizeSettings(), NullLogger<LibraryScanRunner>.Instance,
             () => Interlocked.Increment(ref changes));
 
         await runner.RunScanAsync(() => Task.FromException(new InvalidOperationException("test failure")));

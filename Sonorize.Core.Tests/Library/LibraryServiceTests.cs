@@ -1,4 +1,4 @@
-﻿using Sonorize.Core.Core;
+using Microsoft.Extensions.Logging.Abstractions;
 using Sonorize.Core.Library;
 using Sonorize.Core.Metadata;
 using Sonorize.Core.Playlists;
@@ -79,7 +79,7 @@ public class LibraryServiceTests
             new FolderScanner(_mockMusicLibrary, _settings),
             dataManager,
             _settings,
-            new LogService());
+            NullLogger<LibraryScanCoordinator>.Instance);
 
         _libraryService = new LibraryService(
             dataManager,
