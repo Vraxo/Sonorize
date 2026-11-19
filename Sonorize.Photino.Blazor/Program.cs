@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Photino.Blazor;
 using Serilog;
+using Serilog.Events;
 using Sonorize.Core.Core;
 using Sonorize.Core.Library;
 using Sonorize.Core.Playback;
@@ -14,6 +15,7 @@ namespace Sonorize.Photino.Blazor;
 public class Program
 {
     private const string MutexName = "Sonorize_SingleInstance_Mutex";
+    private const string LogLevelVariable = "SONORIZE_LOG_LEVEL";
     private const string PhotinoLogVerbosityVariable = "SONORIZE_PHOTINO_LOG_VERBOSITY";
 
     [STAThread]
@@ -25,11 +27,12 @@ public class Program
             return;
         }
 
+        Directory.CreateDirectory(AppDataHelper.GetBaseDirectory());
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Is(GetMinimumLogLevel())
             .Enrich.FromLogContext()
             .WriteTo.Console(
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}")
             .WriteTo.File(
                 Path.Combine(AppDataHelper.GetBaseDirectory(), "app-.log"),
                 rollingInterval: RollingInterval.Day,
@@ -142,6 +145,15 @@ public class Program
         app.MainWindow.RegisterCustomSchemeHandler("sonorize",
             (object sender, string scheme, string url, out string contentType) =>
                 SchemeHandlers.ProcessRequest(url, library, out contentType));
+    }
+
+
+    private static LogEventLevel GetMinimumLogLevel()
+    {
+        string? configuredLevel = Environment.GetEnvironmentVariable(LogLevelVariable);
+        return Enum.TryParse(configuredLevel, ignoreCase: true, out LogEventLevel level)
+            ? level
+            : LogEventLevel.Information;
     }
 
     internal static int GetPhotinoLogVerbosity()

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
 using Sonorize.Core.Core;
 using Sonorize.Core.Playback;
 using Sonorize.Core.Scrobbling;
@@ -13,6 +14,7 @@ namespace Sonorize.Tui;
 public static class Program
 {
     private const string MutexName = "Sonorize_SingleInstance_Mutex";
+    private const string LogLevelVariable = "SONORIZE_LOG_LEVEL";
 
     private static int Main()
     {
@@ -23,8 +25,9 @@ public static class Program
             return 1;
         }
 
+        Directory.CreateDirectory(AppDataHelper.GetBaseDirectory());
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
+            .MinimumLevel.Is(GetMinimumLogLevel())
             .Enrich.FromLogContext()
             .WriteTo.File(
                 Path.Combine(AppDataHelper.GetBaseDirectory(), "app-.log"),
@@ -70,5 +73,13 @@ public static class Program
         {
             Log.CloseAndFlush();
         }
+    }
+
+    private static LogEventLevel GetMinimumLogLevel()
+    {
+        string? configuredLevel = Environment.GetEnvironmentVariable(LogLevelVariable);
+        return Enum.TryParse(configuredLevel, ignoreCase: true, out LogEventLevel level)
+            ? level
+            : LogEventLevel.Information;
     }
 }
