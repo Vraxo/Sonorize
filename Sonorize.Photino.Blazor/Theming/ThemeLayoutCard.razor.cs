@@ -58,6 +58,24 @@ public partial class ThemeLayoutCard
         }
     }
 
+    private void ResetPlayerBarPosition() => PlayerBarPos = PlayerBarPosition.Bottom;
+
+    private void ResetSidebarPosition() => SidebarPos = SidebarPosition.Left;
+
+    private void ResetPillButtons() => ResetThemeSetting(theme => theme.UsePillButtons = true);
+
+    private void ResetAmbientBackground() => ResetThemeSetting(theme => theme.EnableAmbientBackground = false);
+
+    private void ResetCustomScrollbars() => ResetThemeSetting(theme => theme.EnableCustomScrollbars = true);
+
+    private void ResetFontFamily() => ResetThemeSetting(theme => theme.CustomFontFamily = string.Empty);
+
+    private void ResetThemeSetting(Action<Sonorize.Core.Theming.SonorizeTheme> update)
+    {
+        update(AppSettings.Theme);
+        Save();
+    }
+
     private void UpdateBool(Action<bool> updateAction, ChangeEventArgs e)
     {
         updateAction((bool)(e.Value ?? false));
